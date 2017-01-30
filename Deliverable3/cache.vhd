@@ -1,3 +1,8 @@
+-- Fabrice Normandin, ID 260636800
+-- Asher Wright, ID 
+-- William Stephen Poole, ID
+-- Stephan Greto-McGrath, ID 
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
