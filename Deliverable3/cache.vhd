@@ -88,12 +88,11 @@ begin
   
   
   -- process responsible for reading data from cache.
-  read_process : process(clock, s_read, s_addr)
+  read_process : process(s_read)
     variable read_block : CACHE_BLOCK;
     variable hit : std_logic;
   begin
-      if(rising_edge(clock)) then
-        if(s_read = '1') then
+      if(rising_edge(s_read)) then
           s_waitrequest <= '1';
           -- get the block from cache.
           read_block := cache(block_index);
@@ -114,15 +113,13 @@ begin
             hit := '0';             
           end if;
         end if;
-      end if;
   end process read_process;
   
-  write_process : process(clock, s_write, s_writedata)
+  write_process : process(s_write)
   variable write_block : CACHE_BLOCK;
   variable hit : std_logic;
   begin
-    if(rising_edge(clock)) then
-      if (s_write = '1') then
+    if(rising_edge(s_write)) then
         
         -- we start writing.
         s_waitrequest <= '1';
@@ -169,7 +166,6 @@ begin
         -- we're done writing.
         s_waitrequest <= '0';
       end if;
-    end if;
   end process write_process;
 
 end arch;
