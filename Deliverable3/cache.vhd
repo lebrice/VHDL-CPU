@@ -216,6 +216,7 @@ begin
           if(byte_counter = 15) then
             -- we're done!
             m_write <= '0';
+            byte_counter <= 0;
             next_state <= ALLOCATE;
           else 
             byte_counter <= byte_counter + 1;
