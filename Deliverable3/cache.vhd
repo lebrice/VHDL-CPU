@@ -43,10 +43,8 @@ architecture arch of cache is
       data : DATA;
   end record;  
   TYPE CACHE_TYPE IS ARRAY(31 downto 0) OF CACHE_BLOCK;
-  
-  
-  -- @TODO: figure out which states the FSM needs.
-  type state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
+    
+  TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
   signal state : state_type;
   signal next_state : state_type;
 
@@ -81,22 +79,27 @@ architecture arch of cache is
   
   
 begin
-    
+  -- the subset of s_addr that we actually care about.
   short_address <= s_addr(14 downto 0);
   
   -- @TODO: Make sure that the TAG is indeed only 6 bits and doesn't include the rest of the 32-bit address (ask Prof.).
   tag <= short_address(14 downto 9);
+
+  -- the index of the block in cache
   block_index_vector <= short_address(8 downto 4);
   block_index <= to_integer(unsigned(block_index_vector));
   
+  -- offset within the block (index of which word in the block)
   block_offset_vector <= short_address(3 downto 2);
   block_offset <= to_integer(unsigned(block_offset_vector));
   
+  -- We initialize the word and word_byte counters using the byte_counter value.
+  -- tells which word in the block we are currently transfering
   word_index_counter <= byte_counter / 4;
+  -- tells which byte in the word we want to read/write
   word_byte_counter <= byte_counter MOD 4;
-  
-  
-  -- @TODO: handle states. (need Asher's godly state diagram for that!)
+
+  -- Standard process (as in PD_1), transitions state at each clock cycle.
   process (clock, reset)
   begin
    if (reset = '1') then
@@ -137,13 +140,15 @@ begin
           if(s_read = '1') then
             s_readdata <= old_block.data(block_offset)(3) & old_block.data(block_offset)(2) & old_block.data(block_offset)(1) & old_block.data(block_offset)(0);
           else
+            -- We are doing a cache write.
             -- we write one byte at a time.
             old_block.data(block_offset)(3) <= s_writedata(31 downto 24);       
             old_block.data(block_offset)(2) <= s_writedata(23 downto 16);
             old_block.data(block_offset)(1) <= s_writedata(15 downto 8);     
             old_block.data(block_offset)(0) <= s_writedata(8 downto 0);
             
-            -- we need this in case we're coming from the "ALLOCATE" stage.
+            -- We need this in case we're coming from the "ALLOCATE" stage.
+            -- (see the PDF for a better explanation)
             old_block.dirty <= '1';
             old_block.valid <= '1';
           end if;
@@ -164,7 +169,6 @@ begin
         ---------------------------------------------------------------------------
       when ALLOCATE =>
             
-        m_read <= '1';
         
         -- the address looks like this;
         -- -------------------------------
@@ -179,8 +183,14 @@ begin
         BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
         
         m_addr_vector := s_addr(31 downto 6) & WW & BB & "00";
-        m_addr <= to_integer(unsigned(m_addr_vector));
+        m_addr <= to_integer(unsigned(m_addr_vector));        
+        m_read <= '1';
         
+        -- @Fabrice: Not sure if the timing (interaction with Memory) makes total sense here.
+        -- The idea is that we put the address on the bus and then check if memory is ready.
+        -- What's confusing to me is if, say, we just grabbed one byte, and we return to the same state again.
+        -- Shouldn't we also re-toggle the m_read, to let memory know we want another byte ?
+        -- More specifically: Does memory set the m_wait when the address changes ? (or only when m_read goes high ?)
         
         -- if the memory is ready, we can copy over one byte.
         if(m_waitrequest = '0') then
