@@ -57,10 +57,7 @@ architecture arch of cache is
   
   signal tag : std_logic_vector(5 downto 0);
   
-  signal block_index_vector : std_logic_vector(4 downto 0);
   signal block_index : integer range 31 downto 0;
-    
-  signal block_offset_vector: std_logic_vector(1 downto 0);
   signal block_offset : integer range 3 downto 0;
   
   signal old_block : CACHE_BLOCK;
@@ -68,7 +65,7 @@ architecture arch of cache is
   
   -- we are going to read and write the 4 words of a block to memory one byte at a time.
   -- To do this, we'll use a counter variable (byte_counter) to tell which word, and which byte of this word we're using.
-  -- byte_counter will progressively increase from 0 to 16.
+  -- byte_counter will progressively increase from 0 to 15.
   signal byte_counter : integer RANGE 0 to 15;
   
   -- index of which word of the block we are (reading/writing) (to/from) memory.
@@ -86,12 +83,13 @@ begin
   tag <= short_address(14 downto 9);
 
   -- the index of the block in cache
-  block_index_vector <= short_address(8 downto 4);
-  block_index <= to_integer(unsigned(block_index_vector));
+  block_index <= to_integer(unsigned(short_address(8 downto 4)));
   
   -- offset within the block (index of which word in the block)
-  block_offset_vector <= short_address(3 downto 2);
-  block_offset <= to_integer(unsigned(block_offset_vector));
+  block_offset <= to_integer(unsigned(short_address(3 downto 2)));
+
+  -- The cache block under use
+  old_block <= cache(block_index);
   
   -- We initialize the word and word_byte counters using the byte_counter value.
   -- tells which word in the block we are currently transfering
@@ -129,9 +127,8 @@ begin
         -- check if there is a miss or a hit.
         -- if there is a hit, just go back to the IDLE state.
         -- if there is a miss, and the old block is dirty, write it back to memory. (go to WRITE_BACK)
-        -- if there is a miss, and the old block is clean, just grab the rest of new block from memory, 
-        --  and then add the new word (for a write), or read the word (for a read).
-        old_block <= cache(block_index);
+        -- if there is a miss, and the old block is clean, grab the rest of the new block from memory, 
+        -- and then add the new word (for a write), or read the word (for a read).
         
         -- check the tag to see if it matches.
         if((old_block.tag = tag) AND (old_block.valid = '1')) then
@@ -168,8 +165,7 @@ begin
         end if;
         ---------------------------------------------------------------------------
       when ALLOCATE =>
-            
-        
+
         -- the address looks like this;
         -- -------------------------------
         -- 0000 0000 0000 0000 0000 0000 0000 0000
