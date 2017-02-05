@@ -236,26 +236,4 @@ begin
     end case;
   end process update_process;
 
-compare_tags_process : process(state)
-begin
-end process compare_tags_process;
-
-write_back_process : process(state)
-begin
-if(state = WRITE_BACK) then  
-  
-end if;   
-end process write_back_process;
-
-allocate_process : process(state)
-begin
-if(state = ALLOCATE) then
- 
-  
-  
-end if;
-end process allocate_process;
-
-
-
 end arch;
