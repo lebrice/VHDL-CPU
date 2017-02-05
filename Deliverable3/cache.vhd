@@ -179,18 +179,21 @@ begin
         BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
         
         m_addr_vector := s_addr(31 downto 6) & WW & BB & "00";
-        m_addr <= to_integer(unsigned(m_addr_vector));        
+        m_addr <= to_integer(unsigned(m_addr_vector));       
         m_read <= '1';
         
         -- @Fabrice: Not sure if the timing (interaction with Memory) makes total sense here.
         -- The idea is that we put the address on the bus and then check if memory is ready.
         -- What's confusing to me is if, say, we just grabbed one byte, and we return to the same state again.
         -- Shouldn't we also re-toggle the m_read, to let memory know we want another byte ?
-        -- More specifically: Does memory set the m_wait when the address changes ? (or only when m_read goes high ?)
+        -- More specifically: Does memory set the m_waitrequest when the address changes ? (or only when m_read goes high ?)
         
-        -- if the memory is ready, we can copy over one byte.
+        -- memory is ready, we can copy over one byte.
         if(m_waitrequest = '0') then
-        
+
+          -- @Fabrice: See the comment above: not sure if this is a solution.
+          m_read <= '0';
+
           -- write the 8 bits of data from memory in the right position in the cache block.
           old_block.data(block_offset)(word_byte_counter) <= m_readdata;
           
