@@ -119,7 +119,7 @@ begin
     allocate_sub_state <= next_allocate_sub_state;
   end process;
   
-  update_process : process(state, s_read, s_write, m_waitrequest)
+  update_process : process(state, s_read, s_write, m_waitrequest, allocate_sub_state, write_back_sub_state)
   variable WW : std_logic_vector(1 downto 0);
   variable BB : std_logic_vector(1 downto 0);
   variable m_addr_vector : std_logic_vector(31 downto 0);
@@ -256,6 +256,7 @@ begin
             -- we move to the INCREMENT stage.
               next_write_back_sub_state <= INCREMENT;
             end if;
+
           when INCREMENT =>
             -- we increment the byte_counter value, and move back to the COMPARE_BYTE_COUNT sub-state.
             m_write <= '0';
