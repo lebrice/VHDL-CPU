@@ -113,10 +113,10 @@ begin
       state <= IDLE;
     elsif(rising_edge(clock)) then
       state <= next_state;
+      -- @Fabrice: Not sure where to put these state transitions.
+      write_back_sub_state <= next_write_back_sub_state;
+      allocate_sub_state <= next_allocate_sub_state;
     end if;
-    -- @Fabrice: Adding in the transition for the write_back sub-state as well.
-    write_back_sub_state <= next_write_back_sub_state;
-    allocate_sub_state <= next_allocate_sub_state;
   end process;
   
   update_process : process(state, s_read, s_write, m_waitrequest, allocate_sub_state, write_back_sub_state)
@@ -167,6 +167,8 @@ begin
           s_waitrequest <= '0'; 
         else      
           -- We have a cache miss!
+          old_block.tag <= tag; -- set the tag field.
+          old_block.valid <= '1';
           if(old_block.dirty = '1') then
             next_state <= WRITE_BACK;
           else
@@ -194,7 +196,7 @@ begin
             end if;
 
           when READ_DATA =>
-              next_state <= ALLOCATE;
+            next_state <= ALLOCATE;
             -- the address looks like this;
             -- -------------------------------
             -- 0000 0000 0000 0000 0000 0000 0000 0000
