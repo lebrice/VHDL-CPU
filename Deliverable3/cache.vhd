@@ -48,9 +48,14 @@ architecture arch of cache is
   signal state : state_type;
   signal next_state : state_type;
   
-  TYPE memory_interaction_state_type is (COMPARE_BYTE_COUNT, WRITE_DATA, READ_DATA, INCREMENT_BYTE_COUNT);
-  signal write_back_sub_state : memory_interaction_state_type;
-  signal next_write_back_sub_state : memory_interaction_state_type;
+  -- states used for memory interaction FSM's in WRITE_BACK and ALLOCATE states.
+  TYPE write_back_sub_state_type is (COMPARE_BYTE_COUNT, WRITE_DATA, INCREMENT);  
+  signal write_back_sub_state : write_back_sub_state_type;
+  signal next_write_back_sub_state : write_back_sub_state_type;
+
+  TYPE allocate_sub_state_type is (COMPARE_BYTE_COUNT, READ_DATA, WAIT_FOR_DATA, GRAB_AND_INCREMENT);
+  signal allocate_sub_state : allocate_sub_state_type;
+  signal next_allocate_sub_state : allocate_sub_state_type;
 
   
   -- the cache
@@ -111,6 +116,7 @@ begin
     end if;
     -- @Fabrice: Adding in the transition for the write_back sub-state as well.
     write_back_sub_state <= next_write_back_sub_state;
+    allocate_sub_state <= next_allocate_sub_state;
   end process;
   
   update_process : process(state, s_read, s_write, m_waitrequest)
@@ -172,52 +178,51 @@ begin
         ---------------------------------------------------------------------------
       when ALLOCATE =>
 
-        -- the address looks like this;
-        -- -------------------------------
-        -- 0000 0000 0000 0000 0000 0000 0000 0000
-        -- ssss ssss ssss ssss ssss ssss ssWW BB00
-        -- -------------------------------
-        -- s: coming from s_addr.
-        -- W: which word in the block
-        -- B: which byte in the word
-        -- which is done with this:   
-        WW := std_logic_vector(to_unsigned(word_index_counter, 2));
-        BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
-        
-        m_addr_vector := s_addr(31 downto 6) & WW & BB & "00";
-        m_addr <= to_integer(unsigned(m_addr_vector));       
-        m_read <= '1';
-        
-        -- @Fabrice: Not sure if the timing (interaction with Memory) makes total sense here.
-        -- The idea is that we put the address on the bus and then check if memory is ready.
-        -- What's confusing to me is if, say, we just grabbed one byte, and we return to the same state again.
-        -- Shouldn't we also re-toggle the m_read, to let memory know we want another byte ?
-        -- More specifically: Does memory set the m_waitrequest when the address changes ? (or only when m_read goes high ?)
-        
-        -- memory is ready, we can copy over one byte.
-        if(m_waitrequest = '0') then
+        case allocate_sub_state is
+          when COMPARE_BYTE_COUNT =>
+            m_read <= '0';
+            if byte_counter = 15 then
+              next_state <= COMPARE_TAG;
+            else
+              next_allocate_sub_state <= READ_DATA;
+            end if;
 
-          -- @Fabrice: See the comment above: not sure if this is a solution.
-          m_read <= '0';
-
-          -- write the 8 bits of data from memory in the right position in the cache block.
-          old_block.data(block_offset)(word_byte_counter) <= m_readdata;
-          
-          if(byte_counter = 15) then
-            -- we're done! we copied the whole word from memory into the cache block.
-            -- move on to the COMPARE stage and reset the byte counter.
-            byte_counter <= 0;
-            next_state <= COMPARE_TAG;
-          else
-            byte_counter <= byte_counter + 1; 
-            next_state <= ALLOCATE;
-          end if;
-          
-        else
-          -- Memory is not ready, we just wait until memory is done fetching the byte we want.
-          next_state <= ALLOCATE; 
-        end if;
+          when READ_DATA =>
+            -- the address looks like this;
+            -- -------------------------------
+            -- 0000 0000 0000 0000 0000 0000 0000 0000
+            -- ssss ssss ssss ssss ssss ssss ssWW BB00
+            -- -------------------------------
+            -- s: coming from s_addr.
+            -- W: which word in the block
+            -- B: which byte in the word
+            -- which is done with this:   
+            WW := std_logic_vector(to_unsigned(word_index_counter, 2));
+            BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
             
+            m_addr_vector := s_addr(31 downto 6) & WW & BB & "00";
+            m_addr <= to_integer(unsigned(m_addr_vector));       
+            m_read <= '1';
+
+            if m_waitrequest = '0' then
+              next_allocate_sub_state <= READ_DATA;
+            else
+              next_allocate_sub_state <= WAIT_FOR_DATA;
+            end if;
+
+          when WAIT_FOR_DATA =>
+            if m_waitrequest = '1' then
+              next_allocate_sub_state <= WAIT_FOR_DATA;
+            else 
+              next_allocate_sub_state <= GRAB_AND_INCREMENT;
+            end if;
+
+          when GRAB_AND_INCREMENT =>
+            -- write the 8 bits of data from memory in the right position in the cache block.
+            old_block.data(word_index_counter)(word_byte_counter) <= m_readdata;
+            m_read <= '0';
+            byte_counter <= byte_counter + 1;
+        end case;   
       ---------------------------------------------------------------------------
       when WRITE_BACK =>
         -- write the old block to memory.
@@ -228,7 +233,7 @@ begin
           when COMPARE_BYTE_COUNT => -- we compare the byte_counter to check if we're done.
             -- we set the output for this state.
             m_write <= '0';
-            if byte_counte = 15 then -- we're done. Move on to ALLOCATE.
+            if byte_counter = 15 then -- we're done. Move on to ALLOCATE.
               next_state <= ALLOCATE;
             else -- we're not done yet.
               if m_waitrequest = '0' then -- memory is ready to accept a new byte.
