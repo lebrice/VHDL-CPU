@@ -47,6 +47,10 @@ architecture arch of cache is
   TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
   signal state : state_type;
   signal next_state : state_type;
+  
+  TYPE memory_interaction_state_type is (COMPARE_BYTE_COUNT, WRITE_DATA, READ_DATA, INCREMENT_BYTE_COUNT);
+  signal write_back_sub_state : memory_interaction_state_type;
+  signal next_write_back_sub_state : memory_interaction_state_type;
 
   
   -- the cache
@@ -105,15 +109,17 @@ begin
     elsif(rising_edge(clock)) then
       state <= next_state;
     end if;
+    -- @Fabrice: Adding in the transition for the write_back sub-state as well.
+    write_back_sub_state <= next_write_back_sub_state;
   end process;
   
-  update_process : process(state)  
+  update_process : process(state, s_read, s_write, m_waitrequest)
   variable WW : std_logic_vector(1 downto 0);
   variable BB : std_logic_vector(1 downto 0);
   variable m_addr_vector : std_logic_vector(31 downto 0);
   begin
     case state is
-      
+
       --------------------------------------------------------------------------
       when IDLE =>
         if(s_read = '1' OR s_write = '1') then
@@ -215,23 +221,42 @@ begin
       ---------------------------------------------------------------------------
       when WRITE_BACK =>
         -- write the old block to memory.
-        if(m_waitrequest = '0') then
-          -- Memory is ready! We can start writing data on the memory bus.
-          m_write <= '1';
-          m_writedata <= old_block.data(word_index_counter)(word_byte_counter);
-                    
-        else
-          -- memomy just finished writing the data. we can move to the next byte.
-          if(byte_counter = 15) then
-            -- we're done!
+
+        -- @Fabrice: I'm attempting to use another FSM for the interaction with memory. (see the PDF for an illustration)
+        case write_back_sub_state is
+
+          when COMPARE_BYTE_COUNT => -- we compare the byte_counter to check if we're done.
+            -- we set the output for this state.
             m_write <= '0';
-            byte_counter <= 0;
-            next_state <= ALLOCATE;
-          else 
+            if byte_counte = 15 then -- we're done. Move on to ALLOCATE.
+              next_state <= ALLOCATE;
+            else -- we're not done yet.
+              if m_waitrequest = '0' then -- memory is ready to accept a new byte.
+                next_write_back_sub_state <= WRITE_DATA;
+              else
+                next_write_back_sub_state <= COMPARE_BYTE_COUNT;
+              end if;
+            end if;
+
+
+          when WRITE_DATA =>
+            -- we're writing data on the bus for memory to grab.
+            m_write <= '1';
+            m_writedata <= old_block.data(word_index_counter)(word_byte_counter);
+
+            if m_waitrequest = '0' then 
+              -- memory hasn't grabbed the data yet.
+              next_write_back_sub_state <= WRITE_DATA;
+            else 
+            -- we move to the INCREMENT stage.
+              next_write_back_sub_state <= INCREMENT;
+            end if;
+          when INCREMENT =>
+            -- we increment the byte_counter value, and move back to the COMPARE_BYTE_COUNT sub-state.
+            m_write <= '0';
             byte_counter <= byte_counter + 1;
-            next_state <= WRITE_BACK;
-          end if;
-        end if;
+            next_write_back_sub_state <= COMPARE_BYTE_COUNT;
+        end case;
     end case;
   end process update_process;
 
