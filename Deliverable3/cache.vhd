@@ -184,6 +184,7 @@ begin
             if byte_counter = 15 then
               next_state <= COMPARE_TAG;
             else
+              next_state <= ALLOCATE;
               if m_waitrequest = '0' then 
                 -- wait until memory is at "idle".
                 next_allocate_sub_state <= COMPARE_BYTE_COUNT;
@@ -193,6 +194,7 @@ begin
             end if;
 
           when READ_DATA =>
+              next_state <= ALLOCATE;
             -- the address looks like this;
             -- -------------------------------
             -- 0000 0000 0000 0000 0000 0000 0000 0000
@@ -220,12 +222,15 @@ begin
             old_block.data(word_index_counter)(word_byte_counter) <= m_readdata;
             m_read <= '0';
             byte_counter <= byte_counter + 1;
+            
+            next_state <= ALLOCATE;
+            next_allocate_sub_state <= COMPARE_BYTE_COUNT;
         end case;   
       ---------------------------------------------------------------------------
       when WRITE_BACK =>
         -- write the old block to memory.
 
-        -- @Fabrice: I'm attempting to use another FSM for the interaction with memory. (see the PDF for an illustration)
+        -- @Fabrice: we're using another FSM for the interaction with memory. (see the PDF for an illustration)
         case write_back_sub_state is
 
           when COMPARE_BYTE_COUNT => -- we compare the byte_counter to check if we're done.
@@ -234,6 +239,7 @@ begin
             if byte_counter = 15 then -- we're done. Move on to ALLOCATE.
               next_state <= ALLOCATE;
             else -- we're not done yet.
+              next_state <= WRITE_BACK;
               if m_waitrequest = '1' then -- memory is at "idle" and ready to accept another byte.
                 next_write_back_sub_state <= WRITE_DATA;
               else
@@ -243,6 +249,7 @@ begin
 
 
           when WRITE_DATA =>
+            next_state <= WRITE_BACK;
             -- we're writing data on the bus for memory to grab.
             m_write <= '1';
             m_writedata <= old_block.data(word_index_counter)(word_byte_counter);
@@ -259,6 +266,7 @@ begin
             -- we increment the byte_counter value, and move back to the COMPARE_BYTE_COUNT sub-state.
             m_write <= '0';
             byte_counter <= byte_counter + 1;
+            next_state <= WRITE_BACK;
             next_write_back_sub_state <= COMPARE_BYTE_COUNT;
         end case;
     end case;
