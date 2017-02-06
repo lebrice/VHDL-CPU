@@ -53,7 +53,7 @@ architecture arch of cache is
   signal write_back_sub_state : write_back_sub_state_type;
   signal next_write_back_sub_state : write_back_sub_state_type;
 
-  TYPE allocate_sub_state_type is (COMPARE_BYTE_COUNT, READ_DATA, WAIT_FOR_DATA, GRAB_AND_INCREMENT);
+  TYPE allocate_sub_state_type is (COMPARE_BYTE_COUNT, READ_DATA, GRAB_AND_INCREMENT);
   signal allocate_sub_state : allocate_sub_state_type;
   signal next_allocate_sub_state : allocate_sub_state_type;
 
@@ -184,7 +184,12 @@ begin
             if byte_counter = 15 then
               next_state <= COMPARE_TAG;
             else
-              next_allocate_sub_state <= READ_DATA;
+              if m_waitrequest = '0' then 
+                -- wait until memory is at "idle".
+                next_allocate_sub_state <= COMPARE_BYTE_COUNT;
+              else
+                next_allocate_sub_state <= READ_DATA;
+              end if;
             end if;
 
           when READ_DATA =>
@@ -204,16 +209,9 @@ begin
             m_addr <= to_integer(unsigned(m_addr_vector));       
             m_read <= '1';
 
-            if m_waitrequest = '0' then
+            if m_waitrequest = '1' then
               next_allocate_sub_state <= READ_DATA;
             else
-              next_allocate_sub_state <= WAIT_FOR_DATA;
-            end if;
-
-          when WAIT_FOR_DATA =>
-            if m_waitrequest = '1' then
-              next_allocate_sub_state <= WAIT_FOR_DATA;
-            else 
               next_allocate_sub_state <= GRAB_AND_INCREMENT;
             end if;
 
@@ -236,7 +234,7 @@ begin
             if byte_counter = 15 then -- we're done. Move on to ALLOCATE.
               next_state <= ALLOCATE;
             else -- we're not done yet.
-              if m_waitrequest = '0' then -- memory is ready to accept a new byte.
+              if m_waitrequest = '1' then -- memory is at "idle" and ready to accept another byte.
                 next_write_back_sub_state <= WRITE_DATA;
               else
                 next_write_back_sub_state <= COMPARE_BYTE_COUNT;
@@ -249,7 +247,7 @@ begin
             m_write <= '1';
             m_writedata <= old_block.data(word_index_counter)(word_byte_counter);
 
-            if m_waitrequest = '0' then 
+            if m_waitrequest = '1' then 
               -- memory hasn't grabbed the data yet.
               next_write_back_sub_state <= WRITE_DATA;
             else 
