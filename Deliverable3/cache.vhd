@@ -166,21 +166,24 @@ begin
             old_block.dirty <= '1';
             old_block.valid <= '1';
           end if;
-          
           -- we're done reading or writing.
+
           next_state <= IDLE;
           s_waitrequest <= '0'; 
-        else      
-          -- We have a cache miss!
-          old_block.tag <= tag; -- set the tag field.
-          old_block.valid <= '1';
-          if(old_block.dirty = '1') then
+        else        
+          -- We have a cache miss! 
+          -- check if we need to write the content back to memory or not.
+          if(old_block.dirty = '1' AND old_block.valid = '1') then
             next_state <= WRITE_BACK;
           else
             next_state <= ALLOCATE;
           end if;      
           -- since we will be handling memory in the next states, we need to reset the byte_counter variable.            
           byte_counter <= 0;
+          
+          -- set the field such that we get a cache hit when we get back to this stage, after fetching data from memory.
+          old_block.tag <= tag; -- set the tag field.
+          old_block.valid <= '1';          
         end if;
         ---------------------------------------------------------------------------
       when ALLOCATE =>
