@@ -9,7 +9,9 @@ use ieee.numeric_std.all;
 
 entity cache is
 generic(
-	ram_size : INTEGER := 32768
+	ram_size : INTEGER := 32768;
+  block_count : INTEGER := 32;
+  words_per_block : INTEGER := 4
 );
 port(
 	clock : in std_logic;
@@ -34,7 +36,7 @@ end cache;
 
 architecture arch of cache is  
   TYPE WORD is array (3 downto 0) of std_logic_vector(7 downto 0);
-  TYPE DATA is array (3 downto 0) of WORD;
+  TYPE DATA is array (words_per_block downto 0) of WORD;
   TYPE CACHE_BLOCK is
   record
       valid : std_logic;
@@ -42,7 +44,7 @@ architecture arch of cache is
       tag : std_logic_vector(5 downto 0);
       data : DATA;
   end record;  
-  TYPE CACHE_TYPE IS ARRAY(31 downto 0) OF CACHE_BLOCK;
+  TYPE CACHE_TYPE IS ARRAY(block_count-1 downto 0) OF CACHE_BLOCK;
     
   TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
   signal state : state_type;
@@ -66,8 +68,8 @@ architecture arch of cache is
   
   signal tag : std_logic_vector(5 downto 0);
   
-  signal block_index : integer range 31 downto 0;
-  signal block_offset : integer range 3 downto 0;
+  signal block_index : integer range block_count - 1 downto 0;
+  signal block_offset : integer range words_per_block - 1 downto 0;
   
   signal old_block : CACHE_BLOCK;
   
@@ -78,7 +80,7 @@ architecture arch of cache is
   signal byte_counter : integer RANGE 0 to 15;
   
   -- index of which word of the block we are (reading/writing) (to/from) memory.
-  signal word_index_counter : integer range 0 to 3;
+  signal word_index_counter : integer range 0 to words_per_block - 1;
     
   -- index of which byte in the word we are (reading/writing) (to/from) memory.
   signal word_byte_counter : integer range 0 to 3;
@@ -111,6 +113,9 @@ begin
   begin
    if (reset = '1') then
       state <= IDLE;
+      clear_blocks : for i in 0 to 31 loop
+        cache(i).valid <= '0';
+      end loop ; -- clear_blocks
     elsif(rising_edge(clock)) then
       state <= next_state;
       -- @Fabrice: Not sure where to put these state transitions.
