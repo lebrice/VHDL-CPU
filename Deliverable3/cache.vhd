@@ -46,6 +46,17 @@ architecture arch of cache is
   end record;  
   TYPE CACHE_TYPE IS ARRAY(block_count-1 downto 0) OF CACHE_BLOCK;
     
+
+  constant empty_word : WORD := (others => X"00");
+  constant empty_cache_block : CACHE_BLOCK := (valid => '0',
+                                              dirty => '0',
+                                              tag => (others => '0'),
+                                              data => (others => empty_word));
+  -- the cache
+  SIGNAL cache : CACHE_TYPE := (others => empty_cache_block);
+
+  signal old_block : CACHE_BLOCK := empty_cache_block;
+
   TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
   signal state : state_type;
   signal next_state : state_type;
@@ -60,9 +71,6 @@ architecture arch of cache is
   signal next_allocate_sub_state : allocate_sub_state_type;
 
   
-  -- the cache
-  SIGNAL cache : CACHE_TYPE;
-  
   -- Using only the 15 relevant bits of the address, since address space is larger than main memory size.
   signal short_address : std_logic_vector(14 downto 0);
   
@@ -71,7 +79,6 @@ architecture arch of cache is
   signal block_index : integer range block_count - 1 downto 0;
   signal block_offset : integer range words_per_block - 1 downto 0;
   
-  signal old_block : CACHE_BLOCK;
   
   
   -- we are going to read and write the 4 words of a block to memory one byte at a time.
@@ -98,9 +105,6 @@ begin
   
   -- offset within the block (index of which word in the block)
   block_offset <= to_integer(unsigned(short_address(3 downto 2)));
-
-  -- The cache block under use
-  old_block <= cache(block_index);
   
   -- We initialize the word and word_byte counters using the byte_counter value.
   -- tells which word in the block we are currently transfering
@@ -129,6 +133,10 @@ begin
   variable BB : std_logic_vector(1 downto 0);
   variable m_addr_vector : std_logic_vector(31 downto 0);
   begin
+   
+    -- The cache block under use
+    old_block <= cache(block_index);
+
     case state is
 
       --------------------------------------------------------------------------
