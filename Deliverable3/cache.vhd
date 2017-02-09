@@ -149,6 +149,7 @@ begin
             next_state <= COMPARE_TAG;
           else 
             next_state <= IDLE;
+            s_waitrequest <= '1';
           end if;
         ---------------------------------------------------------------------------
         when COMPARE_TAG =>
@@ -188,9 +189,6 @@ begin
             else
               next_state <= ALLOCATE;
             end if;      
-            
-            
-            
           end if;
           -- since we will be handling memory in the next states, we need to reset the byte_counter variable.            
           byte_counter <= 0;
@@ -207,9 +205,10 @@ begin
                 next_state <= COMPARE_TAG;
                 -- @TODO: test this out to make sure we're setting the tag at the right moment.
                 cache(block_index).tag <= tag;
+                cache(block_index).dirty <= '0';
               else
                 next_state <= ALLOCATE;
-                if m_waitrequest = '0' then 
+                if m_waitrequest = '0' then
                   -- wait until memory is at "idle".
                   next_allocate_sub_state <= COMPARE_BYTE_COUNT;
                 else
@@ -263,6 +262,7 @@ begin
               m_write <= '0';
               if byte_counter = 16 then -- we're done. Move on to ALLOCATE.
                 next_state <= ALLOCATE;
+                byte_counter <= 0;
               else -- we're not done yet.
                 next_state <= WRITE_BACK;
                 if m_waitrequest = '1' then -- memory is at "idle" and ready to accept another byte.
@@ -289,13 +289,12 @@ begin
               -- 
               -- which is done with this:   
               WW := std_logic_vector(to_unsigned(word_index_counter, 2));
-              BB := std_logic_vector(to_unsigned(word_byte_counter, 2));          
+              BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
               
               m_addr_vector := s_addr(31 downto 15) & cache(block_index).tag & s_addr(8 downto 4) & WW & BB;
               m_addr <= to_integer(unsigned(m_addr_vector));
-
-              m_write <= '1';
               m_writedata <= cache(block_index).data(word_index_counter)(word_byte_counter);
+              m_write <= '1';
 
               if m_waitrequest = '1' then 
                 -- memory hasn't grabbed the data yet.
