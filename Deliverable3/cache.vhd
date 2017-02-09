@@ -171,12 +171,10 @@ begin
             -- We need this in case we're coming from the "ALLOCATE" stage.
             -- (see the PDF for a better explanation)
             cache(block_index).dirty <= '1';
-            cache(block_index).valid <= '1';
           end if;
           -- we're done reading or writing.
 
           next_state <= IDLE;
-          byte_counter <= 0;
           s_waitrequest <= '0'; 
         else        
           -- We have a cache miss! 
@@ -186,14 +184,14 @@ begin
           else
             next_state <= ALLOCATE;
           end if;      
-          -- since we will be handling memory in the next states, we need to reset the byte_counter variable.            
-          byte_counter <= 0;
           
-          -- set the field such that we get a cache hit when we get back to this stage, after fetching data from memory.
-          -- @TODO: can't set the TAG here, is we have write_back we're going to use the "old" tag to put it back in memory!!
-          -- cache(block_index).tag <= tag; -- set the tag field.
-          cache(block_index).valid <= '1';        
+          
+          
         end if;
+        -- since we will be handling memory in the next states, we need to reset the byte_counter variable.            
+        byte_counter <= 0;
+        -- set the 'valid' field such that we get a cache hit when we get back to this stage, after fetching data from memory.
+        cache(block_index).valid <= '1';
         ---------------------------------------------------------------------------
       when ALLOCATE =>
 
@@ -276,8 +274,6 @@ begin
           when WRITE_DATA =>
             next_state <= WRITE_BACK;
             -- we're writing data on the bus for memory to grab.
-            -- @TODO: m_addr needs to be set!! (using the TAG in the cache block)
-
              -- the address looks like this;
             -- -------------------------------
             -- 0000 0000 0000 0000 0000 0000 0000 0000
@@ -296,7 +292,6 @@ begin
             
             m_addr_vector := "00" & s_addr(31 downto 11) & cache(block_index).tag & WW & BB;
             m_addr <= to_integer(unsigned(m_addr_vector));
-
 
             m_write <= '1';
             m_writedata <= cache(block_index).data(word_index_counter)(word_byte_counter);
