@@ -289,7 +289,7 @@ begin
               WW := std_logic_vector(to_unsigned(word_index_counter, 2));
               BB := std_logic_vector(to_unsigned(word_byte_counter, 2));          
               
-              m_addr_vector := s_addr(31 downto 15) & cache(block_index).tag & s_addr(9 downto 4) & WW & BB;
+              m_addr_vector := s_addr(31 downto 15) & cache(block_index).tag & s_addr(8 downto 4) & WW & BB;
               m_addr <= to_integer(unsigned(m_addr_vector));
 
               m_write <= '1';
