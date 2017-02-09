@@ -36,7 +36,7 @@ end cache;
 
 architecture arch of cache is  
   TYPE WORD is array (3 downto 0) of std_logic_vector(7 downto 0);
-  TYPE DATA is array (words_per_block downto 0) of WORD;
+  TYPE DATA is array (words_per_block - 1 downto 0) of WORD;
   TYPE CACHE_BLOCK is
   record
       valid : std_logic;
@@ -46,6 +46,18 @@ architecture arch of cache is
   end record;  
   TYPE CACHE_TYPE IS ARRAY(block_count-1 downto 0) OF CACHE_BLOCK;
     
+  
+  constant empty_word : WORD := (others => X"00");
+  constant empty_cache_block : CACHE_BLOCK := (
+                                              valid => '0',
+                                              dirty => '0',
+                                              tag => (others => '0'),
+                                              data => (others => empty_word)
+                                              );
+  -- the cache
+  SIGNAL cache : CACHE_TYPE := (others => empty_cache_block);
+
+
   TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
   signal state : state_type;
   signal next_state : state_type;
@@ -60,9 +72,6 @@ architecture arch of cache is
   signal next_allocate_sub_state : allocate_sub_state_type;
 
   
-  -- the cache
-  SIGNAL cache : CACHE_TYPE;
-  
   -- Using only the 15 relevant bits of the address, since address space is larger than main memory size.
   signal short_address : std_logic_vector(14 downto 0);
   
@@ -71,16 +80,15 @@ architecture arch of cache is
   signal block_index : integer range block_count - 1 downto 0;
   signal block_offset : integer range words_per_block - 1 downto 0;
   
-  signal old_block : CACHE_BLOCK;
   
   
   -- we are going to read and write the 4 words of a block to memory one byte at a time.
   -- To do this, we'll use a counter variable (byte_counter) to tell which word, and which byte of this word we're using.
   -- byte_counter will progressively increase from 0 to 15.
-  signal byte_counter : integer RANGE 0 to 15;
+  signal byte_counter : integer RANGE 0 to 16;
   
   -- index of which word of the block we are (reading/writing) (to/from) memory.
-  signal word_index_counter : integer range 0 to words_per_block - 1;
+  signal word_index_counter : integer range 0 to words_per_block;
     
   -- index of which byte in the word we are (reading/writing) (to/from) memory.
   signal word_byte_counter : integer range 0 to 3;
@@ -98,9 +106,6 @@ begin
   
   -- offset within the block (index of which word in the block)
   block_offset <= to_integer(unsigned(short_address(3 downto 2)));
-
-  -- The cache block under use
-  old_block <= cache(block_index);
   
   -- We initialize the word and word_byte counters using the byte_counter value.
   -- tells which word in the block we are currently transfering
@@ -113,9 +118,9 @@ begin
   begin
    if (reset = '1') then
       state <= IDLE;
-      clear_blocks : for i in 0 to 31 loop
-        cache(i).valid <= '0';
-      end loop ; -- clear_blocks
+      -- clear_blocks : for i in 0 to 31 loop
+      --   cache(i).valid <= '0';
+      -- end loop ; -- clear_blocks
     elsif(rising_edge(clock)) then
       state <= next_state;
       -- @Fabrice: Not sure where to put these state transitions.
@@ -129,6 +134,8 @@ begin
   variable BB : std_logic_vector(1 downto 0);
   variable m_addr_vector : std_logic_vector(31 downto 0);
   begin
+   
+
     case state is
 
       --------------------------------------------------------------------------
@@ -148,32 +155,33 @@ begin
         -- and then add the new word (for a write), or read the word (for a read).
         
         -- check the tag to see if it matches.
-        if((old_block.tag = tag) AND (old_block.valid = '1')) then
+        if((cache(block_index).tag = tag) AND (cache(block_index).valid = '1')) then
         
           -- we have a cache hit!
           if(s_read = '1') then
-            s_readdata <= old_block.data(block_offset)(3) & old_block.data(block_offset)(2) & old_block.data(block_offset)(1) & old_block.data(block_offset)(0);
+            s_readdata <= cache(block_index).data(block_offset)(3) & cache(block_index).data(block_offset)(2) & cache(block_index).data(block_offset)(1) & cache(block_index).data(block_offset)(0);
           else
             -- We are doing a cache write.
             -- we write one byte at a time.
-            old_block.data(block_offset)(3) <= s_writedata(31 downto 24);       
-            old_block.data(block_offset)(2) <= s_writedata(23 downto 16);
-            old_block.data(block_offset)(1) <= s_writedata(15 downto 8);     
-            old_block.data(block_offset)(0) <= s_writedata(8 downto 0);
+            cache(block_index).data(block_offset)(3) <= s_writedata(31 downto 24);       
+            cache(block_index).data(block_offset)(2) <= s_writedata(23 downto 16);
+            cache(block_index).data(block_offset)(1) <= s_writedata(15 downto 8);     
+            cache(block_index).data(block_offset)(0) <= s_writedata(7 downto 0);
             
             -- We need this in case we're coming from the "ALLOCATE" stage.
             -- (see the PDF for a better explanation)
-            old_block.dirty <= '1';
-            old_block.valid <= '1';
+            cache(block_index).dirty <= '1';
+            cache(block_index).valid <= '1';
           end if;
           -- we're done reading or writing.
 
           next_state <= IDLE;
+          byte_counter <= 0;
           s_waitrequest <= '0'; 
         else        
           -- We have a cache miss! 
           -- check if we need to write the content back to memory or not.
-          if(old_block.dirty = '1' AND old_block.valid = '1') then
+          if(cache(block_index).dirty = '1' AND cache(block_index).valid = '1') then
             next_state <= WRITE_BACK;
           else
             next_state <= ALLOCATE;
@@ -182,8 +190,9 @@ begin
           byte_counter <= 0;
           
           -- set the field such that we get a cache hit when we get back to this stage, after fetching data from memory.
-          old_block.tag <= tag; -- set the tag field.
-          old_block.valid <= '1';          
+          -- @TODO: can't set the TAG here, is we have write_back we're going to use the "old" tag to put it back in memory!!
+          -- cache(block_index).tag <= tag; -- set the tag field.
+          cache(block_index).valid <= '1';        
         end if;
         ---------------------------------------------------------------------------
       when ALLOCATE =>
@@ -191,8 +200,11 @@ begin
         case allocate_sub_state is
           when COMPARE_BYTE_COUNT =>
             m_read <= '0';
-            if byte_counter = 15 then
+            if byte_counter = 16 then
+              -- we're done allocating a block. set the tag appropriately.
               next_state <= COMPARE_TAG;
+              -- @TODO: test this out to make sure we're setting the tag at the right moment.
+              cache(block_index).tag <= tag;
             else
               next_state <= ALLOCATE;
               if m_waitrequest = '0' then 
@@ -213,11 +225,14 @@ begin
             -- s: coming from s_addr.
             -- W: which word in the block
             -- B: which byte in the word
-            -- which is done with this:   
+            -- NOTE: memory uses bytes as the unit of measurement, hence we need to divide the resulting integer by 4 
+            -- (or shift right twice before converting to an integer), giving:
+            -- 00ss ssss ssss ssss ssss ssss ssss WWBB
+            -- which is done with this:  
             WW := std_logic_vector(to_unsigned(word_index_counter, 2));
             BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
             
-            m_addr_vector := s_addr(31 downto 6) & WW & BB & "00";
+            m_addr_vector := "00" & s_addr(31 downto 6) & WW & BB;
             m_addr <= to_integer(unsigned(m_addr_vector));       
             m_read <= '1';
 
@@ -229,7 +244,7 @@ begin
 
           when GRAB_AND_INCREMENT =>
             -- write the 8 bits of data from memory in the right position in the cache block.
-            old_block.data(word_index_counter)(word_byte_counter) <= m_readdata;
+            cache(block_index).data(word_index_counter)(word_byte_counter) <= m_readdata;
             m_read <= '0';
             byte_counter <= byte_counter + 1;
             
@@ -246,7 +261,7 @@ begin
           when COMPARE_BYTE_COUNT => -- we compare the byte_counter to check if we're done.
             -- we set the output for this state.
             m_write <= '0';
-            if byte_counter = 15 then -- we're done. Move on to ALLOCATE.
+            if byte_counter = 16 then -- we're done. Move on to ALLOCATE.
               next_state <= ALLOCATE;
             else -- we're not done yet.
               next_state <= WRITE_BACK;
@@ -261,8 +276,30 @@ begin
           when WRITE_DATA =>
             next_state <= WRITE_BACK;
             -- we're writing data on the bus for memory to grab.
+            -- @TODO: m_addr needs to be set!! (using the TAG in the cache block)
+
+             -- the address looks like this;
+            -- -------------------------------
+            -- 0000 0000 0000 0000 0000 0000 0000 0000
+            -- ssss ssss ssss ssss ssss ssss ssWW BB00
+            -- -------------------------------
+            -- s: coming from s_addr.
+            -- W: which word in the block
+            -- t: coming from the tag.
+            -- B: which byte in the word
+            -- NOTE: memory uses bytes as the unit of measurement, hence we need to divide the resulting integer by 4 
+            -- (or shift right twice before converting to an integer), giving this address:
+            -- 00ss ssss ssss ssss ssss sstt tttt WWBB
+            -- which is done with this:   
+            WW := std_logic_vector(to_unsigned(word_index_counter, 2));
+            BB := std_logic_vector(to_unsigned(word_byte_counter, 2));          
+            
+            m_addr_vector := "00" & s_addr(31 downto 11) & cache(block_index).tag & WW & BB;
+            m_addr <= to_integer(unsigned(m_addr_vector));
+
+
             m_write <= '1';
-            m_writedata <= old_block.data(word_index_counter)(word_byte_counter);
+            m_writedata <= cache(block_index).data(word_index_counter)(word_byte_counter);
 
             if m_waitrequest = '1' then 
               -- memory hasn't grabbed the data yet.
