@@ -126,7 +126,7 @@ begin
     end if;
   end process;
   
-  update_process : process(state, s_read, s_write, m_waitrequest, allocate_sub_state, write_back_sub_state)
+  update_process : process(reset, state, s_read, s_write, m_waitrequest, allocate_sub_state, write_back_sub_state)
   variable WW : std_logic_vector(1 downto 0);
   variable BB : std_logic_vector(1 downto 0);
   variable m_addr_vector : std_logic_vector(31 downto 0);
