@@ -220,19 +220,16 @@ begin
               -- the address looks like this;
               -- -------------------------------
               -- 0000 0000 0000 0000 0000 0000 0000 0000
-              -- ssss ssss ssss ssss ssss ssss ssWW BB00
+              -- ssss ssss ssss ssss ssss ssss ssss WWBB
               -- -------------------------------
               -- s: coming from s_addr.
               -- W: which word in the block
               -- B: which byte in the word
-              -- NOTE: memory uses bytes as the unit of measurement, hence we need to divide the resulting integer by 4 
-              -- (or shift right twice before converting to an integer), giving:
-              -- 00ss ssss ssss ssss ssss ssss ssss WWBB
               -- which is done with this:  
               WW := std_logic_vector(to_unsigned(word_index_counter, 2));
               BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
               
-              m_addr_vector := "00" & s_addr(31 downto 6) & WW & BB;
+              m_addr_vector := s_addr(31 downto 4) & WW & BB;
               m_addr <= to_integer(unsigned(m_addr_vector));       
               m_read <= '1';
 
@@ -279,20 +276,18 @@ begin
               -- the address looks like this;
               -- -------------------------------
               -- 0000 0000 0000 0000 0000 0000 0000 0000
-              -- ssss ssss ssss ssss ssss ssss ssWW BB00
+              -- ssss ssss ssss ssss ssss sstt tttt WWBB
               -- -------------------------------
               -- s: coming from s_addr.
               -- W: which word in the block
               -- t: coming from the tag.
               -- B: which byte in the word
-              -- NOTE: memory uses bytes as the unit of measurement, hence we need to divide the resulting integer by 4 
-              -- (or shift right twice before converting to an integer), giving this address:
-              -- 00ss ssss ssss ssss ssss sstt tttt WWBB
+              -- 
               -- which is done with this:   
               WW := std_logic_vector(to_unsigned(word_index_counter, 2));
               BB := std_logic_vector(to_unsigned(word_byte_counter, 2));          
               
-              m_addr_vector := "00" & s_addr(31 downto 11) & cache(block_index).tag & WW & BB;
+              m_addr_vector := s_addr(31 downto 10) & cache(block_index).tag & WW & BB;
               m_addr <= to_integer(unsigned(m_addr_vector));
 
               m_write <= '1';
