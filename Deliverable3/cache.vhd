@@ -220,10 +220,11 @@ begin
               -- the address looks like this;
               -- -------------------------------
               -- 0000 0000 0000 0000 0000 0000 0000 0000
-              -- ssss ssss ssss ssss ssss ssss ssss WWBB
+              -- ssss ssss ssss ssss ssss ssbb bbbb WWBB
               -- -------------------------------
               -- s: coming from s_addr.
               -- W: which word in the block
+              -- b: which block in cache
               -- B: which byte in the word
               -- which is done with this:  
               WW := std_logic_vector(to_unsigned(word_index_counter, 2));
@@ -276,18 +277,19 @@ begin
               -- the address looks like this;
               -- -------------------------------
               -- 0000 0000 0000 0000 0000 0000 0000 0000
-              -- ssss ssss ssss ssss ssss sstt tttt WWBB
+              -- ssss ssss ssss ssss tttt ttbb bbbb WWBB
               -- -------------------------------
               -- s: coming from s_addr.
               -- W: which word in the block
               -- t: coming from the tag.
+              -- b: which block in cache
               -- B: which byte in the word
               -- 
               -- which is done with this:   
               WW := std_logic_vector(to_unsigned(word_index_counter, 2));
               BB := std_logic_vector(to_unsigned(word_byte_counter, 2));          
               
-              m_addr_vector := s_addr(31 downto 10) & cache(block_index).tag & WW & BB;
+              m_addr_vector := s_addr(31 downto 15) & cache(block_index).tag & s_addr(9 downto 4) & WW & BB;
               m_addr <= to_integer(unsigned(m_addr_vector));
 
               m_write <= '1';
