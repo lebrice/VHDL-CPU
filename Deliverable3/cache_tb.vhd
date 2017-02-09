@@ -130,6 +130,10 @@ test_process : process
 variable tag : integer;
 variable block_index : integer range 0 to 31;
 variable block_offset : integer range 0 to 3;
+variable tag_1 : integer;
+variable tag_2 : integer;
+variable data_1 : std_logic_vector(31 downto 0);
+variable data_2 : std_logic_vector(31 downto 0);
 begin
 
 -- put your tests here
@@ -137,6 +141,68 @@ s_read <= '0';
 s_write <= '0';
 
 wait for 2 * clk_period;
+report "---------------------------------------------------------------------------------------------------";
+report "------------------------------------------- START OF TESTING --------------------------------------";
+report "---------------------------------------------------------------------------------------------------";
+
+
+-- ------------------Functionality testing ----------------------------
+--(testing the innards of the code, rather than the high-level interaction
+tag_1 := 17;
+tag_2 := 23;
+data_1 := X"12345678";
+data_2 := X"FFFF7777";
+
+s_addr <= make_addr(tag_1,0,0);
+s_writedata <= data_1;
+s_read <= '0';
+s_write <= '1';
+wait until falling_edge(s_waitrequest);
+s_write <= '0';
+
+-- read, expect to have data_1 back.
+s_read <= '1';
+wait until falling_edge(s_waitrequest);
+assert s_readdata = data_1 report "first read failed! (expected data_1)" severity ERROR;
+s_read <= '0';
+
+-- write data_2 over data_1. (cache miss, write_back should flush data_1 to memory first)
+
+s_addr <= make_addr(tag_2, 0, 0);
+s_writedata <= data_2;
+s_write <= '1';
+wait until falling_edge(s_waitrequest);
+s_write <= '0';
+
+
+-- read what's in cache, should have data_2.
+s_read <= '1';
+wait until falling_edge(s_waitrequest);
+assert s_readdata = data_2 report "second read failed! (expected data_2)" severity ERROR;
+s_read <= '0';
+
+
+-- now: try to read data_1 (which was previously flushed to memory!)
+s_addr <= make_addr(tag_1, 0, 0);
+s_read <= '1';
+wait until falling_edge(s_waitrequest);
+assert s_readdata = data_1 report "third read failed! (expected data_1 to be fetched from memory and then served!)" severity ERROR;
+report "third read done.";
+s_read <= '0';
+
+-- now, try to read data_2 again! (which was flushed to memory in the last read).
+s_addr <= make_addr(tag_2, 0, 0);
+s_read <= '1';
+wait until falling_edge(s_waitrequest);
+assert s_readdata = data_2 report "fourth read failed! (expected data_2 to be fetched from memory and then served!)" severity ERROR;
+s_read <= '0';
+
+
+
+
+
+
+------------------- Integration tests (16 cases) ---------------------------
 
 -- the address looks like this;
 -- -------------------------------
@@ -311,6 +377,11 @@ wait until falling_edge(s_waitrequest);
 assert s_readdata = X"FFFFFFFD" report "Read unsuccesfull! Was expecting FFFFFFFD but got ____ " SEVERITY ERROR;
 
 report "Testing Complete.";
+
+
+report "---------------------------------------------------------------------------------------------------";
+report "------------------------------------------- END OF TESTING --------------------------------------";
+report "---------------------------------------------------------------------------------------------------";
 wait;	
 
 
