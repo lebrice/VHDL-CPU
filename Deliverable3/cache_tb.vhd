@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity cache_tb is
+
 end cache_tb;
 
 architecture behavior of cache_tb is
@@ -68,6 +69,19 @@ signal m_write : std_logic;
 signal m_writedata : std_logic_vector (7 downto 0);
 signal m_waitrequest : std_logic; 
 
+
+function make_addr (tag : integer; block_index : integer; block_offset: integer) return std_logic_vector is
+variable tag_vector : std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(tag, 6));
+variable block_index_vector : std_logic_vector(4 downto 0) := std_logic_vector(to_unsigned(block_index, 5));
+variable block_offset_vector : std_logic_vector(1 downto 0) := std_logic_vector(to_unsigned(block_offset, 2));
+begin
+
+-- the address looks like this;
+-- -------------------------------
+-- 0000 0000 0000 0000 0000 0000 0000 0000
+-- ssss ssss ssss ssss sttt ttts ssss WWBB
+    return X"0000" & "0" & tag_vector & block_index_vector & block_offset_vector & "00";
+end make_addr;
 begin
 
 -- Connect the components which we instantiated above to their
@@ -113,10 +127,42 @@ begin
 end process;
 
 test_process : process
+variable tag : integer;
+variable block_index : integer range 0 to 31;
+variable block_offset : integer range 0 to 3;
 begin
 
 -- put your tests here
-	
+s_read <= '0';
+s_write <= '0';
+
+wait for 2 * clk_period;
+
+-- the address looks like this;
+-- -------------------------------
+-- 0000 0000 0000 0000 0000 0000 0000 0000
+-- ssss ssss ssss ssss ssss sstt tttt WWBB
+
+
+
+-- testing a write-read cycle.
+s_addr <= X"00000000";
+
+s_read <= '0';
+s_write <= '1';
+s_writedata <= X"FFFFFFFF";
+
+wait until falling_edge(s_waitrequest);
+report "done writing (falling edge of s_waitrequest)";
+s_write <= '0';
+s_read <= '1';
+wait until falling_edge(s_waitrequest);
+s_read <= '0';
+assert s_readdata = X"FFFFFFFF" report "write unsuccesfull!!" severity ERROR;
+report "done!";
+wait;	
+
+
 end process;
 	
 end;
