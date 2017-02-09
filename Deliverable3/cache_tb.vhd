@@ -189,14 +189,14 @@ s_read <= '0';
 s_write <= '1';
 FOR i IN 2 to 9 LOOP
     s_addr <= make_addr(i,i,0); -- Tag = i.
-    s_writedata <= X"FFFFFFE" & to_unsigned(i-2, 4);
+    s_writedata <= X"FFFFFFE" & std_logic_vector(to_unsigned(i-2, 4));
     wait until falling_edge(s_waitrequest);
 END LOOP;
 
 -- Write in second wave of data.
 FOR i IN 2 to 9 LOOP
     s_addr <= make_addr(65-i,i,0); -- Tag = i.
-    s_writedata <= X"FFFFFFD" & to_unsigned(i-2, 4);
+    s_writedata <= X"FFFFFFD" & std_logic_vector(to_unsigned(i-2, 4));
     wait until falling_edge(s_waitrequest);
 END LOOP;
 
