@@ -249,7 +249,7 @@ s_read <= '1';
 s_write <= '0';
 s_addr <= make_addr(5,4,0); -- Note that tags don't match. Corresponding tag of block 4 is 4.
 wait until falling_edge(s_waitrequest);
-assert s_readdata = X"FFFFFFE" report "Read unsuccesfull! Was expecting FFFFFFE but got ____ " SEVERITY ERROR;
+assert s_readdata = X"FFFFFFFE" report "Read unsuccesfull! Was expecting FFFFFFFE but got ____ " SEVERITY ERROR;
 
 -- ***********************************************************************************
 -- Case 12: Valid, Clean, Read, Same Tags.
@@ -258,7 +258,7 @@ s_read <= '1';
 s_write <= '0';
 s_addr <= make_addr(5,5,0); -- Note that tags do match. Corresponding tag of block 5 is 5.
 wait until falling_edge(s_waitrequest);
-assert s_readdata = X"FFFFFFE" report "Read unsuccesfull! Was expecting FFFFFFE but got ____ " SEVERITY ERROR;
+assert s_readdata = X"FFFFFFFE" report "Read unsuccesfull! Was expecting FFFFFFFE but got ____ " SEVERITY ERROR;
 
 
 -- ***********************************************************************************
@@ -299,7 +299,7 @@ s_read <= '1';
 s_write <= '0';
 s_addr <= make_addr(9,8,0); -- Note that tags don't match. Corresponding tag of block 8 is 8.
 wait until falling_edge(s_waitrequest);
-assert s_readdata = X"FFFFFFD" report "Read unsuccesfull! Was expecting FFFFFFD but got ___ " SEVERITY ERROR;
+assert s_readdata = X"FFFFFFFD" report "Read unsuccesfull! Was expecting FFFFFFFD but got ___ " SEVERITY ERROR;
 
 -- ***********************************************************************************
 -- Case 16: Valid, Dirty, Read, Same Tags.
@@ -308,7 +308,7 @@ s_read <= '1';
 s_write <= '0';
 s_addr <= make_addr(9,9,0); -- Note that tags do match. Corresponding tag of block 9 is 9.
 wait until falling_edge(s_waitrequest);
-assert s_readdata = X"FFFFFFD" report "Read unsuccesfull! Was expecting FFFFFFD but got ____ " SEVERITY ERROR;
+assert s_readdata = X"FFFFFFFD" report "Read unsuccesfull! Was expecting FFFFFFFD but got ____ " SEVERITY ERROR;
 
 report "Testing Complete.";
 wait;	
