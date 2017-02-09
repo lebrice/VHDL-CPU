@@ -85,10 +85,10 @@ architecture arch of cache is
   -- we are going to read and write the 4 words of a block to memory one byte at a time.
   -- To do this, we'll use a counter variable (byte_counter) to tell which word, and which byte of this word we're using.
   -- byte_counter will progressively increase from 0 to 15.
-  signal byte_counter : integer RANGE 0 to 15;
+  signal byte_counter : integer RANGE 0 to 16;
   
   -- index of which word of the block we are (reading/writing) (to/from) memory.
-  signal word_index_counter : integer range 0 to words_per_block - 1;
+  signal word_index_counter : integer range 0 to words_per_block;
     
   -- index of which byte in the word we are (reading/writing) (to/from) memory.
   signal word_byte_counter : integer range 0 to 3;
@@ -176,6 +176,7 @@ begin
           -- we're done reading or writing.
 
           next_state <= IDLE;
+          byte_counter <= 0;
           s_waitrequest <= '0'; 
         else        
           -- We have a cache miss! 
@@ -190,8 +191,8 @@ begin
           
           -- set the field such that we get a cache hit when we get back to this stage, after fetching data from memory.
           -- @TODO: can't set the TAG here, is we have write_back we're going to use the "old" tag to put it back in memory!!
-          cache(block_index).tag <= tag; -- set the tag field.
-          cache(block_index).valid <= '1';          
+          -- cache(block_index).tag <= tag; -- set the tag field.
+          cache(block_index).valid <= '1';        
         end if;
         ---------------------------------------------------------------------------
       when ALLOCATE =>
@@ -199,8 +200,11 @@ begin
         case allocate_sub_state is
           when COMPARE_BYTE_COUNT =>
             m_read <= '0';
-            if byte_counter = 15 then
+            if byte_counter = 16 then
+              -- we're done allocating a block. set the tag appropriately.
               next_state <= COMPARE_TAG;
+              -- @TODO: test this out to make sure we're setting the tag at the right moment.
+              cache(block_index).tag <= tag;
             else
               next_state <= ALLOCATE;
               if m_waitrequest = '0' then 
@@ -257,7 +261,7 @@ begin
           when COMPARE_BYTE_COUNT => -- we compare the byte_counter to check if we're done.
             -- we set the output for this state.
             m_write <= '0';
-            if byte_counter = 15 then -- we're done. Move on to ALLOCATE.
+            if byte_counter = 16 then -- we're done. Move on to ALLOCATE.
               next_state <= ALLOCATE;
             else -- we're not done yet.
               next_state <= WRITE_BACK;
