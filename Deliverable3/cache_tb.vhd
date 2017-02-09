@@ -153,7 +153,7 @@ s_writedata <= X"FFFFFFFF";
 wait until falling_edge(s_waitrequest);
 report "Case 1 complete (falling edge of s_waitrequest)";
 
--- Case 12: Valid, Clean, Read, Same Tags (1011).
+--Read and assert
 s_write <= '0';
 s_read <= '1';
 wait until falling_edge(s_waitrequest);
