@@ -253,6 +253,11 @@ wait until falling_edge(s_waitrequest);
 reset <= '1';
 wait for clk_period; --wait for a clock period
 
+s_read <= '1';
+s_write <= '0';
+s_addr <= make_addr(10,10,0);
+wait until falling_edge(s_waitrequest);
+assert s_readdata = X"FFFFFFFE" report "Read unsuccesfull! Was expecting FFFFFFFE " SEVERITY ERROR;
 
 
 -- Case 3: Invalid, Clean, Read, Different Tags (0010).
