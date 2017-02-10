@@ -58,7 +58,7 @@ architecture arch of cache is
   SIGNAL cache : CACHE_TYPE := (others => empty_cache_block);
 
 
-  TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
+  TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK, DONE_STATE);
   signal state : state_type;
   signal next_state : state_type;
   
@@ -152,6 +152,9 @@ begin
             s_waitrequest <= '1';
           end if;
         ---------------------------------------------------------------------------
+        when DONE_STATE =>
+          s_waitrequest <= '0';
+          next_state <= IDLE;
         when COMPARE_TAG =>
           -- check if there is a miss or a hit.
           -- if there is a hit, just go back to the IDLE state.
@@ -165,7 +168,7 @@ begin
             -- we have a cache hit!
             if(s_read = '1') then
               s_readdata <= cache(block_index).data(block_offset)(3) & cache(block_index).data(block_offset)(2) & cache(block_index).data(block_offset)(1) & cache(block_index).data(block_offset)(0);
-            else
+            elsif(s_write = '1') then
               -- We are doing a cache write.
               -- we write one byte at a time.
               cache(block_index).data(block_offset)(3) <= s_writedata(31 downto 24);       
@@ -179,8 +182,7 @@ begin
             end if;
             -- we're done reading or writing.
 
-            next_state <= IDLE;
-            s_waitrequest <= '0'; 
+            next_state <= DONE_STATE;
           else        
             -- We have a cache miss! 
             -- check if we need to write the content back to memory or not.
@@ -188,12 +190,10 @@ begin
               next_state <= WRITE_BACK;
             else
               next_state <= ALLOCATE;
-            end if;      
+            end if;
           end if;
           -- since we will be handling memory in the next states, we need to reset the byte_counter variable.            
           byte_counter <= 0;
-          -- set the 'valid' field such that we get a cache hit when we get back to this stage, after fetching data from memory.
-          cache(block_index).valid <= '1';
           ---------------------------------------------------------------------------
         when ALLOCATE =>
 
@@ -205,7 +205,9 @@ begin
                 next_state <= COMPARE_TAG;
                 -- @TODO: test this out to make sure we're setting the tag at the right moment.
                 cache(block_index).tag <= tag;
-                cache(block_index).dirty <= '0';
+                cache(block_index).dirty <= '0';                
+                -- set the 'valid' field such that we get a cache hit when we get back to this stage, after fetching data from memory.
+                cache(block_index).valid <= '1';
               else
                 next_state <= ALLOCATE;
                 if m_waitrequest = '0' then
