@@ -144,7 +144,7 @@ wait for 2 * clk_period;
 report "---------------------------------------------------------------------------------------------------";
 report "------------------------------------------- START OF TESTING --------------------------------------";
 report "---------------------------------------------------------------------------------------------------";
-
+report "Start of Functional Testing";
 
 -- ------------------Functionality testing ----------------------------
 --(testing the innards of the code, rather than the high-level interaction
@@ -163,9 +163,9 @@ s_write <= '0';
 -- read, expect to have data_1 back.
 s_read <= '1';
 wait until falling_edge(s_waitrequest);
-assert s_readdata = data_1 report "first read failed! (expected data_1)" severity ERROR;
+assert s_readdata = data_1 report "Functional test: first read failed! (expected data_1)" severity ERROR;
 s_read <= '0';
-
+report "First functional test complete";
 -- write data_2 over data_1. (cache miss, write_back should flush data_1 to memory first)
 
 s_addr <= make_addr(tag_2, 0, 0);
@@ -178,30 +178,28 @@ s_write <= '0';
 -- read what's in cache, should have data_2.
 s_read <= '1';
 wait until falling_edge(s_waitrequest);
-assert s_readdata = data_2 report "second read failed! (expected data_2)" severity ERROR;
+assert s_readdata = data_2 report "Functional test: second read failed! (expected data_2)" severity ERROR;
 s_read <= '0';
-
+report "Second functional test complete";
 
 -- now: try to read data_1 (which was previously flushed to memory!)
 s_addr <= make_addr(tag_1, 0, 0);
 s_read <= '1';
 wait until falling_edge(s_waitrequest);
-assert s_readdata = data_1 report "third read failed! (expected data_1 to be fetched from memory and then served!)" severity ERROR;
-report "third read done.";
+assert s_readdata = data_1 report "Functional test: third read failed! (expected data_1 to be fetched from memory and then served!)" severity ERROR;
+report "Third functional test complete.";
 s_read <= '0';
 
 -- now, try to read data_2 again! (which was flushed to memory in the last read).
 s_addr <= make_addr(tag_2, 0, 0);
 s_read <= '1';
 wait until falling_edge(s_waitrequest);
-assert s_readdata = data_2 report "fourth read failed! (expected data_2 to be fetched from memory and then served!)" severity ERROR;
+assert s_readdata = data_2 report "Functional test: fourth read failed! (expected data_2 to be fetched from memory and then served!)" severity ERROR;
 s_read <= '0';
+report "Fourth functional test complete.";
+report "Functional Testing complete.";
 
-
-
-
-
-
+report "Beginning of Integration testing.";
 ------------------- Integration tests (16 cases) ---------------------------
 
 -- the address looks like this;
@@ -227,54 +225,13 @@ s_read <= '0';
 assert s_readdata = X"FFFFFFFF" report "Write unsuccesfull!" severity ERROR;
 report "Case 1 Finished";
 
--- ***********************************************************************************
+-- Cases 2,3, & 4 are not possible without interference with a reset. Thus they will not be tested
 -- Case 2: Invalid, Clean, Write, Same Tags (0001).
--- ***********************************************************************************
-s_read <= '0';
-s_write <= '1';
-
--- Write in first wave of data.
-s_addr <= make_addr(10,10,0);
-s_writedata <= X"FFFFFFFE"; 
-wait until falling_edge(s_waitrequest);
-
--- Write in second wave of data.
-s_addr <= make_addr(11,10,0);
-s_writedata <= X"FFFFFFFD";
-wait until falling_edge(s_waitrequest);
-
--- Now read in first data.
-s_read <= '1';
-s_write <= '0';
-s_addr <= make_addr(10,10,0);
-wait until falling_edge(s_waitrequest);
-
--- Now perform reset to get invalid data.
-reset <= '1';
-
-s_read <= '1';
-s_write <= '0';
-s_addr <= make_addr(10,10,0);
-wait until falling_edge(s_waitrequest);
-assert s_readdata = X"FFFFFFFE" report "Read unsuccesfull! Was expecting FFFFFFFE " SEVERITY ERROR;
-
-
 -- Case 3: Invalid, Clean, Read, Different Tags (0010).
--- s_read <= '1';
--- s_write <= '0';
--- s_addr <= make_addr(1,1,0); -- Tag = 1, Block index 1.
--- wait until falling_edge(s_waitrequest);
--- report "Case 1 complete (falling edge of s_waitrequest)";
-
---the above case should return absolute crap (or break). However,
---we can better do this case by writing data to memory and then resetting and performing
---this again.
-
 -- Case 4: Invalid, Clean, Read, Same Tags (0011).
--- TODO. (Need reset).
 
 -- Cases 5 - 8: IMPOSSIBLE (can't be invalid and dirty...)
-report "Skipping cases 5 - 8 (impossible cases)";
+report "Skipping impossible cases";
 
 -- ***********************************************************************************
 -- Preparation/Setup for future cases.
