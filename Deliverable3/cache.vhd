@@ -1,5 +1,6 @@
+-- cache.vhd: working cache for ECSE 425 project
 -- Fabrice Normandin, ID 260636800
--- Asher Wright, ID 
+-- Asher Wright, ID 260559393
 -- William Stephen Poole, ID 260508650
 -- Stephan Greto-McGrath, ID 
 
