@@ -1,6 +1,6 @@
 -- Fabrice Normandin, ID 260636800
 -- Asher Wright, ID 
--- William Stephen Poole, ID
+-- William Stephen Poole, ID 260508650
 -- Stephan Greto-McGrath, ID 
 
 library ieee;
