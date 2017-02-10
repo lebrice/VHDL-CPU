@@ -251,7 +251,6 @@ wait until falling_edge(s_waitrequest);
 
 -- Now perform reset to get invalid data.
 reset <= '1';
-wait for clk_period; --wait for a clock period
 
 s_read <= '1';
 s_write <= '0';
