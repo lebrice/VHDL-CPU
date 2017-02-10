@@ -361,7 +361,7 @@ s_read <= '1';
 s_write <= '0';
 s_addr <= make_addr(9,8,0); -- Note that tags don't match. Corresponding tag of block 8 is 8.
 wait until falling_edge(s_waitrequest);
-assert s_readdata = X"FFFFFFFD" report "Read unsuccesfull! Was expecting FFFFFFFD but got ___ " SEVERITY ERROR;
+assert s_readdata = X"FFFFFFFD" report "Read unsuccesfull! Was expecting FFFFFFFD " SEVERITY ERROR;
 report "Case 15 Finished.";
 
 -- ***********************************************************************************
