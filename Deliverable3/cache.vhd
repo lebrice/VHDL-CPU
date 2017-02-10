@@ -136,6 +136,7 @@ begin
     if reset = '1' then
       clear_blocks : for i in 0 to block_count - 1 loop
           cache(i).valid <= '0';
+          cache(i).dirty <= '0';
       end loop ; -- clear_blocks
       --also need to reset s_waitrequest to 1
       s_waitrequest <= '1';
