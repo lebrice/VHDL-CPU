@@ -1,6 +1,7 @@
+-- cache.vhd: working cache for ECSE 425 project
 -- Fabrice Normandin, ID 260636800
--- Asher Wright, ID 
--- William Stephen Poole, ID
+-- Asher Wright, ID 260559393
+-- William Stephen Poole, ID 260508650
 -- Stephan Greto-McGrath, ID 
 
 library ieee;
@@ -58,7 +59,7 @@ architecture arch of cache is
   SIGNAL cache : CACHE_TYPE := (others => empty_cache_block);
 
 
-  TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK);
+  TYPE state_type is (IDLE, COMPARE_TAG, ALLOCATE, WRITE_BACK, DONE_STATE);
   signal state : state_type;
   signal next_state : state_type;
   
@@ -126,7 +127,7 @@ begin
     end if;
   end process;
   
-  update_process : process(state, s_read, s_write, m_waitrequest, allocate_sub_state, write_back_sub_state)
+  update_process : process(reset, state, s_read, s_write, m_waitrequest, allocate_sub_state, write_back_sub_state)
   variable WW : std_logic_vector(1 downto 0);
   variable BB : std_logic_vector(1 downto 0);
   variable m_addr_vector : std_logic_vector(31 downto 0);
@@ -136,7 +137,10 @@ begin
     if reset = '1' then
       clear_blocks : for i in 0 to block_count - 1 loop
           cache(i).valid <= '0';
+          cache(i).dirty <= '0';
       end loop ; -- clear_blocks
+      --also need to reset s_waitrequest to 1
+      s_waitrequest <= '1';
     else
       case state is
 
@@ -147,8 +151,12 @@ begin
             next_state <= COMPARE_TAG;
           else 
             next_state <= IDLE;
+            s_waitrequest <= '1';
           end if;
         ---------------------------------------------------------------------------
+        when DONE_STATE =>
+          s_waitrequest <= '0';
+          next_state <= IDLE;
         when COMPARE_TAG =>
           -- check if there is a miss or a hit.
           -- if there is a hit, just go back to the IDLE state.
@@ -162,7 +170,7 @@ begin
             -- we have a cache hit!
             if(s_read = '1') then
               s_readdata <= cache(block_index).data(block_offset)(3) & cache(block_index).data(block_offset)(2) & cache(block_index).data(block_offset)(1) & cache(block_index).data(block_offset)(0);
-            else
+            elsif(s_write = '1') then
               -- We are doing a cache write.
               -- we write one byte at a time.
               cache(block_index).data(block_offset)(3) <= s_writedata(31 downto 24);       
@@ -176,8 +184,7 @@ begin
             end if;
             -- we're done reading or writing.
 
-            next_state <= IDLE;
-            s_waitrequest <= '0'; 
+            next_state <= DONE_STATE;
           else        
             -- We have a cache miss! 
             -- check if we need to write the content back to memory or not.
@@ -185,15 +192,10 @@ begin
               next_state <= WRITE_BACK;
             else
               next_state <= ALLOCATE;
-            end if;      
-            
-            
-            
+            end if;
           end if;
           -- since we will be handling memory in the next states, we need to reset the byte_counter variable.            
           byte_counter <= 0;
-          -- set the 'valid' field such that we get a cache hit when we get back to this stage, after fetching data from memory.
-          cache(block_index).valid <= '1';
           ---------------------------------------------------------------------------
         when ALLOCATE =>
 
@@ -205,9 +207,12 @@ begin
                 next_state <= COMPARE_TAG;
                 -- @TODO: test this out to make sure we're setting the tag at the right moment.
                 cache(block_index).tag <= tag;
+                cache(block_index).dirty <= '0';                
+                -- set the 'valid' field such that we get a cache hit when we get back to this stage, after fetching data from memory.
+                cache(block_index).valid <= '1';
               else
                 next_state <= ALLOCATE;
-                if m_waitrequest = '0' then 
+                if m_waitrequest = '0' then
                   -- wait until memory is at "idle".
                   next_allocate_sub_state <= COMPARE_BYTE_COUNT;
                 else
@@ -261,6 +266,7 @@ begin
               m_write <= '0';
               if byte_counter = 16 then -- we're done. Move on to ALLOCATE.
                 next_state <= ALLOCATE;
+                byte_counter <= 0;
               else -- we're not done yet.
                 next_state <= WRITE_BACK;
                 if m_waitrequest = '1' then -- memory is at "idle" and ready to accept another byte.
@@ -287,13 +293,12 @@ begin
               -- 
               -- which is done with this:   
               WW := std_logic_vector(to_unsigned(word_index_counter, 2));
-              BB := std_logic_vector(to_unsigned(word_byte_counter, 2));          
+              BB := std_logic_vector(to_unsigned(word_byte_counter, 2));
               
-              m_addr_vector := s_addr(31 downto 15) & cache(block_index).tag & s_addr(9 downto 4) & WW & BB;
+              m_addr_vector := s_addr(31 downto 15) & cache(block_index).tag & s_addr(8 downto 4) & WW & BB;
               m_addr <= to_integer(unsigned(m_addr_vector));
-
-              m_write <= '1';
               m_writedata <= cache(block_index).data(word_index_counter)(word_byte_counter);
+              m_write <= '1';
 
               if m_waitrequest = '1' then 
                 -- memory hasn't grabbed the data yet.
