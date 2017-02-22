@@ -14,7 +14,7 @@ use STD.textio;
 
 entity fetchStage is
   port (
-    clock
+    clock : std_logic
   ) ;
 end fetchStage;
 

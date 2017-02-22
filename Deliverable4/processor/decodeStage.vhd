@@ -14,7 +14,7 @@ use STD.textio;
 
 entity decodeStage is
   port (
-    clock
+    clock : std_logic
   ) ;
 end decodeStage ;
 

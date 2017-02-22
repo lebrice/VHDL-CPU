@@ -14,7 +14,7 @@ use STD.textio;
 
 entity writebackStage is
   port (
-    clock
+    clock : std_logic
   ) ;
 end writebackStage ;
 

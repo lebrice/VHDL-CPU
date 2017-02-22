@@ -14,7 +14,7 @@ use STD.textio;
 
 entity processor is
   port (
-    clock
+    clock : std_logic
   ) ;
 end processor;
 

@@ -14,7 +14,7 @@ use STD.textio;
 
 entity ALU is
   port (
-    clock,
+    clock : std_logic
   );
 end ALU ;
 

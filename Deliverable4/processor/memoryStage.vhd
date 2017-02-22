@@ -14,7 +14,7 @@ use STD.textio;
 
 entity memoryStage is
   port (
-    clock
+    clock : std_logic
   ) ;
 end memoryStage ;
 
