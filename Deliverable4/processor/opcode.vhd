@@ -15,83 +15,63 @@ use STD.textio;
 
 package OPCODE_TOOLS is
     -- Arithmetic
-    constant ADD_INSTR : std_logic_vector(5 downto 0) := "010000"; -- add
-    constant SUB_INSTR : std_logic_vector(5 downto 0) := "010000"; -- subtract
-    constant ADDI_INSTR : std_logic_vector(5 downto 0) := "010000"; -- add immediate
-    constant MULT_INSTR : std_logic_vector(5 downto 0) := "010000"; -- multiply
-    constant DIV_INSTR : std_logic_vector(5 downto 0) := "010000"; -- divide
-    constant SLT_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Set Less than
-    constant SLTI_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Set less than immediate
+
+    constant ALU_OP : std_logic_vector(5 downto 0)   := "000000";
+
+    -- constant ADD_OP : std_logic_vector(5 downto 0)   := "100000"; -- (R-Type) add
+    -- constant SUB_OP : std_logic_vector(5 downto 0)   := "100010"; -- (R-Type) subtract
+    -- constant MULT_OP : std_logic_vector(5 downto 0)  := "011000"; -- (R-Type) multiply
+    -- constant DIV_OP : std_logic_vector(5 downto 0)   := "011010"; -- (R-Type) divide
+    -- constant SLT_OP : std_logic_vector(5 downto 0)   := "101010"; -- (R-Type) Set Less than
+    constant ADDI_OP : std_logic_vector(5 downto 0)  := "001000"; -- (I-Type) add immediate
+    constant SLTI_OP : std_logic_vector(5 downto 0)  := "001010"; -- (I-Type) Set less than immediate
 
     -- Logical
-    constant AND_INSTR : std_logic_vector(5 downto 0) := "010000"; -- AND
-    constant OR_INSTR : std_logic_vector(5 downto 0) := "010000"; -- OR
-    constant NOR_INSTR : std_logic_vector(5 downto 0) := "010000"; -- NOR
-    constant XOR_INSTR : std_logic_vector(5 downto 0) := "010000"; -- XOR
-    constant ANDI_INSTR : std_logic_vector(5 downto 0) := "010000"; -- AND Immediate
-    constant ORI_INSTR : std_logic_vector(5 downto 0) := "010000"; -- OR immediate
-    constant XORI_INSTR : std_logic_vector(5 downto 0) := "010000"; -- XOR immediate
+    -- constant AND_OP : std_logic_vector(5 downto 0)   := "100100"; -- (R-Type) AND
+    -- constant OR_OP : std_logic_vector(5 downto 0)    := "100101"; -- (R-Type) OR
+    -- constant NOR_OP : std_logic_vector(5 downto 0)   := "100111"; -- (R-Type) NOR
+    -- constant XOR_OP : std_logic_vector(5 downto 0)   := "100110"; -- (R-Type) XOR
+    constant ANDI_OP : std_logic_vector(5 downto 0)  := "001100"; -- (I-Type) AND Immediate
+    constant ORI_OP : std_logic_vector(5 downto 0)   := "001101"; -- (I-Type) OR immediate
+    constant XORI_OP : std_logic_vector(5 downto 0)  := "001110"; -- (I-Type) XOR immediate
 
     -- transfer
-    constant MFHI_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Move from HI : (used after multiplications)
-    constant MFLO_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Move from Lo : (used after multiplications)
-    constant LUI_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Load Upper Immediate (@TODO: not sure what this does.)
+    -- constant MFHI_OP : std_logic_vector(5 downto 0)  := "010000"; -- (R-Type) Move from HI : (used after multiplications)
+    -- constant MFLO_OP : std_logic_vector(5 downto 0)  := "010010"; -- (R-Type) Move from Lo : (used after multiplications)
+    constant LUI_OP : std_logic_vector(5 downto 0)   := "001111"; -- (I-Type) Load Upper Immediate (@TODO: not sure what this does.)
 
     -- shift
-    constant SLL_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Shift Left Logical
-    constant SRL_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Shift Right Logical
-    constant SRA_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Shift Right Arithmetic (keeps track of the MSB, preserving sign of the number.)
+    -- constant SLL_OP : std_logic_vector(5 downto 0)   := "000000"; -- (R-Type) Shift Left Logical
+    -- constant SRL_OP : std_logic_vector(5 downto 0)   := "000010"; -- (R-Type) Shift Right Logical
+    -- constant SRA_OP : std_logic_vector(5 downto 0)   := "000011"; -- (R-Type) Shift Right Arithmetic (keeps track of the MSB, preserving sign of the number.)
 
     -- Memory
-    constant LW_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Load word
-    constant LB_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Load Byte
-    constant SW_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Store Word
-    constant SB_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Store Byte
-
+    constant LW_OP : std_logic_vector(5 downto 0)    := "100011"; -- (I-Type) Load word
+    constant SW_OP : std_logic_vector(5 downto 0)    := "101011"; -- (I-Type) Store Word
+    
     -- Control-flow
-    constant BEQ_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Branch if equal
-    constant BNE_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Branch if NOT equal
-    constant J_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Jump : Jump to an immediate (relative, sign-extended) address
-    constant JR_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Jump To Register : (Jumpts to the address in a register)
-    constant JAL_INSTR : std_logic_vector(5 downto 0) := "010000"; -- Jump and Link
+    constant BEQ_OP : std_logic_vector(5 downto 0)   := "000100"; -- (I-Type) Branch if equal
+    constant BNE_OP : std_logic_vector(5 downto 0)   := "000101"; -- (I-Type) Branch if NOT equal
+    constant J_OP : std_logic_vector(5 downto 0)     := "000010"; -- (J-Type) Jump : Jump to an immediate (relative, sign-extended) address
+    -- constant JR_OP : std_logic_vector(5 downto 0)    := "001000"; -- (R-Type) Jump To Register : (Jumpts to the address in a register)
+    constant JAL_OP : std_logic_vector(5 downto 0)   := "000011"; -- (J-Type) Jump and Link
 
 
-    type INSTRUCTION_FORMAT is (R_TYPE, J_TYPE, I_TYPE);
+    type INSTRUCTION_FORMAT is (R_TYPE, J_TYPE, I_TYPE, UNKNOWN);
 end OPCODE_TOOLS;
 package body OPCODE_TOOLS is 
     function getInstructionFormat(opcode : std_logic_vector(5 downto 0))
               return INSTRUCTION_FORMAT is
     begin
     case opcode is
-        when ADD_INSTR =>    return R_TYPE;
-        when SUB_INSTR =>    return R_TYPE;
-        when ADDI_INSTR =>   return R_TYPE;
-        when MULT_INSTR =>   return R_TYPE;
-        when DIV_INSTR =>    return R_TYPE;
-        when SLT_INSTR =>    return R_TYPE;
-        when SLTI_INSTR =>   return R_TYPE;
-        when AND_INSTR =>    return R_TYPE;
-        when OR_INSTR =>     return R_TYPE;
-        when NOR_INSTR =>    return R_TYPE;
-        when XOR_INSTR =>    return R_TYPE;
-        when ANDI_INSTR =>   return R_TYPE;
-        when ORI_INSTR =>    return R_TYPE;
-        when XORI_INSTR =>   return R_TYPE;            
-        when MFHI_INSTR =>   return R_TYPE;
-        when MFLO_INSTR =>   return R_TYPE;
-        when LUI_INSTR =>    return R_TYPE;
-        when SLL_INSTR =>    return R_TYPE;
-        when SRL_INSTR =>    return R_TYPE;
-        when SRA_INSTR =>    return R_TYPE;
-        when LW_INSTR =>     return R_TYPE;
-        when LB_INSTR =>     return R_TYPE;
-        when SW_INSTR =>     return R_TYPE;
-        when SB_INSTR =>     return R_TYPE;
-        when BEQ_INSTR =>    return R_TYPE;
-        when BNE_INSTR =>    return R_TYPE;
-        when J_INSTR =>      return R_TYPE;
-        when JR_INSTR =>     return R_TYPE;
-        when JAL_INSTR =>    return R_TYPE;
+        when ALU_OP => 
+            return R_TYPE;
+        when ADDI_OP | SLTI_OP | ANDI_OP | ORI_OP | XORI_OP | LUI_OP | LW_op | SW_OP | BEQ_OP | BNE_OP =>
+            return I_TYPE;
+        when J_OP | JAL_OP =>
+            return J_TYPE;
+        when others =>
+            return UNKNOWN;
     end case;
     end getInstructionFormat;
 end OPCODE_TOOLS;
