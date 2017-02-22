@@ -1,16 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.std_logic_textio.all;
-use IEEE.std_logic_arith.all;
-use IEEE.numeric_bit.all;
 use IEEE.numeric_std.all;
-use IEEE.std_logic_signed.all;
-use IEEE.std_logic_unsigned.all;
-use IEEE.math_real.all;
-use IEEE.math_complex.all;
-
-library STD;
-use STD.textio;
 
 -- opcode tool library
 use work.OPCODE_TOOLS.all;
@@ -32,8 +22,74 @@ architecture ALU_arch of ALU is
 -- I-Instructions: addi, slti, bne, sw, beq, lw, lb, sb, lui, andi, ori, xori, asrt, asrti, halt;
 -- J-Instructions: jal, jr, j;
 -- Custom test instructions: asrt, asrti, halt
-
-signal instructionType : INSTRUCTION_TYPE;
 begin
-  instructionType <= getInstructionType(instruction);
+
+  computation : process( instruction, op_a, op_b )
+  variable instructionType : INSTRUCTION_TYPE := getInstructionType(instruction);
+  variable a_unsigned : unsigned(31 downto 0);
+  variable b_unsigned : unsigned(31 downto 0);
+  begin
+    a_unsigned := unsigned(op_a);    
+    b_unsigned := unsigned(op_b);
+    case instructionType is
+      when ADD =>
+        ALU_result <= std_logic_vector(a_unsigned + b_unsigned);
+      when SUBTRACT =>
+        
+      when ADD_IMMEDIATE =>
+        
+      when MULTIPLY =>
+        
+      when DIVIDE =>
+        
+      when SET_LESS_THAN =>
+        
+      when SET_LESS_THAN_IMMEDIATE =>
+        
+      when BITWISE_AND =>
+        
+      when BITWISE_OR =>
+        
+      when BITWISE_NOR =>
+        
+      when BITWISE_XOR =>
+        
+      when BITWISE_AND_IMMEDIATE =>
+        
+      when BITWISE_OR_IMMEDIATE =>
+        
+      when BITWISE_XOR_IMMEDIATE =>
+        
+      when MOVE_FROM_HI =>
+        
+      when MOVE_FROM_LOW =>
+        
+      when LOAD_UPPER_IMMEDIATE =>
+        
+      when SHIFT_LEFT_LOGICAL =>
+        
+      when SHIFT_RIGHT_LOGICAL =>
+        
+      when SHIFT_RIGHT_ARITHMETIC =>
+        
+      when LOAD_WORD =>
+        
+      when STORE_WORD =>
+        
+      when BRANCH_IF_EQUAL =>
+        
+      when BRANCH_IF_NOT_EQUAL =>
+        
+      when JUMP =>
+        
+      when JUMP_TO_REGISTER =>
+        
+      when JUMP_AND_LINK =>
+        
+      when UNKNOWN =>
+        
+    end case;
+  end process ; -- computation
+  
+
 end architecture ; -- arch
