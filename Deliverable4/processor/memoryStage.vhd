@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 
 entity memoryStage is
   port (
-    clock : std_logic
+    clock : in std_logic;
   ) ;
 end memoryStage ;
 
