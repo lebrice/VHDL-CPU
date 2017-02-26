@@ -7,12 +7,12 @@ entity decodeStage is
     clock : in std_logic;
     PCPlus4In : in std_logic_vector(3 downto 0);
     writeData : in std_logic_vector(31 downto 0);
-    writeRegister : in integer range 0 to 31;
+    writeRegister : in std_logic_vector(31 downto 0);
     instructionIn : in std_logic_vector(31 downto 0);
-    valA : out ;
-    valB : out;
-    iSignExtended : out ;
-    PCPlus4Out : out;
+    valA : out std_logic_vector(31 downto 0);
+    valB : out std_logic_vector(31 downto 0);
+    iSignExtended : out std_logic_vector(31 downto 0);
+    PCPlus4Out : out std_logic_vector(3 downto 0);
     instructionOut : out std_logic_vector(31 downto 0);
     
   ) ;

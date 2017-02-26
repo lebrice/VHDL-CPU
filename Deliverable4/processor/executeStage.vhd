@@ -6,13 +6,13 @@ entity executeStage is
   port (
     clock : in std_logic;
     instructionIn : in std_logic_vector(31 downto 0);
-    valA : in ;
-    valB : in ;
-    iSignExtended : in ;
-    PCPlus4In : in ;
+    valA : in std_logic_vector(31 downto 0);
+    valB : in std_logic_vector(31 downto 0);
+    iSignExtended : in std_logic_vector(31 downto 0);
+    PCPlus4In : in std_logic_vector(3 downto 0);
     instructionOut : out std_logic_vector(31 downto 0);
     branch : std_logic;
-    ALU_Result : std_logic_vector(25 downto 0);
+    ALU_Result : std_logic_vector(31 downto 0);
   ) ;
 end executeStage ;
 

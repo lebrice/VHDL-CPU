@@ -6,10 +6,10 @@ entity writebackStage is
   port (
     clock : in std_logic;
     memDataIn : in std_logic_vector(31 downto 0);
-    ALU_ResultIn : in std_logic_vector(25 downto 0);
+    ALU_ResultIn : in std_logic_vector(31 downto 0);
     instructionIn : in std_logic_vector(31 downto 0);
     writeData : out std_logic_vector(31 downto 0);
-    writeRegister : out integer range 0 to 31;
+    writeRegister : out integer std_logic_vector(31 downto 0);
     instructionOut : out std_logic_vector(31 downto 0);
   ) ;
 end writebackStage ;
