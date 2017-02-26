@@ -10,7 +10,7 @@ entity memoryStage is
     instructionIn : in std_logic_vector(31 downto 0);
     mem_data : out std_logic_vector(31 downto 0);
     ALU_ResultOut : out std_logic_vector(31 downto 0);
-    instructionOut : out std_logic_vector(31 downto 0);
+    instructionOut : out std_logic_vector(31 downto 0)
   ) ;
 end memoryStage ;
 
