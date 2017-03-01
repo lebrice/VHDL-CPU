@@ -98,7 +98,7 @@ package OPCODE_TOOLS is
         address : std_logic_vector(25 downto 0);
     end record;
 
-    function getInstructionFormat(opcode : std_logic_vector(5 downto 0))
+    function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT;
 
     function getInstructionType(instruction : std_logic_vector(31 downto 0))
@@ -112,8 +112,9 @@ end OPCODE_TOOLS;
 
 
 package body OPCODE_TOOLS is 
-    function getInstructionFormat(opcode : std_logic_vector(5 downto 0))
+    function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT is
+        variable opcode : std_logic_vector(5 downto 0) := instruction(31 downto 26);
     begin
     case opcode is
         when ALU_OP => 
