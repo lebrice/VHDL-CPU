@@ -7,7 +7,7 @@ library STD;
 use STD.textio;
 
 
-package OPCODE_TOOLS is
+package INSTRUCTION_TOOLS is
     
     -- R type opcodes:
     constant ALU_OP : std_logic_vector(5 downto 0)   := "000000";
@@ -101,11 +101,11 @@ package OPCODE_TOOLS is
     function getInstruction(instruction_vector : std_logic_vector(31 downto 0))
         return INSTRUCTION;
 
-end OPCODE_TOOLS;
+end INSTRUCTION_TOOLS;
 
 
 
-package body OPCODE_TOOLS is 
+package body INSTRUCTION_TOOLS is 
     function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT is
         variable opcode : std_logic_vector(5 downto 0) := instruction(31 downto 26);
@@ -178,4 +178,4 @@ package body OPCODE_TOOLS is
         return inst;
     end getInstruction;
 
-end OPCODE_TOOLS;
+end INSTRUCTION_TOOLS;

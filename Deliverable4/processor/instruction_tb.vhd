@@ -10,7 +10,7 @@ USE ieee.numeric_std.all;
 ENTITY instruction_tb IS
 END instruction_tb;
 
-use work.OPCODE_TOOLS.all;
+use work.INSTRUCTION_TOOLS.all;
 
 ARCHITECTURE behaviour OF instruction_tb IS
 BEGIN

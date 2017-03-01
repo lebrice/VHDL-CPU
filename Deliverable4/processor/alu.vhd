@@ -3,7 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 -- opcode tool library
-use work.OPCODE_TOOLS.all;
+use work.INSTRUCTION_TOOLS.all;
 
 entity ALU is
   port (
