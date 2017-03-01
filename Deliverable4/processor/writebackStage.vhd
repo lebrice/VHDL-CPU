@@ -9,8 +9,8 @@ entity writebackStage is
     ALU_ResultIn : in std_logic_vector(31 downto 0);
     instructionIn : in std_logic_vector(31 downto 0);
     writeData : out std_logic_vector(31 downto 0);
-    writeRegister : out integer std_logic_vector(31 downto 0);
-    instructionOut : out std_logic_vector(31 downto 0);
+    writeRegister : out std_logic_vector(31 downto 0);
+    instructionOut : out std_logic_vector(31 downto 0)
   ) ;
 end writebackStage ;
 

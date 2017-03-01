@@ -13,7 +13,7 @@ entity decodeStage is
     valB : out std_logic_vector(31 downto 0);
     iSignExtended : out std_logic_vector(31 downto 0);
     PCPlus4Out : out std_logic_vector(3 downto 0);
-    instructionOut : out std_logic_vector(31 downto 0);
+    instructionOut : out std_logic_vector(31 downto 0)
     
   ) ;
 end decodeStage ;

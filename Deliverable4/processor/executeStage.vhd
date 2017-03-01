@@ -12,7 +12,7 @@ entity executeStage is
     PCPlus4In : in std_logic_vector(3 downto 0);
     instructionOut : out std_logic_vector(31 downto 0);
     branch : std_logic;
-    ALU_Result : std_logic_vector(31 downto 0);
+    ALU_Result : std_logic_vector(31 downto 0)
   ) ;
 end executeStage ;
 
