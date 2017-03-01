@@ -104,6 +104,9 @@ package OPCODE_TOOLS is
     function getInstructionType(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_TYPE;
 
+    function getInstruction(instruction_vector : std_logic_vector(31 downto 0))
+        return INSTRUCTION;
+
 end OPCODE_TOOLS;
 
 
@@ -162,4 +165,12 @@ package body OPCODE_TOOLS is
         when others     =>  return UNKNOWN;
     end case;
     end getInstructionType;
+
+    function getInstruction(instruction_vector : std_logic_vector(31 downto 0))
+        return INSTRUCTION is
+        variable inst : INSTRUCTION;
+    begin
+        
+    end getInstruction;
+
 end OPCODE_TOOLS;
