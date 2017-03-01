@@ -52,6 +52,7 @@ package OPCODE_TOOLS is
     constant JR_FN : std_logic_vector(5 downto 0)    := "001000"; -- (R-Type) Jump To Register : (Jumpts to the address in a register)
 
 
+
     type INSTRUCTION_FORMAT is (R_TYPE, J_TYPE, I_TYPE, UNKNOWN);
 
     type INSTRUCTION_TYPE is (
@@ -84,6 +85,18 @@ package OPCODE_TOOLS is
         JUMP_AND_LINK,
         UNKNOWN
         );
+    
+    type INSTRUCTION is
+    record
+        inst_type : INSTRUCTION_TYPE;
+        format : INSTRUCTION_FORMAT;
+        rs : std_logic_vector(4 downto 0);
+        rt : std_logic_vector(4 downto 0);
+        rd : std_logic_vector(4 downto 0);
+        shamt : std_logic_vector(4 downto 0);
+        immediate : std_logic_vector(15 downto 0);
+        address : std_logic_vector(25 downto 0);
+    end record;
 
     function getInstructionFormat(opcode : std_logic_vector(5 downto 0))
         return INSTRUCTION_FORMAT;
