@@ -1,13 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_textio.all;
-use IEEE.std_logic_arith.all;
-use IEEE.numeric_bit.all;
 use IEEE.numeric_std.all;
-use IEEE.std_logic_signed.all;
-use IEEE.std_logic_unsigned.all;
-use IEEE.math_real.all;
-use IEEE.math_complex.all;
 
 library STD;
 use STD.textio;
@@ -88,7 +82,7 @@ package OPCODE_TOOLS is
     
     type INSTRUCTION is
     record
-        inst_type : INSTRUCTION_TYPE;
+        instruction_type : INSTRUCTION_TYPE;
         format : INSTRUCTION_FORMAT;
         rs : std_logic_vector(4 downto 0);
         rt : std_logic_vector(4 downto 0);
@@ -171,7 +165,17 @@ package body OPCODE_TOOLS is
         return INSTRUCTION is
         variable inst : INSTRUCTION;
     begin
-        
+        inst.instruction_type := getInstructionType(instruction_vector);
+        inst.format := getInstructionFormat(instruction_vector);
+        -- report "instruction opcode is " & integer'image(to_integer(unsigned(instruction_vector(31 downto 26)))) severity note;
+        -- report "instruction function code is " & integer'image(to_integer(unsigned(instruction_vector(5 downto 0)))) severity note;
+        inst.rs := instruction_vector(25 downto 21);
+        inst.rt := instruction_vector(20 downto 16);
+        inst.rd := instruction_vector(15 downto 11);
+        inst.shamt := instruction_vector(10 downto 6);
+        inst.immediate := instruction_vector(15 downto 0);
+        inst.address := instruction_vector(25 downto 0);
+        return inst;
     end getInstruction;
 
 end OPCODE_TOOLS;
