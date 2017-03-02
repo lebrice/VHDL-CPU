@@ -172,6 +172,8 @@ package body INSTRUCTION_TOOLS is
         when SW_OP      =>  return STORE_WORD;
         when BEQ_OP     =>  return BRANCH_IF_EQUAL;
         when BNE_OP     =>  return BRANCH_IF_NOT_EQUAL;
+        when J_OP       =>  return JUMP;
+        when JAL_OP     =>  return JUMP_AND_LINK;
         when others     =>  return UNKNOWN;
     end case;
     end getInstructionType;
