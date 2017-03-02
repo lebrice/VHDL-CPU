@@ -116,6 +116,9 @@ package INSTRUCTION_TOOLS is
     function makeInstruction(opCode : std_logic_vector; rs: integer; rt : integer; immediate : integer)
         return INSTRUCTION;
 
+    function makeInstruction(opCode : std_logic_vector(5 downto 0); address : integer)
+        return INSTRUCTION;
+
 end INSTRUCTION_TOOLS;
 
 
@@ -239,6 +242,20 @@ package body INSTRUCTION_TOOLS is
         immediate_v := std_logic_vector(to_unsigned(immediate, 16));  
 
         instruction_v := opcode_v & rs_v & rt_v & immediate_v;
+        instruction := getInstruction(instruction_v);
+        return instruction;
+    end makeInstruction;
+
+    function makeInstruction(opCode : std_logic_vector(5 downto 0); address : integer)
+        return INSTRUCTION is
+        variable instruction : INSTRUCTION;
+        variable instruction_v : std_logic_vector(31 downto 0);
+        variable opcode_v : std_logic_vector(5 downto 0);
+        variable address_v : std_logic_vector(25 downto 0);
+    begin
+        opcode_v := opCode(5 downto 0);
+        address_v := std_logic_vector(to_unsigned(address, 26));
+        instruction_v := opcode_v & address_v;
         instruction := getInstruction(instruction_v);
         return instruction;
     end makeInstruction;

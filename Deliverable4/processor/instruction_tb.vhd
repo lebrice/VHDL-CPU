@@ -37,7 +37,7 @@ BEGIN
         assert test.format = J_TYPE report "Incorrect format for Jump with integer address" severity error;
         assert test.instruction_type = JUMP report "Did not create a Jump instruction correctly" severity error;
         assert test.address = 1231 report "Did not correctly return the jump address supplied." severity error;
-        
+
 
         
         
