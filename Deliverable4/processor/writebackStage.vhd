@@ -4,7 +4,13 @@ use IEEE.numeric_std.all;
 
 entity writebackStage is
   port (
-    clock : std_logic
+    clock : in std_logic;
+    memDataIn : in std_logic_vector(31 downto 0);
+    ALU_ResultIn : in std_logic_vector(31 downto 0);
+    instructionIn : in std_logic_vector(31 downto 0);
+    writeData : out std_logic_vector(31 downto 0);
+    writeRegister : out std_logic_vector(31 downto 0);
+    instructionOut : out std_logic_vector(31 downto 0)
   ) ;
 end writebackStage ;
 
