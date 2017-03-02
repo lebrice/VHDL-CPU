@@ -15,14 +15,24 @@ use work.INSTRUCTION_TOOLS.all;
 ARCHITECTURE behaviour OF instruction_tb IS
 BEGIN
     test_process : process
-    variable inst : INSTRUCTION;
     variable test_instruction : std_logic_vector(31 downto 0);
+    variable test : INSTRUCTION;
     BEGIN
         test_instruction := (others => '0');
         test_instruction(5 downto 0) := "100000"; -- ADD function code
-        inst := getInstruction(test_instruction);
-        assert inst.format = R_TYPE report "Did not report the right instruction format for ADD" severity error;
-        assert inst.instruction_type = ADD report "Did not report the right instruction type for ADD" severity error;
+        test := getInstruction(test_instruction);
+        assert test.format = R_TYPE report "Did not report the right instruction format for ADD" severity error;
+        assert test.instruction_type = ADD report "Did not report the right instruction type for ADD" severity error;
+
+        test := makeInstruction(x"00", 1,2,3,0, "100000"); -- ADD R1 R2 R3
+        assert test.instruction_type = ADD report "Did not report the right instruction type for ADD" severity error;
+        assert test.format = R_TYPE report "Did not report the right instruction format for ADD" severity error;
+        
+        
+        test := makeInstruction("000010", 1,2,3,0, "000000"); -- jump
+        assert test.instruction_type = JUMP report "Did not report the right instruction type for JUMP" severity error;
+        
+        
         wait;
 
     END PROCESS;
