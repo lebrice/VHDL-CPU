@@ -31,6 +31,14 @@ BEGIN
         
         test := makeInstruction("000010", 1,2,3,0, "000000"); -- jump
         assert test.instruction_type = JUMP report "Did not report the right instruction type for JUMP" severity error;
+        assert test.format = J_TYPE report "Incorrect format for Jump instruction" severity error;
+
+        test := makeInstruction("000010", 1231);
+        assert test.format = J_TYPE report "Incorrect format for Jump with integer address" severity error;
+        assert test.instruction_type = JUMP report "Did not create a Jump instruction correctly" severity error;
+        assert test.address = 1231 report "Did not correctly return the jump address supplied." severity error;
+        
+
         
         
         wait;
