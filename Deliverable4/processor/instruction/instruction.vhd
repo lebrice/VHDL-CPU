@@ -1,19 +1,13 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_textio.all;
-use IEEE.std_logic_arith.all;
-use IEEE.numeric_bit.all;
 use IEEE.numeric_std.all;
-use IEEE.std_logic_signed.all;
-use IEEE.std_logic_unsigned.all;
-use IEEE.math_real.all;
-use IEEE.math_complex.all;
 
 library STD;
 use STD.textio;
 
 
-package OPCODE_TOOLS is
+package INSTRUCTION_TOOLS is
     
     -- R type opcodes:
     constant ALU_OP : std_logic_vector(5 downto 0)   := "000000";
@@ -52,6 +46,7 @@ package OPCODE_TOOLS is
     constant JR_FN : std_logic_vector(5 downto 0)    := "001000"; -- (R-Type) Jump To Register : (Jumpts to the address in a register)
 
 
+
     type INSTRUCTION_FORMAT is (R_TYPE, J_TYPE, I_TYPE, UNKNOWN);
 
     type INSTRUCTION_TYPE is (
@@ -84,20 +79,54 @@ package OPCODE_TOOLS is
         JUMP_AND_LINK,
         UNKNOWN
         );
+    
+    type INSTRUCTION is
+    record
+        instruction_type : INSTRUCTION_TYPE;
+        format : INSTRUCTION_FORMAT;
+        rs : integer range 0 to 31;
+        rt : integer range 0 to 31;
+        rd : integer range 0 to 31;
+        shamt : integer range 0 to 31;
+        immediate : integer;
+        address : integer;   
 
-    function getInstructionFormat(opcode : std_logic_vector(5 downto 0))
+        -- vector versions (for convenience)
+        rs_vect : std_logic_vector(4 downto 0);
+        rt_vect : std_logic_vector(4 downto 0);
+        rd_vect : std_logic_vector(4 downto 0);
+        shamt_vect : std_logic_vector(4 downto 0);
+        immediate_vect : std_logic_vector(15 downto 0);
+        address_vect : std_logic_vector(25 downto 0);
+
+    end record;
+
+    function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT;
 
     function getInstructionType(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_TYPE;
 
-end OPCODE_TOOLS;
+    function getInstruction(instruction_vector : std_logic_vector(31 downto 0))
+        return INSTRUCTION;
+
+    function makeInstruction(opCode : std_logic_vector; rs: integer; rt : integer; rd : integer; shamt : integer; funct : std_logic_vector)
+        return INSTRUCTION;
+
+    function makeInstruction(opCode : std_logic_vector; rs: integer; rt : integer; immediate : integer)
+        return INSTRUCTION;
+
+    function makeInstruction(opCode : std_logic_vector(5 downto 0); address : integer)
+        return INSTRUCTION;
+
+end INSTRUCTION_TOOLS;
 
 
 
-package body OPCODE_TOOLS is 
-    function getInstructionFormat(opcode : std_logic_vector(5 downto 0))
+package body INSTRUCTION_TOOLS is 
+    function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT is
+        variable opcode : std_logic_vector(5 downto 0) := instruction(31 downto 26);
     begin
     case opcode is
         when ALU_OP => 
@@ -146,7 +175,89 @@ package body OPCODE_TOOLS is
         when SW_OP      =>  return STORE_WORD;
         when BEQ_OP     =>  return BRANCH_IF_EQUAL;
         when BNE_OP     =>  return BRANCH_IF_NOT_EQUAL;
+        when J_OP       =>  return JUMP;
+        when JAL_OP     =>  return JUMP_AND_LINK;
         when others     =>  return UNKNOWN;
     end case;
     end getInstructionType;
-end OPCODE_TOOLS;
+
+    function getInstruction(instruction_vector : std_logic_vector(31 downto 0))
+        return INSTRUCTION is
+        variable inst : INSTRUCTION;
+    begin
+        -- set the instruction type and format
+        inst.instruction_type := getInstructionType(instruction_vector);
+        inst.format := getInstructionFormat(instruction_vector);
+
+        -- set all vector fields
+        inst.rs_vect := instruction_vector(25 downto 21);
+        inst.rt_vect := instruction_vector(20 downto 16);
+        inst.rd_vect := instruction_vector(15 downto 11);
+        inst.shamt_vect := instruction_vector(10 downto 6);
+        inst.immediate_vect := instruction_vector(15 downto 0);
+        inst.address_vect := instruction_vector(25 downto 0);
+
+        -- set all integer fields
+        inst.rs := to_integer(unsigned(inst.rs_vect));
+        inst.rt := to_integer(unsigned(inst.rt_vect));
+        inst.rd := to_integer(unsigned(inst.rd_vect));
+        inst.shamt := to_integer(unsigned(inst.shamt_vect));
+        inst.immediate := to_integer(unsigned(inst.immediate_vect));
+        inst.address := to_integer(unsigned(inst.address_vect));
+
+        return inst;
+    end getInstruction;
+
+
+    function makeInstruction(opCode : std_logic_vector(5 downto 0); rs: integer; rt : integer; rd : integer; shamt : integer; funct : std_logic_vector(5 downto 0))
+        return INSTRUCTION is
+        variable instruction : INSTRUCTION;
+        variable instruction_v : std_logic_vector(31 downto 0);
+        variable opcode_v, funct_v: std_logic_vector(5 downto 0);
+        variable rs_v, rt_v, rd_v, shamt_v: std_logic_vector(4 downto 0);
+    begin
+        opcode_v := opCode(5 downto 0);
+        funct_v := funct(5 downto 0);
+        rs_v := std_logic_vector(to_unsigned(rs, 5));
+        rt_v := std_logic_vector(to_unsigned(rt, 5));
+        rd_v := std_logic_vector(to_unsigned(rd, 5));
+        shamt_v := std_logic_vector(to_unsigned(shamt, 5));
+        
+        instruction_v := opcode_v & rs_v & rt_v & rd_v & shamt_v & funct_v;
+        instruction := getInstruction(instruction_v);
+        return instruction;
+    end makeInstruction;
+
+    function makeInstruction(opCode : std_logic_vector(5 downto 0); rs: integer; rt : integer; immediate : integer)
+        return INSTRUCTION is
+        variable instruction : INSTRUCTION;
+        variable instruction_v : std_logic_vector(31 downto 0);
+        variable opcode_v : std_logic_vector(5 downto 0);
+        variable rs_v, rt_v: std_logic_vector(4 downto 0);
+        variable immediate_v : std_logic_vector(15 downto 0);
+    begin
+        opcode_v := opCode(5 downto 0);
+        rs_v := std_logic_vector(to_unsigned(rs, 5));
+        rt_v := std_logic_vector(to_unsigned(rt, 5));
+        immediate_v := std_logic_vector(to_unsigned(immediate, 16));  
+
+        instruction_v := opcode_v & rs_v & rt_v & immediate_v;
+        instruction := getInstruction(instruction_v);
+        return instruction;
+    end makeInstruction;
+
+    function makeInstruction(opCode : std_logic_vector(5 downto 0); address : integer)
+        return INSTRUCTION is
+        variable instruction : INSTRUCTION;
+        variable instruction_v : std_logic_vector(31 downto 0);
+        variable opcode_v : std_logic_vector(5 downto 0);
+        variable address_v : std_logic_vector(25 downto 0);
+    begin
+        opcode_v := opCode(5 downto 0);
+        address_v := std_logic_vector(to_unsigned(address, 26));
+        instruction_v := opcode_v & address_v;
+        instruction := getInstruction(instruction_v);
+        return instruction;
+    end makeInstruction;
+
+end INSTRUCTION_TOOLS;

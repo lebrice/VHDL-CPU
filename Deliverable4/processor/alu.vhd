@@ -3,12 +3,12 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 -- opcode tool library
-use work.OPCODE_TOOLS.all;
+use work.INSTRUCTION_TOOLS.all;
 
 entity ALU is
   port (
     clock : in std_logic;
-    instruction : in std_logic_vector(31 downto 0);
+    instruction : in INSTRUCTION;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
     ALU_out : out std_logic_vector(63 downto 0); -- RD
@@ -42,21 +42,20 @@ begin
 
   
   computation : process( instruction, op_a, op_b )
-  variable instructionType : INSTRUCTION_TYPE := getInstructionType(instruction);
   variable a : signed(31 downto 0) := signed(op_a);
   variable b : signed(31 downto 0) := signed(op_b);
-  variable immediate_vector : std_logic_vector(31 downto 0) := signExtend(instruction(15 downto 0));
-  variable s_immediate : signed(31 downto 0) := signed(immediate_vector);
-  variable shift_amount : integer := to_integer(unsigned(instruction(10 downto 6)));
-  variable jump_address : std_logic_vector(25 downto 0) := instruction(25 downto 0);
+  variable sign_extended_immediate_vector : std_logic_vector(31 downto 0) := signExtend(instruction.immediate_vect);
+  variable sign_extended_immediate : signed(31 downto 0) := signed(sign_extended_immediate_vector);
+  variable shift_amount : integer := instruction.shamt;
+  variable jump_address : std_logic_vector(25 downto 0) := instruction.address_vect;
   begin
-    case instructionType is
+    case instruction.instruction_type is
       when ADD =>
         ALU_out <= std_logic_vector(a + b);
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b);
       when ADD_IMMEDIATE =>
-        ALU_out <= std_logic_vector(a + s_immediate);
+        ALU_out <= std_logic_vector(a + sign_extended_immediate);
       when MULTIPLY =>
         ALU_out <= std_logic_vector(a * b);
       when DIVIDE =>
@@ -68,7 +67,7 @@ begin
           ALU_out <= "0";
         end if;
       when SET_LESS_THAN_IMMEDIATE =>
-        if a < s_immediate then
+        if a < sign_extended_immediate then
           ALU_out <= "1";
         else
           ALU_out <= "0";
@@ -82,11 +81,11 @@ begin
       when BITWISE_XOR =>
         ALU_out <= op_a XOR op_b;
       when BITWISE_AND_IMMEDIATE =>
-        ALU_out <= op_a XOR immediate_vector;
+        ALU_out <= op_a XOR sign_extended_immediate_vector;
       when BITWISE_OR_IMMEDIATE =>
-        ALU_out <= op_a OR immediate_vector;
+        ALU_out <= op_a OR sign_extended_immediate_vector;
       when BITWISE_XOR_IMMEDIATE =>
-        ALU_out <= op_a XOR immediate_vector;
+        ALU_out <= op_a XOR sign_extended_immediate_vector;
       when MOVE_FROM_HI =>
         -- TODO:  understand what's happening in this case.
       when MOVE_FROM_LOW =>
@@ -102,15 +101,15 @@ begin
         ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra shift_amount);      
       when LOAD_WORD =>
         -- provide the target address, (R[rs] + SignExtendedImmediate).
-        ALU_out <= std_logic_vector(a + s_immediate);
+        ALU_out <= std_logic_vector(a + sign_extended_immediate);
       when STORE_WORD =>
-        ALU_out <= std_logic_vector(a + s_immediate);
+        ALU_out <= std_logic_vector(a + sign_extended_immediate);
       when BRANCH_IF_EQUAL =>
         -- PC = PC + 4 + branch target
         -- TODO: Assuming that the Branch target is calculated with A being the current PC + 4.
-        ALU_out <= std_logic_vector(a + s_immediate);
+        ALU_out <= std_logic_vector(a + sign_extended_immediate);
       when BRANCH_IF_NOT_EQUAL =>
-        ALU_out <= std_logic_vector(a + s_immediate);
+        ALU_out <= std_logic_vector(a + sign_extended_immediate);
       when JUMP =>
       -- PC = PC(31 downto 26) & jump_address;
       -- Assuming that PC is given as input.
