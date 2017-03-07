@@ -8,7 +8,7 @@ use work.INSTRUCTION_TOOLS.all;
 entity ALU is
   port (
     clock : in std_logic;
-    instruction : in INSTRUCTION;
+    instructionType : in INSTRUCTION.instruction_type;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
     ALU_out : out std_logic_vector(63 downto 0); -- RD
@@ -49,7 +49,7 @@ begin
   variable shift_amount : integer := instruction.shamt;
   variable jump_address : std_logic_vector(25 downto 0) := instruction.address_vect;
   begin
-    case instruction.instruction_type is
+    case instructionType is
       when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
 
