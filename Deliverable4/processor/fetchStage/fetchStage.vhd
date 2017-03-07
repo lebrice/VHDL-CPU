@@ -7,11 +7,12 @@ use work.INSTRUCTION_TOOLS.all;
 entity fetchStage is
   port (
     clock : in std_logic;
-    branchTarget : in std_logic_vector(31 downto 0);
-    branch : in std_logic;
-    disableAdder : in std_logic;
+    reset : in std_logic;
+    branch_target : in integer;
+    branch_condition : in std_logic;
+    stall : in std_logic;
     instruction : out Instruction;
-    PCPlus4 : out std_logic_vector(3 downto 0)
+    PC : out integer
   ) ;
 end fetchStage;
 

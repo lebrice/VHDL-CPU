@@ -17,31 +17,33 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
     COMPONENT fetchStage IS
         PORT (
             clock : in std_logic;
-            branchTarget : in std_logic_vector(31 downto 0);
-            branch : in std_logic;
-            disableAdder : in std_logic;
+            reset : in std_logic;
+            branch_target : in integer;
+            branch_condition : in std_logic;
+            stall : in std_logic;
             instruction : out Instruction;
-            PCPlus4 : out std_logic_vector(3 downto 0)
+            PC : out integer
         );
     END COMPONENT;
 
     --all the input signals with initial values
     signal clock : std_logic := '0';
-    signal branchTarget : std_logic_vector(31 downto 0);
-    signal branch : std_logic;
-    signal disableAdder : std_logic;
+    signal reset : std_logic;
+    signal branch_target : integer;
+    signal branch_condition : std_logic;
+    signal stall : std_logic;
     signal instruction : Instruction;
-    signal PCPlus4 : std_logic_vector(3 downto 0);
+    signal PC : integer;
 
 BEGIN
     -- device under test.
     fet: fetchStage PORT MAP(
         clock,
-        branchTarget,
-        branch,
-        disableAdder,
-        instruction,
-        PCPlus4
+        reset,
+        branch_target,
+        branch_condition,
+        stall,
+        instruction
     );
 
     clk_process : process
@@ -54,9 +56,15 @@ BEGIN
 
     test_process : process
     BEGIN
+
+
+
+
+
+
+
         report "Done testing fetch stage." severity NOTE;
         wait;
-
     END PROCESS;
 
  
