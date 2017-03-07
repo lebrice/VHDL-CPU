@@ -30,16 +30,28 @@ architecture executeStage_arch of executeStage is
   );
   END COMPONENT;
   
+  --Signals for what go into the ALU
+  SIGNAL input_a: std_logic_vector(31 downto 0);
+  SIGNAL input_b: std_logic_vector(31 downto 0);
 begin
   --define alu component
   exAlu: ALU port map (clock, instructionIn, , , ALU_Result, branch);
 
 
-  --here's what we need to do:
-  --1) decide between Val from memory and PC+4
-  --2) decide between Val from memory and SE
-  --3) set 1) and 2) to op_a, op_b for the ALU
-  
+  -- here's what we need to do:
+  -- 1) decide between Val from memory and PC+4
+    -- we choose val if it's not a jump (pretty sure)
+    -- otherwise we choose PC+4
+  -- 2) decide between Val from memory and SE
+    -- If it is an Immediate OP then we choose ISE (and val for "1)")
+    -- otherwise we choose the val ()
+  -- 3) set 1) and 2) to op_a, op_b for the ALU
+  -- 4) we also need to do stuff for whether we branch. Do this last
 
+
+  -- strategy: we pretty much just need to go through the type of op_a
+  -- if it is immediate, choose ISE and valA
+  -- if it is Jump, we choose PC+4 (but what for B?)
+  -- if it is R, we choose Val A and val B 
 
 end architecture ; -- arch
