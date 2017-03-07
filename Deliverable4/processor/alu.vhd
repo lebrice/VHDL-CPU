@@ -27,15 +27,15 @@ architecture ALU_arch of ALU is
 -- J-Instructions: jal, jr, j;
 -- Custom test instructions: asrt, asrti, halt
 
-  function signExtend(immediate : std_logic_vector(15 downto 0))
-    return std_logic_vector is
-  begin
-    if(immediate(15) = '1') then
-      return X"FFFF" & immediate;
-    else
-      return X"0000" & immediate;
-    end if;
-  end signExtend;
+  -- function signExtend(immediate : std_logic_vector(15 downto 0))
+  --   return std_logic_vector is
+  -- begin
+  --   if(immediate(15) = '1') then
+  --     return X"FFFF" & immediate;
+  --   else
+  --     return X"0000" & immediate;
+  --   end if;
+  -- end signExtend;
 
 
 begin
