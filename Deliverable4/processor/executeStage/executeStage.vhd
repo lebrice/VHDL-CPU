@@ -35,7 +35,7 @@ architecture executeStage_arch of executeStage is
   SIGNAL input_b: std_logic_vector(31 downto 0);
 begin
   --define alu component
-  exAlu: ALU port map (clock, instructionIn, , , ALU_Result, branch);
+  exAlu: ALU port map (clock, instructionIn, input_a, input_b, ALU_Result, branch);
 
 
   -- here's what we need to do:
@@ -53,5 +53,16 @@ begin
   -- if it is immediate, choose ISE and valA
   -- if it is Jump, we choose PC+4 (but what for B?)
   -- if it is R, we choose Val A and val B 
+  case instructionIn.INSTRUCTION_FORMAT is
+    when R_TYPE =>
+      input_a <= valA;
+      input_b <= valB;
+    when J_TYPE =>
 
+    when I_TYPE =>
+      input_a <= valA;
+      input_b <= iSignExtended;
+    when others => --this is unknown. Just do vals.
+      input_a <= valA;
+      input_b <= valB;
 end architecture ; -- arch

@@ -50,42 +50,33 @@ begin
   variable jump_address : std_logic_vector(25 downto 0) := instruction.address_vect;
   begin
     case instruction.instruction_type is
-      when ADD =>
-        ALU_out <= std_logic_vector(a + b);
+      when ADD or ADD_IMMEDIATE or LOAD_WORD or STORE_WORD or BRANCH_IF_EQUAL or BRANCH_IF_NOT_EQUAL =>
+        --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
+
+        -- for branch if equal PC = PC + 4 + branch target
+          -- TODO: Assuming that the Branch target is calculated with A being the current PC + 4.
+       
+        ALU_out <= std_logic_vector(a + signed(b)); --may be redundant may not work
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b);
-      when ADD_IMMEDIATE =>
-        ALU_out <= std_logic_vector(a + sign_extended_immediate);
       when MULTIPLY =>
         ALU_out <= std_logic_vector(a * b);
       when DIVIDE =>
         ALU_out <= std_logic_vector(a / b);
-      when SET_LESS_THAN =>
-        if a < b then 
+      when SET_LESS_THAN or SET_LESS_THAN_IMMEDIATE =>
+        if a < signed(b) then --may be redundant, may not work.
           ALU_out <= "1";
         else 
           ALU_out <= "0";
-        end if;
-      when SET_LESS_THAN_IMMEDIATE =>
-        if a < sign_extended_immediate then
-          ALU_out <= "1";
-        else
-          ALU_out <= "0";
         end if;  
-      when BITWISE_AND =>
+      when BITWISE_AND or BITWISE_AND_IMMEDIATE=>
         ALU_out <= op_a AND op_b;
-      when BITWISE_OR =>
+      when BITWISE_OR or BITWISE_OR_IMMEDIATE =>
         ALU_out <= op_a OR op_b;
       when BITWISE_NOR =>
         ALU_out <= op_a NOR op_b;
-      when BITWISE_XOR =>
+      when BITWISE_XOR or BITWISE_XOR_IMMEDIATE =>
         ALU_out <= op_a XOR op_b;
-      when BITWISE_AND_IMMEDIATE =>
-        ALU_out <= op_a XOR sign_extended_immediate_vector;
-      when BITWISE_OR_IMMEDIATE =>
-        ALU_out <= op_a OR sign_extended_immediate_vector;
-      when BITWISE_XOR_IMMEDIATE =>
-        ALU_out <= op_a XOR sign_extended_immediate_vector;
       when MOVE_FROM_HI =>
         -- TODO:  understand what's happening in this case.
       when MOVE_FROM_LOW =>
@@ -99,33 +90,22 @@ begin
         ALU_out <= std_logic_vector(b SRL shift_amount);
       when SHIFT_RIGHT_ARITHMETIC =>
         ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra shift_amount);      
-      when LOAD_WORD =>
-        -- provide the target address, (R[rs] + SignExtendedImmediate).
-        ALU_out <= std_logic_vector(a + sign_extended_immediate);
-      when STORE_WORD =>
-        ALU_out <= std_logic_vector(a + sign_extended_immediate);
-      when BRANCH_IF_EQUAL =>
-        -- PC = PC + 4 + branch target
-        -- TODO: Assuming that the Branch target is calculated with A being the current PC + 4.
-        ALU_out <= std_logic_vector(a + sign_extended_immediate);
-      when BRANCH_IF_NOT_EQUAL =>
-        ALU_out <= std_logic_vector(a + sign_extended_immediate);
-      when JUMP =>
+      when JUMP or JUMP_AND_LINK =>
+      -- JUMP:
       -- PC = PC(31 downto 26) & jump_address;
       -- Assuming that PC is given as input.
       -- TODO: this should probably be done in ID or in IF, not sure it belongs in EX stage.
+
+      -- JUMP_AND_LINK:
+      -- TODO: also put the current PC into Register 31.
         ALU_out <= op_a(31 downto 26) & jump_address;
       when JUMP_TO_REGISTER =>
       -- TODO: Not sure this is handled here.
       -- NOTE: assuming that the content of register is given in A, just passing it along.
         ALU_out <= op_a;
-      when JUMP_AND_LINK =>
-      -- TODO: also put the current PC into Register 31.
-        ALU_out <= op_a(31 downto 26) & jump_address;
       when UNKNOWN =>
         report "ERROR: unknown instruction given to ALU!" severity FAILURE;
     end case;
   end process ; -- computation
-  
 
 end architecture ; -- arch
