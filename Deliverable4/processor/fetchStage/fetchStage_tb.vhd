@@ -57,6 +57,14 @@ BEGIN
     test_process : process
     BEGIN
 
+        reset <= '1';
+        wait for clock_period;
+        assert PC = 0 report "PC Should be 0 whenever reset is asserted." severity error;
+        reset <= '0';
+        
+        wait for clock_period;
+
+        
 
 
 
