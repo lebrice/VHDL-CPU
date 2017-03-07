@@ -50,7 +50,7 @@ begin
   variable jump_address : std_logic_vector(25 downto 0) := instruction.address_vect;
   begin
     case instruction.instruction_type is
-      when ADD or ADD_IMMEDIATE or LOAD_WORD or STORE_WORD or BRANCH_IF_EQUAL or BRANCH_IF_NOT_EQUAL =>
+      when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
 
         -- for branch if equal PC = PC + 4 + branch target
@@ -63,19 +63,19 @@ begin
         ALU_out <= std_logic_vector(a * b);
       when DIVIDE =>
         ALU_out <= std_logic_vector(a / b);
-      when SET_LESS_THAN or SET_LESS_THAN_IMMEDIATE =>
+      when SET_LESS_THAN | SET_LESS_THAN_IMMEDIATE =>
         if a < signed(b) then --may be redundant, may not work.
           ALU_out <= "1";
         else 
           ALU_out <= "0";
         end if;  
-      when BITWISE_AND or BITWISE_AND_IMMEDIATE=>
+      when BITWISE_AND | BITWISE_AND_IMMEDIATE=>
         ALU_out <= op_a AND op_b;
-      when BITWISE_OR or BITWISE_OR_IMMEDIATE =>
+      when BITWISE_OR | BITWISE_OR_IMMEDIATE =>
         ALU_out <= op_a OR op_b;
       when BITWISE_NOR =>
         ALU_out <= op_a NOR op_b;
-      when BITWISE_XOR or BITWISE_XOR_IMMEDIATE =>
+      when BITWISE_XOR | BITWISE_XOR_IMMEDIATE =>
         ALU_out <= op_a XOR op_b;
       when MOVE_FROM_HI =>
         -- TODO:  understand what's happening in this case.
@@ -90,7 +90,7 @@ begin
         ALU_out <= std_logic_vector(b SRL shift_amount);
       when SHIFT_RIGHT_ARITHMETIC =>
         ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra shift_amount);      
-      when JUMP or JUMP_AND_LINK =>
+      when JUMP | JUMP_AND_LINK =>
       -- JUMP:
       -- PC = PC(31 downto 26) & jump_address;
       -- Assuming that PC is given as input.
