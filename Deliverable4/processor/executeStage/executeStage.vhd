@@ -13,8 +13,8 @@ entity executeStage is
     iSignExtended : in std_logic_vector(31 downto 0);
     PCPlus4In : in std_logic_vector(3 downto 0);
     instructionOut : out Instruction;
-    branch : std_logic;
-    ALU_Result : std_logic_vector(31 downto 0)
+    branch : out std_logic;
+    ALU_Result : out std_logic_vector(31 downto 0)
   ) ;
 end executeStage ;
 
@@ -36,6 +36,23 @@ begin
   --define alu component
   exAlu: ALU port map (clock, instructionIn, input_a, input_b, ALU_Result);
 
+  -- first we will compute the "branch" output
+  case instructionIn.INSTRUCTION_TYPE is
+    when BRANCH_IF_EQUAL =>
+      if ((signed(op_a)-signed(iSignExtended)) = 0) then
+        branch <= 1;
+      else
+        branch <= 0;
+      end if;
+    when BRANCH_IF_NOT_EQUAL =>
+      if ((signed(op_a)-signed(iSignExtended)) /= 0) then
+        branch <= 1;
+      else
+        branch <= 0;
+      end if;
+    when others =>
+      branch <= 0;
+  end case; --TODO: figure out why there's an error here 
   -- The instruction changes what is passed to the ALU
   -- We either pass in:
   --  a) values read from registers
@@ -52,7 +69,7 @@ begin
           input_a <= (31 downto 5 => '0') & instructionIn.shamt_vect; --padded with 0s
         when others =>
           input_a <= valA;
-      end case; --TODO: figure out why there's an error here 
+      end case; 
       
       input_b <= valB;
     --if it's a J-type, we pass in the address vector and b value
