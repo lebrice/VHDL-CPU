@@ -59,7 +59,7 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
     signal instruction_out : Instruction;
     signal PC : integer;
 
-    signal mem_addr : integer;
+    signal mem_addr : integer range 0 to ram_size-1;
     signal mem_read : std_logic;
     signal mem_readdata : std_logic_vector (bit_width-1 downto 0);
     signal mem_write : std_logic;
@@ -68,25 +68,13 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
 
 
     signal fetch_addr : integer;
-    signal fetch_read : std_logic;
-    signal fetch_readdata : std_logic_vector (bit_width-1 downto 0);
-    -- signal fetch_write : std_logic;
-    -- signal fetch_writedata : std_logic_vector (bit_width-1 downto 0);
-    signal fetch_waitrequest : std_logic; -- unused until the Avalon Interface is added.
-
-    signal test_addr : integer;
-    signal test_read : std_logic;
-    signal test_readdata : std_logic_vector (bit_width-1 downto 0);
-    signal test_write : std_logic;
-    signal test_writedata : std_logic_vector (bit_width-1 downto 0);
-    signal test_waitrequest : std_logic; -- unused until the Avalon Interface is added.
+    signal test_addr : integer range 0 to ram_size-1;
 
 
     signal accessing_memory : std_logic;
 BEGIN
 
     mem_addr <= test_addr when accessing_memory = '1' else fetch_addr;
-    mem_read <= test_read when accessing_memory = '1' else fetch_read;
 
     -- memory component which will be linked to the fetchStage under test.
     dut: memory 
@@ -110,7 +98,7 @@ BEGIN
         PC,
 
         fetch_addr,
-        fetch_read,
+        mem_read,
         mem_readdata,
         mem_waitrequest -- unused until the Avalon Interface is added.
     );
@@ -176,6 +164,7 @@ BEGIN
         assert test_instruction.instruction_type = ADD report "The Instruction package failed to create the proper instruction!" severity failure;
         mem_writedata <= test_instruction.vector;
         wait until rising_edge(mem_waitrequest);
+        accessing_memory <= '0';
         mem_write <= '0';
 
         reset <= '1';
