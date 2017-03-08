@@ -24,7 +24,6 @@ begin
 PC <= PC_register;
 
 PC_next <= 
-  4             when reset = '1' else
   branch_target when branch_condition = '1' else
   PC_register   when stall = '1' else 
   PC_register + 4;

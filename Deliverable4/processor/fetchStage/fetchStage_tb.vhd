@@ -57,7 +57,7 @@ BEGIN
 
     test_process : process
     BEGIN
-        assert PC = 0 report "PC is " & integer'image(PC) & " at the start of testing. (It should be 0!)" severity warning;
+        assert PC = 0 report "PC is " & integer'image(PC) & " at the start of testing. (It should probably be 0!)" severity warning;
        
         reset <= '1';
         wait for clock_period;
