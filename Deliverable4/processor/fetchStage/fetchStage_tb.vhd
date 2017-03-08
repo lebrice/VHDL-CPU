@@ -22,7 +22,31 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
             branch_condition : in std_logic;
             stall : in std_logic;
             instruction : out Instruction;
-            PC : out integer
+            PC : out integer;
+            m_addr : out integer;
+            m_read : out std_logic;
+            m_readdata : in std_logic_vector (bit_width-1 downto 0);
+            m_write : out std_logic;
+            m_writedata : out std_logic_vector (bit_width-1 downto 0);
+            m_waitrequest : in std_logic -- unused until the Avalon Interface is added.
+        );
+    END COMPONENT;
+
+    COMPONENT memory IS
+        GENERIC(
+            ram_size : INTEGER := ram_size;
+            bit_width : INTEGER := bit_width;
+            mem_delay : time := 0.1 ns;
+            clock_period : time := clock_period
+        );
+        PORT (
+            clock: IN STD_LOGIC;
+            writedata: IN STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
+            address: IN INTEGER;
+            memwrite: IN STD_LOGIC;
+            memread: IN STD_LOGIC;
+            readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
+            waitrequest: OUT STD_LOGIC
         );
     END COMPONENT;
 
@@ -35,7 +59,25 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
     signal instruction : Instruction;
     signal PC : integer;
 
+    signal mem_addr : integer;
+    signal mem_read : std_logic;
+    signal mem_readdata : std_logic_vector (bit_width-1 downto 0);
+    signal mem_write : std_logic;
+    signal mem_writedata : std_logic_vector (bit_width-1 downto 0);
+    signal mem_waitrequest : std_logic; -- unused until the Avalon Interface is added.
 BEGIN
+
+    -- memory component which will be linked to the fetchStage under test.
+    dut: memory 
+    PORT MAP(
+        clock,
+        mem_writedata,
+        mem_addr,
+        mem_write,
+        mem_read,
+        mem_readdata,
+        mem_waitrequest
+    );
     -- device under test.
     fet: fetchStage PORT MAP(
         clock,
@@ -44,7 +86,14 @@ BEGIN
         branch_condition,
         stall,
         instruction,
-        PC
+        PC,
+
+        mem_addr,
+        mem_read,
+        mem_readdata,
+        mem_write,
+        mem_writedata,
+        mem_waitrequest -- unused until the Avalon Interface is added.
     );
 
     clk_process : process
@@ -97,10 +146,8 @@ BEGIN
         stall <= '0';        
         wait for clock_period;
         assert PC = 8 report "PC Should start incrementing normally again when stall is de-asserted." severity error;
-        
 
-
-
+        mem_addr <= 32;
 
 
 

@@ -5,6 +5,10 @@ use IEEE.numeric_std.all;
 use work.INSTRUCTION_TOOLS.all;
 
 entity fetchStage is
+  GENERIC(
+		ram_size : INTEGER := 8192;
+		bit_width : INTEGER := 32
+	);
   port (
     clock : in std_logic;
     reset : in std_logic;
@@ -12,7 +16,15 @@ entity fetchStage is
     branch_condition : in std_logic;
     stall : in std_logic;
     instruction : out Instruction;
-    PC : out integer
+    PC : out integer;
+
+    m_addr : out integer range 0 to ram_size-1;
+    m_read : out std_logic;
+    m_readdata : in std_logic_vector (bit_width-1 downto 0);
+    m_write : out std_logic;
+    m_writedata : out std_logic_vector (bit_width-1 downto 0);
+    m_waitrequest : in std_logic -- unused until the Avalon Interface is added.
+
   ) ;
 end fetchStage;
 
@@ -27,6 +39,7 @@ PC_next <=
   branch_target when branch_condition = '1' else
   PC_register   when stall = '1' else 
   PC_register + 4;
+
 
 
 pc_process : process( clock, reset )
