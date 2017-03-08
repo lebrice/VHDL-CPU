@@ -58,13 +58,33 @@ BEGIN
     BEGIN
 
         reset <= '1';
-        wait for clock_period;
         assert PC = 0 report "PC Should be 0 whenever reset is asserted." severity error;
         reset <= '0';
 
-        wait for clock_period;
+
         assert PC = 4 report "PC Should be 4 (one cycle after a reset)" severity error;
 
+        branch_target <= 36;
+        branch_condition <= '0';
+        assert PC = 8 report "PC Should be 8, the branch should not be taken!" severity error;
+
+        branch_condition <= '1';
+        assert PC = 36 report "PC Should be 36 (the branch target), since branch condition is '1'." severity error;
+        branch_condition <= '0';
+
+        reset <= '1';
+        assert PC = 0 report "PC Should be 0 whenever reset is asserted (second time)" severity error;
+        reset <= '0';
+
+        assert PC = 4 report "PC Should be 4 (one cycle after a reset, second time)" severity error;
+
+        stall <= '1';
+        assert PC = 4 report "PC should hold whenever stall is asserted." severity error;
+        
+        assert PC = 4 report "PC should hold whenever stall is asserted, even for multiple clock cycles." severity error;
+        stall <= '0';
+
+        assert PC = 8 report "PC Should start incrementing normally again when stall is de-asserted." severity error;
         
 
 
