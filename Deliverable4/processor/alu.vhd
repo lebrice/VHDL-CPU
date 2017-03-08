@@ -42,9 +42,10 @@ begin
 
   --variable sign_extended_immediate_vector : std_logic_vector(31 downto 0) := signExtend(instruction.immediate_vect);
   --variable sign_extended_immediate : signed(31 downto 0) := signed(sign_extended_immediate_vector);
-  --shamt is stored in last 5 bits of a
+  --shamt is stored in last 5 bits of "a"
   variable shift_amount : integer := to_integer(op_a(4 downto 0));
-  --variable jump_address : std_logic_vector(25 downto 0) := instruction.address_vect;
+  --jump address will be last 26 bits of "a"
+  variable jump_address : std_logic_vector(25 downto 0) := op_a(25 downto 0);
   begin
     case instructionType is
       when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
@@ -52,7 +53,6 @@ begin
 
         -- for branch if equal PC = PC + 4 + branch target
           -- TODO: Assuming that the Branch target is calculated with A being the current PC + 4.
-       
         ALU_out <= std_logic_vector(a + signed(b)); --may be redundant may not work
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b);
@@ -93,16 +93,12 @@ begin
       -- Assuming that PC is given as input.
       -- TODO: this should probably be done in ID or in IF, not sure it belongs in EX stage.
       
-      -- Assume that the jump address will be sent in valA
-      -- Then we need to grab the bottom 25 bits or whatever
-        ALU_out <= op_a(31 downto 26) & std_logic_vector(a);
+        ALU_out <= op_a(31 downto 26) & jump_address;
       when JUMP_AND_LINK =>
       -- JUMP_AND_LINK:
       -- TODO: also put the current PC into Register 31.
 
-      -- Assume that the jump address will be sent in valA
-      -- Then we need to grab the bottom 25 bits or whatever.
-        ALU_out <= op_a(31 downto 26) & std_logic_vector(a);
+        ALU_out <= op_a(31 downto 26) & jump_address;
       when JUMP_TO_REGISTER =>
       -- TODO: Not sure this is handled here.
       -- NOTE: assuming that the content of register is given in A, just passing it along.
