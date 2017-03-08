@@ -25,9 +25,8 @@ architecture executeStage_arch of executeStage is
     instruction : in INSTRUCTION;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
-    ALU_out : out std_logic_vector(63 downto 0); -- RD
-    BranchCondition : out std_logic
-  );
+    ALU_out : out std_logic_vector(63 downto 0) -- RD
+);
   END COMPONENT;
   
   --Signals for what go into the ALU
@@ -35,7 +34,7 @@ architecture executeStage_arch of executeStage is
   SIGNAL input_b: std_logic_vector(31 downto 0);
 begin
   --define alu component
-  exAlu: ALU port map (clock, instructionIn, input_a, input_b, ALU_Result, branch);
+  exAlu: ALU port map (clock, instructionIn, input_a, input_b, ALU_Result);
 
 
   -- here's what we need to do:
@@ -58,7 +57,8 @@ begin
       input_a <= valA;
       input_b <= valB;
     when J_TYPE =>
-
+      input_a <= ;
+      input_b <= ; --doesn't matter
     when I_TYPE =>
       input_a <= valA;
       input_b <= iSignExtended;
