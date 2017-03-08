@@ -26,7 +26,7 @@ architecture executeStage_arch of executeStage is
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
     ALU_out : out std_logic_vector(63 downto 0) -- RD
-);
+  );
   END COMPONENT;
   
   --Signals for what go into the ALU
@@ -35,12 +35,6 @@ architecture executeStage_arch of executeStage is
 begin
   --define alu component
   exAlu: ALU port map (clock, instructionIn, input_a, input_b, ALU_Result);
-
-
-  -- here's what we need to do:
-  -- 1) decide between Val from memory and PC+4
-    -- we choose val if it's not a jump (pretty sure)
-    -- otherwise we choose PC+4
 
   -- The instruction changes what is passed to the ALU
   -- We either pass in:
