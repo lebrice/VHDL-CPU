@@ -85,7 +85,7 @@ begin
       when SHIFT_RIGHT_LOGICAL =>
         ALU_out <= std_logic_vector(b SRL shift_amount);
       when SHIFT_RIGHT_ARITHMETIC =>
-        ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra a(4 downto 0));      
+        ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra shift_amount);      
       when JUMP =>
       -- JUMP:
       -- PC = PC(31 downto 26) & jump_address;

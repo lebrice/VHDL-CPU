@@ -54,15 +54,22 @@ begin
   -- if it is R, we choose Val A and val B 
   case instructionIn.INSTRUCTION_FORMAT is
     when R_TYPE =>
-      input_a <= valA;
+      --if it is a shift, we store the shamt in "a"
+      case instructionIn.INSTRUCTION_TYPE is
+        when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+          input_a <= (31 downto 5 => '0') & instructionIn.shamt_vect; --padded with 0s
+        when others =>
+          input_a <= valA;
+      end case; --TODO: figure out why there's an error here 
+      
       input_b <= valB;
     when J_TYPE =>
-      input_a <= ;
-      input_b <= ; --doesn't matter
+      input_a <= "000000" & instructionIn.address_vect;
+      input_b <= valB; --doesn't matter
     when I_TYPE =>
       input_a <= valA;
       input_b <= iSignExtended;
-    when others => --this is unknown. Just do vals.
-      input_a <= valA;
-      input_b <= valB;
+    when UNKNOWN => --this is unknown. Just do vals.
+      report "ERROR: unknown instruction format in execute stage!" severity FAILURE;
+  end case;
 end architecture ; -- arch
