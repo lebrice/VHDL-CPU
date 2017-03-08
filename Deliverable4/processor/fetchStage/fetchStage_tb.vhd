@@ -26,8 +26,8 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
             m_addr : out integer;
             m_read : out std_logic;
             m_readdata : in std_logic_vector (bit_width-1 downto 0);
-            m_write : out std_logic;
-            m_writedata : out std_logic_vector (bit_width-1 downto 0);
+            -- m_write : out std_logic;
+            -- m_writedata : out std_logic_vector (bit_width-1 downto 0);
             m_waitrequest : in std_logic -- unused until the Avalon Interface is added.
         );
     END COMPONENT;
@@ -56,7 +56,7 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
     signal branch_target : integer := 0;
     signal branch_condition : std_logic := '0';
     signal stall : std_logic;
-    signal instruction : Instruction;
+    signal instruction_out : Instruction;
     signal PC : integer;
 
     signal mem_addr : integer;
@@ -65,7 +65,28 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
     signal mem_write : std_logic;
     signal mem_writedata : std_logic_vector (bit_width-1 downto 0);
     signal mem_waitrequest : std_logic; -- unused until the Avalon Interface is added.
+
+
+    signal fetch_addr : integer;
+    signal fetch_read : std_logic;
+    signal fetch_readdata : std_logic_vector (bit_width-1 downto 0);
+    -- signal fetch_write : std_logic;
+    -- signal fetch_writedata : std_logic_vector (bit_width-1 downto 0);
+    signal fetch_waitrequest : std_logic; -- unused until the Avalon Interface is added.
+
+    signal test_addr : integer;
+    signal test_read : std_logic;
+    signal test_readdata : std_logic_vector (bit_width-1 downto 0);
+    signal test_write : std_logic;
+    signal test_writedata : std_logic_vector (bit_width-1 downto 0);
+    signal test_waitrequest : std_logic; -- unused until the Avalon Interface is added.
+
+
+    signal accessing_memory : std_logic;
 BEGIN
+
+    mem_addr <= test_addr when accessing_memory = '1' else fetch_addr;
+    mem_read <= test_read when accessing_memory = '1' else fetch_read;
 
     -- memory component which will be linked to the fetchStage under test.
     dut: memory 
@@ -85,14 +106,12 @@ BEGIN
         branch_target,
         branch_condition,
         stall,
-        instruction,
+        instruction_out,
         PC,
 
-        mem_addr,
-        mem_read,
+        fetch_addr,
+        fetch_read,
         mem_readdata,
-        mem_write,
-        mem_writedata,
         mem_waitrequest -- unused until the Avalon Interface is added.
     );
 
@@ -104,7 +123,9 @@ BEGIN
         wait for clock_period/2;
     end process;
 
+
     test_process : process
+    variable test_instruction : INSTRUCTION;
     BEGIN
         assert PC = 0 report "PC is " & integer'image(PC) & " at the start of testing. (It should probably be 0!)" severity warning;
        
@@ -147,10 +168,26 @@ BEGIN
         wait for clock_period;
         assert PC = 8 report "PC Should start incrementing normally again when stall is de-asserted." severity error;
 
-        mem_addr <= 32;
 
+        accessing_memory <= '1';
+        test_addr <= 0;
+        mem_write <= '1';
+        test_instruction := makeInstruction(x"00", 1,2,3,0, "100000"); -- ADD R1 R2 R3
+        assert test_instruction.instruction_type = ADD report "The Instruction package failed to create the proper instruction!" severity failure;
+        mem_writedata <= test_instruction.vector;
+        wait until rising_edge(mem_waitrequest);
+        mem_write <= '0';
 
-
+        reset <= '1';
+        wait for clock_period;
+        -- check if the fetchStage read instruction memory correctly.
+        -- keep in mind, the "instruction" signal is the output of the fetch stage. It should match what we just wrote in memory.
+        assert instruction_out.format = R_TYPE report "The output instruction does not have the right format! (Should have R Type)" severity error;
+        assert instruction_out.instruction_type = ADD report "The output instruction does NOT have the right type (expecting Add)" severity error;
+        assert instruction_out.rs = 1 report "Instruction RS is wrong! (got " & integer'image(instruction_out.rs) & ", was expecting 1" severity error;
+        assert instruction_out.rt = 2 report "Instruction RT is wrong! (got " & integer'image(instruction_out.rt) & ", was expecting 2" severity error;
+        assert instruction_out.rd = 3 report "Instruction RD is wrong! (got " & integer'image(instruction_out.rd) & ", was expecting 3" severity error;
+        assert instruction_out.shamt = 0 report "Instruction shift amount should be 0." severity error;
         report "Done testing fetch stage." severity NOTE;
         wait;
     END PROCESS;

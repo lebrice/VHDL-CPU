@@ -21,8 +21,8 @@ entity fetchStage is
     m_addr : out integer range 0 to ram_size-1;
     m_read : out std_logic;
     m_readdata : in std_logic_vector (bit_width-1 downto 0);
-    m_write : out std_logic;
-    m_writedata : out std_logic_vector (bit_width-1 downto 0);
+    -- m_write : out std_logic; (fetch doesn't write to memory)
+    -- m_writedata : out std_logic_vector (bit_width-1 downto 0); (fetch doesn't write to memory)
     m_waitrequest : in std_logic -- unused until the Avalon Interface is added.
 
   ) ;
