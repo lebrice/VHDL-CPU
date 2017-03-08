@@ -12,7 +12,6 @@ entity ALU is
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
     ALU_out : out std_logic_vector(63 downto 0); -- RD
-    BranchCondition : out std_logic
   );
 end ALU ;
 
