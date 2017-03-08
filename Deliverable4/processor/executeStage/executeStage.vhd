@@ -41,18 +41,16 @@ begin
   -- 1) decide between Val from memory and PC+4
     -- we choose val if it's not a jump (pretty sure)
     -- otherwise we choose PC+4
-  -- 2) decide between Val from memory and SE
-    -- If it is an Immediate OP then we choose ISE (and val for "1)")
-    -- otherwise we choose the val ()
-  -- 3) set 1) and 2) to op_a, op_b for the ALU
-  -- 4) we also need to do stuff for whether we branch. Do this last
 
-
-  -- strategy: we pretty much just need to go through the type of op_a
-  -- if it is immediate, choose ISE and valA
-  -- if it is Jump, we choose PC+4 (but what for B?)
-  -- if it is R, we choose Val A and val B 
+  -- The instruction changes what is passed to the ALU
+  -- We either pass in:
+  --  a) values read from registers
+  --  b) shamt
+  --  c) address vector
+  --  d) immediate sign extended
+  --  e) branch target
   case instructionIn.INSTRUCTION_FORMAT is
+    --if it's an R-type, we pass in values (unless shifting)
     when R_TYPE =>
       --if it is a shift, we store the shamt in "a"
       case instructionIn.INSTRUCTION_TYPE is
@@ -63,13 +61,22 @@ begin
       end case; --TODO: figure out why there's an error here 
       
       input_b <= valB;
+    --if it's a J-type, we pass in the address vector and b value
     when J_TYPE =>
       input_a <= "000000" & instructionIn.address_vect;
       input_b <= valB; --doesn't matter
+    --if it's an I-type we pass in the value A and the immediate sign extended
     when I_TYPE =>
-      input_a <= valA;
+      --we need to check if it's a branch (in which case we do PC + 4)
+      case instructionIn.INSTRUCTION_TYPE is
+        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+          --with branches, we want "a" to have the PCPlus4
+          input_a <= (31 downto 4 => '0') & PCPlus4In;
+        when others =>
+          input_a <= valA;   
+      end case;
       input_b <= iSignExtended;
-    when UNKNOWN => --this is unknown. Just do vals.
+    when UNKNOWN => --this is unknown. report an error.
       report "ERROR: unknown instruction format in execute stage!" severity FAILURE;
   end case;
 end architecture ; -- arch

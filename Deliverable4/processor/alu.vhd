@@ -52,7 +52,7 @@ begin
 
         -- for branch if equal PC = PC + 4 + branch target
           -- TODO: Assuming that the Branch target is calculated with A being the current PC + 4.
-        ALU_out <= std_logic_vector(a + signed(b)); --may be redundant may not work
+        ALU_out <= std_logic_vector(a + b); 
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b);
       when MULTIPLY =>
@@ -60,7 +60,7 @@ begin
       when DIVIDE =>
         ALU_out <= std_logic_vector(a / b);
       when SET_LESS_THAN | SET_LESS_THAN_IMMEDIATE =>
-        if a < signed(b) then --may be redundant, may not work.
+        if a < b then 
           ALU_out <= "1";
         else 
           ALU_out <= "0";
