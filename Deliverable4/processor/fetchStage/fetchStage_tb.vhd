@@ -21,7 +21,7 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
             branch_target : in integer;
             branch_condition : in std_logic;
             stall : in std_logic;
-            instruction : out Instruction;
+            instruction_out : out Instruction;
             PC : out integer;
             m_addr : out integer;
             m_read : out std_logic;

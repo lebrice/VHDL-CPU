@@ -15,7 +15,7 @@ entity fetchStage is
     branch_target : in integer;
     branch_condition : in std_logic;
     stall : in std_logic;
-    instruction : out Instruction;
+    instruction_out : out INSTRUCTION;
     PC : out integer;
 
     m_addr : out integer range 0 to ram_size-1;
@@ -29,7 +29,7 @@ entity fetchStage is
 end fetchStage;
 
 architecture fetchStage_arch of fetchStage is
-signal PC_next : integer;
+signal PC_next : integer := 4;
 signal PC_register : integer := 0;
 begin 
 
@@ -40,7 +40,15 @@ PC_next <=
   PC_register   when stall = '1' else 
   PC_register + 4;
 
-
+mem_process : process(m_waitrequest)
+variable inst : INSTRUCTION;
+begin
+  -- TODO: add the proper timing and avalon interface stuff later.
+  m_read <= '1';
+  m_addr <= PC_register;
+  inst := getInstruction(m_readdata);
+  instruction_out <= inst;
+end process;
 
 pc_process : process( clock, reset )
 begin
