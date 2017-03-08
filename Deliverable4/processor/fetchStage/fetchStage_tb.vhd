@@ -28,9 +28,9 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
 
     --all the input signals with initial values
     signal clock : std_logic := '0';
-    signal reset : std_logic;
-    signal branch_target : integer;
-    signal branch_condition : std_logic;
+    signal reset : std_logic := '0';
+    signal branch_target : integer := 0;
+    signal branch_condition : std_logic := '0';
     signal stall : std_logic;
     signal instruction : Instruction;
     signal PC : integer;
@@ -61,8 +61,9 @@ BEGIN
         wait for clock_period;
         assert PC = 0 report "PC Should be 0 whenever reset is asserted." severity error;
         reset <= '0';
-        
+
         wait for clock_period;
+        assert PC = 4 report "PC Should be 4 (one cycle after a reset)" severity error;
 
         
 
