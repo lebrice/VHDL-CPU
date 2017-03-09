@@ -41,7 +41,7 @@ package body REGISTERS is
         return r_block;
     end reset_register_block;
 
-   -- function to set desired register (register_number - up to 32) to hold data (register_data)
+   -- function to set desired register (register_number - 0 to 31) to hold data (register_data)
     function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : REGISTER_BLOCK)
         return REGISTER_BLOCK is
         variable r_block : REGISTER_BLOCK := reg_block;
