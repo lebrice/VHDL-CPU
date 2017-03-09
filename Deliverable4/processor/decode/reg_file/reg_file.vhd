@@ -10,20 +10,25 @@ library std;
 package registers is
      -- number of registers
     constant NUM_REGISTERS : integer := 31;
+
     -- register entry data structure
-    TYPE register_entry is
+    type register_entry is
     record
         busy : std_logic;
         data : std_logic_vector(31 downto 0);
     end record;
-    -- register block data structure
-    TYPE register_block is array (NUM_REGISTERS downto 0) of register_entry; 
 
+    -- register block data structure
+    type register_block is array (NUM_REGISTERS downto 0) of register_entry;
+
+    -- function declarations
     function reset_register_block(reg_block : register_block)
         return register_block;
     function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : register_block)
         return register_block;
     procedure dump_registers(reg_block  : register_block);
+    -- procedure dump_test(reg_block  : register_block);
+
 end registers;
 
 package body registers is

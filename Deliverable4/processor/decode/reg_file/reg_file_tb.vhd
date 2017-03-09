@@ -1,4 +1,4 @@
-LIBRARY ieee;
+library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
     use ieee.numeric_std_unsigned.all ; 
@@ -14,10 +14,9 @@ end reg_file_tb;
 architecture behaviour of reg_file_tb is
 begin
     test_process : process
-    variable data : std_logic_vector (31 downto 0);
     variable reg_block : register_block;
-    variable check : integer;
     begin
+        report "test beginning";
         -- test reseting register block
         reg_block := reset_register_block(reg_block);
         for i in reg_block' range loop
@@ -25,17 +24,17 @@ begin
             assert reg_block(i).data = to_std_logic_vector(0, 32) report "failed to reset data" severity error;
         end loop;
 
-        -- test setting regiester block
+        -- test setting register block
         for i in reg_block' range loop  -- set
             reg_block := set_register(i, to_std_logic_vector(i, 32), reg_block);
         end loop;
-
-        for i in reg_block' range loop  -- test
+        for i in reg_block' range loop  -- test (in seperate loop to ensure no overwrite)
              assert reg_block(i).data = to_std_logic_vector(i, 32) report "failed to set data" severity error;
         end loop;
 
         -- test register dump
         dump_registers(reg_block);
+        report "test completed";
 
     wait;
     end process; 
