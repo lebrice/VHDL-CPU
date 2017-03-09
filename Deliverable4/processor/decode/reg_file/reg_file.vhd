@@ -23,8 +23,8 @@ package REGISTERS is
         return REGISTER_BLOCK;
     function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : REGISTER_BLOCK)
         return REGISTER_BLOCK;
-    -- function dump_registers(reg_block  : REGISTER_BLOCK)
-    --     return std_logic;
+    function dump_registers(reg_block  : REGISTER_BLOCK)
+        return std_logic;
 end REGISTERS;
 
 package body REGISTERS is
