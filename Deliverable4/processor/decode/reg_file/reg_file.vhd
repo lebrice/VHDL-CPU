@@ -23,8 +23,7 @@ package REGISTERS is
         return REGISTER_BLOCK;
     function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : REGISTER_BLOCK)
         return REGISTER_BLOCK;
-    function dump_registers(reg_block  : REGISTER_BLOCK)
-        return std_logic;
+    procedure dump_registers(reg_block  : REGISTER_BLOCK);
 end REGISTERS;
 
 package body REGISTERS is
@@ -53,18 +52,16 @@ package body REGISTERS is
 
     -- TODO check out warning (vcom-1283) Cannot reference file "outfile" inside pure function "dump_registers".
     -- function to dump all register contents to a file "register_dump.txt"
-    function dump_registers(register_block  : REGISTER_BLOCK)
-        return std_logic is
+    procedure dump_registers(reg_block  : REGISTER_BLOCK) is
         file      outfile  : text;
         variable  outline  : line;
     begin
         file_open(outfile, "register_dump.txt", write_mode);
-        for i in register_block' range loop
-            write(outline, register_block(i).data);
+        for i in reg_block' range loop
+            write(outline, reg_block(i).data);
             writeline(outfile, outline);
         end loop;
         file_close(outfile);
-        return '1';
-    end dump_registers;
+    end procedure dump_registers;
 
 end REGISTERS;

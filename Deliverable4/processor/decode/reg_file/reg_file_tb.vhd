@@ -3,6 +3,9 @@ LIBRARY ieee;
     USE ieee.numeric_std.all;
     USE ieee.numeric_std_unsigned.all ; 
 
+library STD;
+    use STD.textio.all;
+
 USE work.REGISTERS.all;
 
 ENTITY reg_file_tb IS
@@ -13,6 +16,7 @@ BEGIN
     test_process : process
     variable data : std_logic_vector (31 downto 0);
     variable reg_block : REGISTER_BLOCK;
+    variable check : integer;
     BEGIN
         -- test reseting register block
         reg_block := reset_register_block(reg_block);
@@ -29,6 +33,8 @@ BEGIN
         for i in reg_block' range loop  -- test
              assert reg_block(i).data = to_std_logic_vector(i, 32) report "failed to set data" severity error;
         end loop;
+
+        -- test register dump
 
     wait;
     END PROCESS; 
