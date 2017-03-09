@@ -1,37 +1,37 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_textio.all;
-use IEEE.numeric_std.all;
+library ieee;
+    use ieee.std_logic_1164.all;
+    use ieee.std_logic_textio.all;
+    use ieee.numeric_std.all;
 
-library STD;
-use STD.textio.all;
+library std;
+    use std.textio.all;
 
 
-package REGISTERS is
+package registers is
      -- number of registers
     constant NUM_REGISTERS : integer := 31;
     -- register entry data structure
-    TYPE REGISTER_ENTRY is
+    TYPE register_entry is
     record
         busy : std_logic;
         data : std_logic_vector(31 downto 0);
     end record;
     -- register block data structure
-    TYPE REGISTER_BLOCK is array (NUM_REGISTERS downto 0) of REGISTER_ENTRY; 
+    TYPE register_block is array (NUM_REGISTERS downto 0) of register_entry; 
 
-    function reset_register_block(reg_block : REGISTER_BLOCK)
-        return REGISTER_BLOCK;
-    function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : REGISTER_BLOCK)
-        return REGISTER_BLOCK;
-    procedure dump_registers(reg_block  : REGISTER_BLOCK);
-end REGISTERS;
+    function reset_register_block(reg_block : register_block)
+        return register_block;
+    function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : register_block)
+        return register_block;
+    procedure dump_registers(reg_block  : register_block);
+end registers;
 
-package body REGISTERS is
+package body registers is
 
     --function to set all registers to 0;
-    function reset_register_block(reg_block : REGISTER_BLOCK)
-        return REGISTER_BLOCK is
-        variable r_block : REGISTER_BLOCK := reg_block;
+    function reset_register_block(reg_block : register_block)
+        return register_block is
+        variable r_block : register_block := reg_block;
     begin 
         for i in r_block' range loop
             r_block(i).busy := '0';
@@ -41,18 +41,16 @@ package body REGISTERS is
     end reset_register_block;
 
    -- function to set desired register (register_number - 0 to 31) to hold data (register_data)
-    function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : REGISTER_BLOCK)
-        return REGISTER_BLOCK is
-        variable r_block : REGISTER_BLOCK := reg_block;
+    function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : register_block)
+        return register_block is
+        variable r_block : register_block := reg_block;
     begin
         r_block(reg_number).data := reg_data;
         return r_block;
     end set_register;
 
-
-    -- TODO check out warning (vcom-1283) Cannot reference file "outfile" inside pure function "dump_registers".
     -- function to dump all register contents to a file "register_dump.txt"
-    procedure dump_registers(reg_block  : REGISTER_BLOCK) is
+    procedure dump_registers(reg_block  : register_block) is
         file      outfile  : text;
         variable  outline  : line;
     begin
@@ -64,4 +62,4 @@ package body REGISTERS is
         file_close(outfile);
     end procedure dump_registers;
 
-end REGISTERS;
+end registers;

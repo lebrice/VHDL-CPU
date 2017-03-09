@@ -1,23 +1,23 @@
 LIBRARY ieee;
-    USE ieee.std_logic_1164.all;
-    USE ieee.numeric_std.all;
-    USE ieee.numeric_std_unsigned.all ; 
+    use ieee.std_logic_1164.all;
+    use ieee.numeric_std.all;
+    use ieee.numeric_std_unsigned.all ; 
 
-library STD;
-    use STD.textio.all;
+library std;
+    use std.textio.all;
 
-USE work.REGISTERS.all;
+use work.registers.all;
 
-ENTITY reg_file_tb IS
-END reg_file_tb;
+entity reg_file_tb is
+end reg_file_tb;
 
-ARCHITECTURE behaviour OF reg_file_tb IS
-BEGIN
+architecture behaviour of reg_file_tb is
+begin
     test_process : process
     variable data : std_logic_vector (31 downto 0);
-    variable reg_block : REGISTER_BLOCK;
+    variable reg_block : register_block;
     variable check : integer;
-    BEGIN
+    begin
         -- test reseting register block
         reg_block := reset_register_block(reg_block);
         for i in reg_block' range loop
@@ -35,10 +35,11 @@ BEGIN
         end loop;
 
         -- test register dump
+        dump_registers(reg_block);
 
     wait;
-    END PROCESS; 
-END;
+    end process; 
+end;
 
 
 
