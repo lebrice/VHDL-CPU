@@ -9,7 +9,7 @@ library std;
 
 package registers is
      -- number of registers
-    constant NUM_REGISTERS : integer := 31;
+    constant NUM_REGISTERS : integer := 32;
 
     -- register entry data structure
     type register_entry is
@@ -19,7 +19,7 @@ package registers is
     end record;
 
     -- register block data structure
-    type register_block is array (NUM_REGISTERS downto 0) of register_entry;
+    type register_block is array (NUM_REGISTERS-1 downto 0) of register_entry;
 
     -- function declarations
     function reset_register_block(reg_block : register_block)
@@ -27,7 +27,6 @@ package registers is
     function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : register_block)
         return register_block;
     procedure dump_registers(reg_block  : register_block);
-    -- procedure dump_test(reg_block  : register_block);
 
 end registers;
 
@@ -60,7 +59,11 @@ package body registers is
         variable  outline  : line;
     begin
         file_open(outfile, "register_dump.txt", write_mode);
-        for i in reg_block' range loop
+        for i in reg_block' reverse_range loop
+            write(outline, string'("R"));
+            write(outline, i);
+            write(outline, string'(":"));
+            write(outline, HT);
             write(outline, reg_block(i).data);
             writeline(outfile, outline);
         end loop;
