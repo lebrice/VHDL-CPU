@@ -95,17 +95,23 @@ begin
   -- UNKNOWN
 
   write_to_registers : process(write_back_instruction, write_back_data, register_file)
+  variable rs : REGISTER_ENTRY := register_file(write_back_instruction.rs);
+  variable rt : REGISTER_ENTRY := register_file(write_back_instruction.rt);
+  variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
   begin
     if clock = '1' then
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
-
-        -- instructions where we simply write back the data to the "rd" register:
+        -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
+        -- behave in exactly the same way. (might be wrong though).
         when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN =>
-          rd_reg.data <= write_back_data(31 downto 0);
-          rd_reg.busy <= '0';
+          -- instructions where we simply write back the data to the "rd" register:
+          rd.data := write_back_data(31 downto 0);
+          rd.busy := '0';
         when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
-
+          -- instructions where we use "rt" as a destination
+          rt.data := write_back_data(31 downto 0);
+          rt.busy := '0';
         when MULTIPLY =>
         when DIVIDE =>
 
