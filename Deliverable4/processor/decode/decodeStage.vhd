@@ -94,7 +94,7 @@ begin
   -- JUMP_AND_LINK,
   -- UNKNOWN
 
-  write_output : process(instruction_in, write_back_instruction, register_file)
+  write_to_registers : process(write_back_instruction, write_back_data, register_file)
   begin
     if clock = '1' then
       -- first half of clock cycle: write result of instruction to the registers.
@@ -115,12 +115,16 @@ begin
         when MOVE_FROM_LOW => 
         when MOVE_FROM_HI =>
         when others =>
-
       end case;
-    elsif clock = '0' then
+   end if;
+  end process write_to_registers;
+
+  read_from_registers : process(instruction_in, write_back_instruction, register_file)
+  begin
+    if clock = '0' then
       -- second half of clock cycle: read data from registers, and output the correct instruction.
     end if;
-  end process write_output;
+  end process read_from_registers;
 
 
 
