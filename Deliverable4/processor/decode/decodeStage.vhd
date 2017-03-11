@@ -36,10 +36,29 @@ entity decodeStage is
 end decodeStage ;
 
 architecture decodeStage_arch of decodeStage is
-
-
-
+  signal rs_reg, rt_reg, rd_reg : REGISTER_ENTRY;
 begin
+  rs_reg <= register_file(instruction_in.rs);
+  rt_reg <= register_file(instruction_in.rt);
+  rd_reg <= register_file(instruction_in.rd);
+
+  detect_stall : process(instruction_in, register_file)
+  begin
+    case instruction_in.format is
+      when R_TYPE =>
+        if rs_reg.busy = '1' OR rt_reg.busy = '1' OR rd_reg.busy = '1' then
+          stall_out <= '1';
+        else 
+          stall_out <= '0';
+        end if;
+      when I_TYPE =>
+
+      when J_TYPE =>
+
+      when UNKNOWN =>
+        report "ERROR: unknown Instruction format in Decode stage!" severity failure;
+    end case;
+  end process detect_stall;
 
 
 
