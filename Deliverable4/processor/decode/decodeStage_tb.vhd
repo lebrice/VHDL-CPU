@@ -58,11 +58,14 @@ signal stall_out : std_logic;
 signal val_a_int : integer;
 signal val_b_int : integer;
 
+signal write_back_data_int : integer;
+
 constant no_op : INSTRUCTION := makeInstruction(ALU_OP, 0,0,0,0, ADD_FN);
 begin
 
     val_a_int <= to_integer(unsigned(val_a));
     val_b_int <= to_integer(unsigned(val_b));
+    write_back_data <= std_logic_vector(to_unsigned(write_back_data_int, 32));
 
     dec : decodeStage port map (
         clock,
@@ -92,11 +95,12 @@ begin
         -- TODO: figure out if the return value really needs to be used or not.
         registers := reset_register_block(registers);
 
-        for I in 0 to NUM_REGISTERS loop
+        for I in 0 to NUM_REGISTERS-1 loop
+            -- Each register contains the integer value of 10 times their index. (i.e. R1 = 10, R17 = 170, etc.)
             registers(I).data := std_logic_vector(to_unsigned(I * 10, 32));
             registers(I).busy := '0';
         end loop;
-        write_back_instruction <= makeInstruction(ALU_OP, 0,0,0,0, ADD_FN); -- ADD R0 R0 R0
+        write_back_instruction <= no_op;
         PC <= 0;
 
         instruction_in <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- ADD R1 R2 R3
@@ -112,7 +116,38 @@ begin
         assert instruction_out.shamt = 0 report "Instruction shift amount should be 0." severity error;
 
         wait for clock_period;    
+
+        instruction_in <= no_op;
+        assert registers(3).busy = '1' report "Register R3 should still be busy, since we haven't received the Write-Back instruction writing its result." severity error;
         
+        wait for clock_period;
+
+        -- simulate the data coming back from the Write-Back stage, and check that it is written correctly.
+        write_back_instruction <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- the "same" instruction comes back from WB
+        write_back_data_int <= 30; -- result of 10 + 20.
+
+        assert registers(3).data = std_logic_vector(to_unsigned(30, 32)) report "The result (30) should have been written back!" severity error;
+        assert registers(3).busy = '0' report "$R3 should not be busy, since we just wrote the result back in from WB." severity error;
+
+        wait for clock_period;
+
+        write_back_instruction <= no_op;
+        instruction_in <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
+        
+        wait for clock_period;
+        assert registers(25).busy = '1' report "Last cycle, we started an operation using $R25, it should be busy!" severity error;
+        -- this instruction would use $R25, but since it's busy, we would expect a STALL_OUT to arise.
+        instruction_in <= makeInstruction(ALU_OP, 20, 25, 10, 0, ADD_FN); -- ADD $R20, $R25, $R10 
+        assert stall_out = '1' report "Stall_out should be '1', since there's a data dependency, and the instruction hasn't come back from WB yet." severity error;
+
+        wait for clock_period;
+        -- the instruction came back from the WB stage.
+        write_back_instruction <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
+        write_back_data_int <= 250;
+        assert stall_out = '0' report "The Instruction coming back from WB should de-assert Stall_out" severity error;
+        assert registers(25).busy = '0' report "Register should be marked with 'busy'='0' after the instruction comes back from WB." severity error;
+        assert registers(25).data = write_back_data;
+
         report "Done testing decode stage." severity NOTE;
         wait;
 
