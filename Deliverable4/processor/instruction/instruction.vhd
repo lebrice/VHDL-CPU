@@ -119,6 +119,8 @@ package INSTRUCTION_TOOLS is
     function makeInstruction(opCode : std_logic_vector(5 downto 0); address : integer)
         return INSTRUCTION;
 
+    constant NO_OP_INSTRUCTION : INSTRUCTION;
+    
 end INSTRUCTION_TOOLS;
 
 
@@ -259,5 +261,6 @@ package body INSTRUCTION_TOOLS is
         instruction := getInstruction(instruction_v);
         return instruction;
     end makeInstruction;
+   constant NO_OP_INSTRUCTION : INSTRUCTION := makeInstruction(ALU_OP, 0,0,0,0, ADD_FN);
 
 end INSTRUCTION_TOOLS;

@@ -60,7 +60,6 @@ signal val_b_int : integer;
 
 signal write_back_data_int : integer;
 
-constant no_op : INSTRUCTION := makeInstruction(ALU_OP, 0,0,0,0, ADD_FN);
 begin
 
     val_a_int <= to_integer(unsigned(val_a));
@@ -100,7 +99,7 @@ begin
             registers(I).data := std_logic_vector(to_unsigned(I * 10, 32));
             registers(I).busy := '0';
         end loop;
-        write_back_instruction <= no_op;
+        write_back_instruction <= NO_OP_INSTRUCTION;
         PC <= 0;
 
         instruction_in <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- ADD R1 R2 R3
@@ -117,7 +116,7 @@ begin
 
         wait for clock_period;    
 
-        instruction_in <= no_op;
+        instruction_in <= NO_OP_INSTRUCTION;
         assert registers(3).busy = '1' report "Register R3 should still be busy, since we haven't received the Write-Back instruction writing its result." severity error;
         
         wait for clock_period;
@@ -131,7 +130,7 @@ begin
 
         wait for clock_period;
 
-        write_back_instruction <= no_op;
+        write_back_instruction <= NO_OP_INSTRUCTION;
         instruction_in <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
         
         wait for clock_period;
