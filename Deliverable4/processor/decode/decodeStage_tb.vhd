@@ -23,7 +23,7 @@ architecture behaviour of decode_tb is
 
             -- Instruction and data coming from the Write-Back stage.
             write_back_instruction : in INSTRUCTION;
-            write_back_data : in std_logic_vector(31 downto 0);
+            write_back_data : in std_logic_vector(63 downto 0);
 
 
             -- Outputs to the ID/EX Register
@@ -46,7 +46,7 @@ signal clock : std_logic;
 signal PC : integer;
 signal instruction_in : INSTRUCTION;
 signal write_back_instruction : INSTRUCTION;
-signal write_back_data : std_logic_vector(31 downto 0);
+signal write_back_data : std_logic_vector(63 downto 0);
 signal val_a : std_logic_vector(31 downto 0);
 signal val_b : std_logic_vector(31 downto 0);
 signal i_sign_extended : std_logic_vector(31 downto 0);
@@ -64,7 +64,7 @@ begin
 
     val_a_int <= to_integer(unsigned(val_a));
     val_b_int <= to_integer(unsigned(val_b));
-    write_back_data <= std_logic_vector(to_unsigned(write_back_data_int, 32));
+    write_back_data <= std_logic_vector(to_unsigned(write_back_data_int, 64));
 
     dec : decodeStage port map (
         clock,

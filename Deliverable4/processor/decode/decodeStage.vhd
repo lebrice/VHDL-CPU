@@ -16,8 +16,7 @@ entity decodeStage is
 
     -- Instruction and data coming from the Write-Back stage.
     write_back_instruction : in INSTRUCTION;
-    -- TODO: the write_back_data signal should be of length 64, since Multiply gives back 64 bits!
-    write_back_data : in std_logic_vector(31 downto 0);
+    write_back_data : in std_logic_vector(63 downto 0);
 
 
     -- Outputs to the ID/EX Register
@@ -43,7 +42,7 @@ end decodeStage ;
 architecture decodeStage_arch of decodeStage is
   signal rs_reg, rt_reg, rd_reg : REGISTER_ENTRY;
   signal stall_reg : std_logic;
-  -- TODO: Add the LO and HI special registers!
+  signal LOW, HI : REGISTER_ENTRY;
 begin
   rs_reg <= register_file(instruction_in.rs);
   rt_reg <= register_file(instruction_in.rt);
@@ -112,14 +111,11 @@ begin
           -- instructions where we use "rt" as a destination
           rt.data := write_back_data(31 downto 0);
           rt.busy := '0';
-        when MULTIPLY =>
-        when DIVIDE =>
-
-        -- TODO: There is no need to go through the rest of the pipeline stages in the case of Move from Low and move from hi,
-        -- since they only move data from the HI or LOW special registers to another register.
-        -- (they move half of the result from a MULTIPLY instruction.)
-        when MOVE_FROM_LOW => 
-        when MOVE_FROM_HI =>
+        when MULTIPLY | DIVIDE =>
+          LOW.data <= write_back_data(31 downto 0);
+          LOW.busy <= '0';
+          HI.data <= write_back_data(63 downto 32);
+          HI.busy <= '0';
         when others =>
       end case;
    end if;
@@ -129,6 +125,9 @@ begin
   begin
     if clock = '0' then
       -- second half of clock cycle: read data from registers, and output the correct instruction.
+      -- TODO: There is no need to go through the rest of the pipeline stages in the case of Move from Low and move from hi,
+      -- since they only move data from the HI or LOW special registers to another register.
+      -- (they move half of the result from a MULTIPLY instruction.)
     end if;
   end process read_from_registers;
 
