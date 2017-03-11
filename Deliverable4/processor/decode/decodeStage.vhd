@@ -103,11 +103,11 @@ begin
       case write_back_instruction.instruction_type is
         -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
         -- behave in exactly the same way. (might be wrong though).
-        when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN =>
+        when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           -- instructions where we simply write back the data to the "rd" register:
           rd.data := write_back_data(31 downto 0);
           rd.busy := '0';
-        when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
+        when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
           -- instructions where we use "rt" as a destination
           rt.data := write_back_data(31 downto 0);
           rt.busy := '0';
@@ -116,7 +116,13 @@ begin
           LOW.busy <= '0';
           HI.data <= write_back_data(63 downto 32);
           HI.busy <= '0';
-        when others =>
+        when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
+          -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
+        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
+          -- TODO: Not 100% sure if we're supposed to do anything here.
+        when UNKNOWN =>
+          report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
+        when others =>          
       end case;
    end if;
   end process write_to_registers;
@@ -124,10 +130,16 @@ begin
   read_from_registers : process(instruction_in, write_back_instruction, register_file)
   begin
     if clock = '0' then
+      if stall_reg = '0' then
       -- second half of clock cycle: read data from registers, and output the correct instruction.
       -- TODO: There is no need to go through the rest of the pipeline stages in the case of Move from Low and move from hi,
       -- since they only move data from the HI or LOW special registers to another register.
       -- (they move half of the result from a MULTIPLY instruction.)
+      else
+        instruction_out <= NO_OP_INSTRUCTION;
+        val_a <= (others => '0');
+        val_b <= (others => '0');
+      end if;
     end if;
   end process read_from_registers;
 
