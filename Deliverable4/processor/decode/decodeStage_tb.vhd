@@ -55,7 +55,14 @@ signal instruction_out : INSTRUCTION;
 signal register_file : REGISTER_BLOCK;
 signal stall_out : std_logic;
 
+signal val_a_int : integer;
+signal val_b_int : integer;
+
+constant no_op : INSTRUCTION := makeInstruction(ALU_OP, 0,0,0,0, ADD_FN);
 begin
+
+    val_a_int <= to_integer(unsigned(val_a));
+    val_b_int <= to_integer(unsigned(val_b));
 
     dec : decodeStage port map (
         clock,
@@ -86,14 +93,27 @@ begin
         registers := reset_register_block(registers);
 
         for I in 0 to NUM_REGISTERS loop
-            registers(I).data := std_logic_vector(to_unsigned(I, 32));
+            registers(I).data := std_logic_vector(to_unsigned(I * 10, 32));
             registers(I).busy := '0';
         end loop;
-
+        write_back_instruction <= makeInstruction(ALU_OP, 0,0,0,0, ADD_FN); -- ADD R0 R0 R0
         PC <= 0;
+
         instruction_in <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- ADD R1 R2 R3
+        assert val_a_int = 10 report "Value A should be 10, but we have " & integer'image(val_a_int) severity error;
+        assert val_b_int = 20 report "Value B should be 20, but we have " & integer'image(val_b_int) severity error;
+        assert registers(3).busy = '1' report "Register R3 should be busy, since the result of the addition is going into it." severity error;
+        assert stall_out = '0' report "Stall_Out should definitely NOT be '0' right here." severity error;
+        assert instruction_out.format = R_TYPE report "The output instruction does not have the right format! (Should have R Type)" severity error;
+        assert instruction_out.instruction_type = ADD report "The output instruction does NOT have the right type (expecting Add)" severity error;
+        assert instruction_out.rs = 1 report "Instruction RS is wrong! (got " & integer'image(instruction_out.rs) & ", was expecting 1" severity error;
+        assert instruction_out.rt = 2 report "Instruction RT is wrong! (got " & integer'image(instruction_out.rt) & ", was expecting 2" severity error;
+        assert instruction_out.rd = 3 report "Instruction RD is wrong! (got " & integer'image(instruction_out.rd) & ", was expecting 3" severity error;
+        assert instruction_out.shamt = 0 report "Instruction shift amount should be 0." severity error;
 
-
+        wait for clock_period;    
+        
+        report "Done testing decode stage." severity NOTE;
         wait;
 
     end process;
