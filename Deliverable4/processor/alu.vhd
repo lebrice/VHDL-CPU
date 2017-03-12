@@ -8,7 +8,7 @@ use work.INSTRUCTION_TOOLS.all;
 entity ALU is
   port (
     clock : in std_logic;
-    instructionType : in INSTRUCTION.instruction_type;
+    instruction_type : in INSTRUCTION.instruction_type;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
     ALU_out : out std_logic_vector(63 downto 0) -- RD
@@ -35,7 +35,7 @@ architecture ALU_arch of ALU is
 
 begin
   
-  computation : process( instructionType, op_a, op_b )
+  computation : process( instruction_typ, op_a, op_b )
   variable a : signed(31 downto 0) := signed(op_a);
   variable b : signed(31 downto 0) := signed(op_b);
 
@@ -47,7 +47,7 @@ begin
   variable jump_address : std_logic_vector(25 downto 0) := op_a(25 downto 0);
   begin
     
-    case instructionType is
+    case instruction_type is
       
       when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
