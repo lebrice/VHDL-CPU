@@ -26,21 +26,30 @@ signal val_a : std_logic_vector(31 downto 0);
 signal val_b : std_logic_vector(31 downto 0);
 signal imm_sign_extended : std_logic_vector(31 downto 0);
 signal PC : integer;
+
+CONSTANT clk_period : time := 1 ns; --TODO: figure out how long we wait here for...
 begin
     
     --TODO: figure out: maybe don't need the clock process?
-    clk_process : PROCESS
-    BEGIN
-        clock <= '0';
-        WAIT FOR clk_period/2;
-        clock <= '1';
-        WAIT FOR clk_period/2;
-    END PROCESS;
+    -- clk_process : PROCESS
+    -- BEGIN
+    --     clock <= '0';
+    --     WAIT FOR clk_period/2;
+    --     clock <= '1';
+    --     WAIT FOR clk_period/2;
+    -- END PROCESS;
 
     exAlu: EXECUTE port map (clock, instruction_in, val_a, val_b, imm_sign_extended, PC, instruction_out, branch, ALU_Result);
     test_process : PROCESS(clock)
     BEGIN
-        
-    wait;
+        instruction_in <= x"014B4820"; --add t1 t2 t3
+        val_a <= x"0000000A"; --10
+        val_b <= x"000000AB"; --171
+        imm_sign_extended <= x"00000000"; --0
+        PC <= "50";
+        WAIT FOR clk_period; 
+
+        ASSERT (ALU_Result = x"000000b5") REPORT "ALU_Result should = b5, but wasn't... " SEVERITY ERROR;
+        wait;
     END PROCESS;
 END;
