@@ -1,6 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
+USE work.instruction_tools.all;
 
 ENTITY mem is
     port (
@@ -19,17 +20,19 @@ END mem;
 ARCHITECTURE memArch OF mem IS
 BEGIN
 
-    mem_process : PROCESS ()
+    mem_process : process(clock)
     BEGIN
-        IF(instruction_in is branch and branch_taken_in == '1') THEN
-            branch_taken_out = '1';
-        ELSIF(instruction_in is load) THEN
-            mem_data <= DATACACHE[ALU_result_in];
-        ELSIF(instruction_in is store) THEN
-            DATACACHE[ALU_result_in] <= valB;
-        END IF;
-
-        instresult_iut <= instruction_in;
-        ALU_result_out <= ALU_result_in;_i
+        CASE instruction_in.INSTRUCTION_TYPE IS
+            WHEN branch_if_equal | branch_if_not_equal =>
+                IF(branch_taken_in = '1') THEN
+                    branch_taken_out <= '1';
+                END IF;
+            WHEN load_word =>
+                mem_data <= DATACACHE[ALU_result_in]; --TODO: Call memory correctly
+            WHEN store_word =>
+                DATACACHE[ALU_result_in] <= valB; --TODO: Call memory correctly
+        END CASE;
+        instruction_out <= instruction_in;
+        ALU_result_out <= ALU_result_in;
     END PROCESS;
 END ARCHITECTURE;
