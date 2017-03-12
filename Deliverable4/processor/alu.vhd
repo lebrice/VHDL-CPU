@@ -46,46 +46,63 @@ begin
   --jump address will be last 26 bits of "a"
   variable jump_address : std_logic_vector(25 downto 0) := op_a(25 downto 0);
   begin
+    
     case instructionType is
+      
       when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
 
         -- for branch if equal PC = PC + 4 + branch target
           -- TODO: Assuming that the Branch target is calculated with A being the current PC + 4.
         ALU_out <= std_logic_vector(a + b); 
+      
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b);
+      
       when MULTIPLY =>
         ALU_out <= std_logic_vector(a * b);
+      
       when DIVIDE =>
         ALU_out <= std_logic_vector(a / b);
+      
       when SET_LESS_THAN | SET_LESS_THAN_IMMEDIATE =>
         if a < b then 
           ALU_out <= "1";
         else 
           ALU_out <= "0";
         end if;  
+      
       when BITWISE_AND | BITWISE_AND_IMMEDIATE=>
         ALU_out <= op_a AND op_b;
+      
       when BITWISE_OR | BITWISE_OR_IMMEDIATE =>
         ALU_out <= op_a OR op_b;
+      
       when BITWISE_NOR =>
         ALU_out <= op_a NOR op_b;
+      
       when BITWISE_XOR | BITWISE_XOR_IMMEDIATE =>
         ALU_out <= op_a XOR op_b;
+      
       when MOVE_FROM_HI =>
         -- TODO:  understand what's happening in this case.
+      
       when MOVE_FROM_LOW =>
         -- TODO:  understand what's happening in this case.
+      
       when LOAD_UPPER_IMMEDIATE =>
         -- loads the upper 16 bits of RT with the 16 bit immediate, and all the lower bits to '0'.
         ALU_out <= op_a(31 downto 16) & X"0000";
+      
       when SHIFT_LEFT_LOGICAL =>
         ALU_out <= std_logic_vector(b SLL shift_amount); 
+      
       when SHIFT_RIGHT_LOGICAL =>
         ALU_out <= std_logic_vector(b SRL shift_amount);
+      
       when SHIFT_RIGHT_ARITHMETIC =>
         ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra shift_amount);      
+      
       when JUMP =>
       -- JUMP:
       -- PC = PC(31 downto 26) & jump_address;
@@ -93,15 +110,18 @@ begin
       -- TODO: this should probably be done in ID or in IF, not sure it belongs in EX stage.
       
         ALU_out <= op_a(31 downto 26) & jump_address;
+      
       when JUMP_AND_LINK =>
       -- JUMP_AND_LINK:
       -- TODO: also put the current PC into Register 31.
 
         ALU_out <= op_a(31 downto 26) & jump_address;
+      
       when JUMP_TO_REGISTER =>
       -- TODO: Not sure this is handled here.
       -- NOTE: assuming that the content of register is given in A, just passing it along.
         ALU_out <= op_a;
+      
       when UNKNOWN =>
         report "ERROR: unknown instruction given to ALU!" severity FAILURE;
     end case;
