@@ -31,5 +31,5 @@ BEGIN
 
         instresult_iut <= instruction_in;
         ALU_result_out <= ALU_result_in;_i
-    END PRO_tE_t_o_i_o
-E_bD memArch;
+    END PROCESS;
+END ARCHITECTURE;
