@@ -40,9 +40,6 @@ entity decodeStage is
 end decodeStage ;
 
 architecture decodeStage_arch of decodeStage is
-  signal rs_reg, rt_reg, rd_reg : REGISTER_ENTRY;
-  signal stall_reg : std_logic;
-  signal LOW, HI : REGISTER_ENTRY;
 
   function signExtend(immediate : std_logic_vector(15 downto 0))
     return std_logic_vector is
@@ -59,6 +56,10 @@ architecture decodeStage_arch of decodeStage is
   begin
     return X"0000" & immediate;
   end zeroExtend;
+
+  signal rs_reg, rt_reg, rd_reg : REGISTER_ENTRY;
+  signal stall_reg : std_logic;
+  signal LOW, HI : REGISTER_ENTRY;
 begin
   stall_out <= stall_reg;
 
@@ -108,10 +109,11 @@ begin
 
 
   read_from_registers : process(clock, instruction_in, register_file)
-  variable rs : REGISTER_ENTRY := register_file(instruction_in.rs);
-  variable rt : REGISTER_ENTRY := register_file(instruction_in.rt);
-  variable rd : REGISTER_ENTRY := register_file(instruction_in.rd);
-  variable immediate : std_logic_vector(15 downto 0) := instruction_in.immediate_vect;
+    variable rs : REGISTER_ENTRY := register_file(instruction_in.rs);
+    variable rt : REGISTER_ENTRY := register_file(instruction_in.rt);
+    variable rd : REGISTER_ENTRY := register_file(instruction_in.rd);
+    variable immediate : std_logic_vector(15 downto 0) := instruction_in.immediate_vect;
+    variable link_register : REGISTER_ENTRY := register_file(31);
   begin
     if clock = '0' then
       if stall_reg = '0' then
@@ -121,24 +123,80 @@ begin
       -- (they move half of the result from a MULTIPLY instruction.)
       
       case instruction_in.instruction_type is 
-        when ADD | SUBTRACT =>
+        -- TODO: Make sure that we're clear on what exactly EX or ID handles in each case.
+
+        when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
           val_a <= rs.data;
           val_b <= rt.data;
           rd.busy := '1';
+
         when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
           val_a <= rs.data;
           val_b <= signExtend(immediate);
-          rt.busy := '1';        
+          rt.busy := '1';   
+
         when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
           val_a <= rs.data;
-          val_b <= zeroExtend(immediate);
+          i_sign_extended <= zeroExtend(immediate);
           rt.busy := '1';
+
         when MULTIPLY | DIVIDE =>
           val_a <= rs.data;
           val_b <= rt.data;
           LOW.busy <= '1';
           HI.busy <= '1';
-        when others =>
+
+        when MOVE_FROM_HI =>
+          rd.data := HI.data;
+          instruction_out <= NO_OP_INSTRUCTION;
+          val_a <= (others => '0');
+          val_b <= (others => '0');
+
+        when MOVE_FROM_LOW =>
+          rd.data := LOW.data;
+          instruction_out <= NO_OP_INSTRUCTION;
+          val_a <= (others => '0');
+          val_b <= (others => '0');
+
+        when LOAD_UPPER_IMMEDIATE =>
+          rt.data := immediate & (16 downto 0 => '0');
+          instruction_out <= NO_OP_INSTRUCTION;
+          val_a <= (others => '0');
+          val_b <= (others => '0');
+
+        when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+          val_b <= rt.data;
+          val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
+          rd.busy := '1';
+
+        when LOAD_WORD =>
+          val_a <= rs.data;
+          i_sign_extended <= signExtend(immediate);
+          rt.busy := '1';
+
+        when STORE_WORD =>
+        -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
+          val_a <= rs.data; -- the base address
+          val_b <= rt.data; -- the word to store
+          i_sign_extended <= signExtend(immediate); -- the offset
+
+        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+          val_a <= rs.data;
+          val_b <= rt.data;
+          i_sign_extended <= signExtend(immediate);
+
+        when JUMP =>
+          -- do nothing
+
+        when JUMP_AND_LINK =>
+          link_register.data := std_logic_vector(to_unsigned(PC + 8, 32));
+
+        when JUMP_TO_REGISTER =>
+          -- TODO: Clarify this with Asher
+          val_a <= rs.data;
+
+        when UNKNOWN =>
+           report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
 
       end case;
 
@@ -154,42 +212,48 @@ begin
 
 
   write_to_registers : process(clock, write_back_instruction, write_back_data, register_file)
-  variable rs : REGISTER_ENTRY := register_file(write_back_instruction.rs);
-  variable rt : REGISTER_ENTRY := register_file(write_back_instruction.rt);
-  variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
+    variable rs : REGISTER_ENTRY := register_file(write_back_instruction.rs);
+    variable rt : REGISTER_ENTRY := register_file(write_back_instruction.rt);
+    variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
   begin
     if clock = '1' then
+      
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
+
         -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
         -- behave in exactly the same way. (might be wrong though).
         when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           -- instructions where we simply write back the data to the "rd" register:
           rd.data := write_back_data(31 downto 0);
           rd.busy := '0';
+
         when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
           -- instructions where we use "rt" as a destination
           rt.data := write_back_data(31 downto 0);
           rt.busy := '0';
+
         when MULTIPLY | DIVIDE =>
           LOW.data <= write_back_data(31 downto 0);
           LOW.busy <= '0';
           HI.data <= write_back_data(63 downto 32);
           HI.busy <= '0';
+
         when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
           -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
+
         when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
           -- TODO: Not 100% sure if we're supposed to do anything here.
+
+        when STORE_WORD =>
+          -- Do Nothing.
+
         when UNKNOWN =>
           report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
-        when others =>          
+
       end case;
    end if;
   end process write_to_registers;
-
-
-
-
 
   detect_stall : process(instruction_in, register_file)
   begin
