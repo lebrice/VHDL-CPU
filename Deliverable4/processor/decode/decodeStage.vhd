@@ -217,7 +217,7 @@ begin
     variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
   begin
     if clock = '1' then
-      
+
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
 
@@ -255,23 +255,81 @@ begin
    end if;
   end process write_to_registers;
 
-  detect_stall : process(instruction_in, register_file)
+
+
+  stall_detection : process(instruction_in, register_file)
+    variable rs : REGISTER_ENTRY := register_file(instruction_in.rs);
+    variable rt : REGISTER_ENTRY := register_file(instruction_in.rt);
+    variable rd : REGISTER_ENTRY := register_file(instruction_in.rd);
   begin
-    case instruction_in.format is
-      when R_TYPE =>
-        if rs_reg.busy = '1' OR rt_reg.busy = '1' OR rd_reg.busy = '1' then
+    case instruction_in.instruction_type is
+      -- TODO: IMPORTANT, if we put stall_out here, and de-stall when the JUMP instruction comes back from the WB stage, we HAVE to have the 
+      -- Fetch stage be able to take in the jump address while it is stalled!
+
+      when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
+        -- if the instruction coming in from Fetch is one of these, then we wait until the same instruction 
+        -- comes back from Write-Back until releasing the pipeline.
+        
+        -- TODO: We HAVE to make sure that Fetch will work properly with this: 
+        --    - Even when stalled, it should latch the PC_NEXT value from a JUMP or BRANCH instruction.
+        --    - HOWEVER, the instruction coming into DECODE should stay the same until STALL is DE-ASSERTED! (This seems like a challenge right now.)
+        if (write_back_instruction.instruction_type = instruction_in.instruction_type) then
+          stall_reg <= '0';
+        else
           stall_reg <= '1';
-        else 
+        end if;
+
+      when ADD | SUBTRACT =>
+        if rs.busy = '1' OR rt.busy = '1' OR rd.busy = '1' then
+          stall_reg <= '1';
+        else
           stall_reg <= '0';
         end if;
-      when I_TYPE =>
 
-      when J_TYPE =>
+      when ADD_IMMEDIATE =>
+      when MULTIPLY =>
+
+      when DIVIDE =>
+
+      when SET_LESS_THAN =>
+
+      when SET_LESS_THAN_IMMEDIATE =>
+
+      when BITWISE_AND =>
+
+      when BITWISE_OR =>
+
+      when BITWISE_NOR =>
+
+      when BITWISE_XOR =>
+
+      when BITWISE_AND_IMMEDIATE =>
+
+      when BITWISE_OR_IMMEDIATE =>
+
+      when BITWISE_XOR_IMMEDIATE =>
+
+      when MOVE_FROM_HI =>
+
+      when MOVE_FROM_LOW =>
+
+      when LOAD_UPPER_IMMEDIATE =>
+
+      when SHIFT_LEFT_LOGICAL =>
+
+      when SHIFT_RIGHT_LOGICAL =>
+
+      when SHIFT_RIGHT_ARITHMETIC =>
+
+      when LOAD_WORD =>
+
+      when STORE_WORD =>
 
       when UNKNOWN =>
-        report "ERROR: unknown Instruction format in Decode stage!" severity failure;
+        report "ERROR: unknown Instruction type in Decode stage!" severity failure;
+
     end case;
-  end process detect_stall;
+  end process stall_detection;
 
 
 
