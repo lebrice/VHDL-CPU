@@ -43,14 +43,14 @@ begin
     case instructionIn.INSTRUCTION_TYPE is
 
       when BRANCH_IF_EQUAL =>
-        if ((signed(op_a)-signed(iSignExtended)) = 0) then
+        if ((signed(op_b)-signed(iSignExtended)) = 0) then
           branch <= 1;
         else
           branch <= 0;
         end if;
 
       when BRANCH_IF_NOT_EQUAL =>
-        if ((signed(op_a)-signed(iSignExtended)) /= 0) then
+        if ((signed(op_b)-signed(iSignExtended)) /= 0) then
           branch <= 1;
         else
           branch <= 0;
