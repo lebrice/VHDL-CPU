@@ -11,7 +11,7 @@ entity executeStage is
     valA : in std_logic_vector(31 downto 0);
     valB : in std_logic_vector(31 downto 0);
     iSignExtended : in std_logic_vector(31 downto 0);
-    PCPlus4In : in std_logic_vector(3 downto 0);
+    PC : in std_logic_vector(3 downto 0);
     instructionOut : out Instruction;
     branch : out std_logic;
     ALU_Result : out std_logic_vector(31 downto 0)
@@ -94,7 +94,7 @@ begin
           
           when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
             --with branches, we want "a" to have the PCPlus4
-            input_a <= (31 downto 4 => '0') & PCPlus4In;
+            input_a <= (31 downto 4 => '0') & PC;
           
           when others =>
             input_a <= valA;   
