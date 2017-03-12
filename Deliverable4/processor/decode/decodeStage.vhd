@@ -105,41 +105,6 @@ begin
   -- JUMP_AND_LINK,
   -- UNKNOWN
 
-  write_to_registers : process(clock, write_back_instruction, write_back_data, register_file)
-  variable rs : REGISTER_ENTRY := register_file(write_back_instruction.rs);
-  variable rt : REGISTER_ENTRY := register_file(write_back_instruction.rt);
-  variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
-  begin
-    if clock = '1' then
-      -- first half of clock cycle: write result of instruction to the registers.
-      case write_back_instruction.instruction_type is
-        -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
-        -- behave in exactly the same way. (might be wrong though).
-        when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-          -- instructions where we simply write back the data to the "rd" register:
-          rd.data := write_back_data(31 downto 0);
-          rd.busy := '0';
-        when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
-          -- instructions where we use "rt" as a destination
-          rt.data := write_back_data(31 downto 0);
-          rt.busy := '0';
-        when MULTIPLY | DIVIDE =>
-          LOW.data <= write_back_data(31 downto 0);
-          LOW.busy <= '0';
-          HI.data <= write_back_data(63 downto 32);
-          HI.busy <= '0';
-        when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
-          -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
-        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
-          -- TODO: Not 100% sure if we're supposed to do anything here.
-        when UNKNOWN =>
-          report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
-        when others =>          
-      end case;
-   end if;
-  end process write_to_registers;
-
-
 
 
   read_from_registers : process(clock, instruction_in, register_file)
@@ -185,6 +150,44 @@ begin
       end if;
     end if;
   end process read_from_registers;
+
+
+
+  write_to_registers : process(clock, write_back_instruction, write_back_data, register_file)
+  variable rs : REGISTER_ENTRY := register_file(write_back_instruction.rs);
+  variable rt : REGISTER_ENTRY := register_file(write_back_instruction.rt);
+  variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
+  begin
+    if clock = '1' then
+      -- first half of clock cycle: write result of instruction to the registers.
+      case write_back_instruction.instruction_type is
+        -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
+        -- behave in exactly the same way. (might be wrong though).
+        when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+          -- instructions where we simply write back the data to the "rd" register:
+          rd.data := write_back_data(31 downto 0);
+          rd.busy := '0';
+        when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
+          -- instructions where we use "rt" as a destination
+          rt.data := write_back_data(31 downto 0);
+          rt.busy := '0';
+        when MULTIPLY | DIVIDE =>
+          LOW.data <= write_back_data(31 downto 0);
+          LOW.busy <= '0';
+          HI.data <= write_back_data(63 downto 32);
+          HI.busy <= '0';
+        when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
+          -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
+        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
+          -- TODO: Not 100% sure if we're supposed to do anything here.
+        when UNKNOWN =>
+          report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
+        when others =>          
+      end case;
+   end if;
+  end process write_to_registers;
+
+
 
 
 
