@@ -57,11 +57,11 @@ architecture decodeStage_arch of decodeStage is
     return X"0000" & immediate;
   end zeroExtend;
 
-  signal rs_reg, rt_reg, rd_reg : REGISTER_ENTRY;
   signal stall_reg : std_logic;
   signal LOW, HI : REGISTER_ENTRY;
 begin
   stall_out <= stall_reg;
+  PC_out <= PC;
 
   -- Rough Pseudocode:
   -- Conditions that create a stall:
@@ -109,102 +109,104 @@ begin
 
 
   read_from_registers : process(clock, instruction_in, register_file)
-    variable rs : REGISTER_ENTRY := register_file(instruction_in.rs);
-    variable rt : REGISTER_ENTRY := register_file(instruction_in.rt);
-    variable rd : REGISTER_ENTRY := register_file(instruction_in.rd);
-    variable immediate : std_logic_vector(15 downto 0) := instruction_in.immediate_vect;
-    variable link_register : REGISTER_ENTRY := register_file(31);
+    variable rs, rt, rd : REGISTER_ENTRY;
+    variable immediate : std_logic_vector(15 downto 0);
+    variable link_register : REGISTER_ENTRY;
   begin
+    rs := register_file(instruction_in.rs);
+    rt := register_file(instruction_in.rt);
+    rd := register_file(instruction_in.rd);
+    immediate := instruction_in.immediate_vect;
+    link_register := register_file(31);
+
+
+
     if clock = '0' then
-      if stall_reg = '0' then
-      -- second half of clock cycle: read data from registers, and output the correct instruction.
-      -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
-      -- since they only move data from the HI or LOW special registers to another register.
-      -- (they move half of the result from a MULTIPLY instruction.)
-      
-      case instruction_in.instruction_type is 
-        -- TODO: Make sure that we're clear on what exactly EX or ID handles in each case.
+      if stall_reg = '0' then        
+        -- second half of clock cycle: read data from registers, and output the correct instruction.
+        -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
+        -- since they only move data from the HI or LOW special registers to another register.
+        -- (they move half of the result from a MULTIPLY instruction.)
+        
+        case instruction_in.instruction_type is 
+          -- TODO: Make sure that we're clear on what exactly EX or ID handles in each case.
 
-        when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
-          val_a <= rs.data;
-          val_b <= rt.data;
-          rd.busy := '1';
+          when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
+            val_a <= rs.data;
+            val_b <= rt.data;
+            rd.busy := '1';
 
-        when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
-          val_a <= rs.data;
-          val_b <= signExtend(immediate);
-          rt.busy := '1';   
+          when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
+            val_a <= rs.data;
+            val_b <= signExtend(immediate);
+            rt.busy := '1';   
 
-        when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
-          val_a <= rs.data;
-          i_sign_extended <= zeroExtend(immediate);
-          rt.busy := '1';
+          when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
+            val_a <= rs.data;
+            i_sign_extended <= zeroExtend(immediate);
+            rt.busy := '1';
 
-        when MULTIPLY | DIVIDE =>
-          val_a <= rs.data;
-          val_b <= rt.data;
-          LOW.busy <= '1';
-          HI.busy <= '1';
+          when MULTIPLY | DIVIDE =>
+            val_a <= rs.data;
+            val_b <= rt.data;
+            LOW.busy <= '1';
+            HI.busy <= '1';
 
-        when MOVE_FROM_HI =>
-          rd.data := HI.data;
-          instruction_out <= NO_OP_INSTRUCTION;
-          val_a <= (others => '0');
-          val_b <= (others => '0');
+          when MOVE_FROM_HI =>
+            rd.data := HI.data;
+            val_a <= (others => '0');
+            val_b <= (others => '0');
 
-        when MOVE_FROM_LOW =>
-          rd.data := LOW.data;
-          instruction_out <= NO_OP_INSTRUCTION;
-          val_a <= (others => '0');
-          val_b <= (others => '0');
+          when MOVE_FROM_LOW =>
+            rd.data := LOW.data;
+            val_a <= (others => '0');
+            val_b <= (others => '0');
 
-        when LOAD_UPPER_IMMEDIATE =>
-          rt.data := immediate & (16 downto 0 => '0');
-          instruction_out <= NO_OP_INSTRUCTION;
-          val_a <= (others => '0');
-          val_b <= (others => '0');
+          when LOAD_UPPER_IMMEDIATE =>
+            rt.data := immediate & (15 downto 0 => '0');
+            val_a <= (others => '0');
+            val_b <= (others => '0');
 
-        when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-          val_b <= rt.data;
-          val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
-          rd.busy := '1';
+          when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+            val_b <= rt.data;
+            val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
+            rd.busy := '1';
 
-        when LOAD_WORD =>
-          val_a <= rs.data;
-          i_sign_extended <= signExtend(immediate);
-          rt.busy := '1';
+          when LOAD_WORD =>
+            val_a <= rs.data;
+            i_sign_extended <= signExtend(immediate);
+            rt.busy := '1';
 
-        when STORE_WORD =>
-        -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
-          val_a <= rs.data; -- the base address
-          val_b <= rt.data; -- the word to store
-          i_sign_extended <= signExtend(immediate); -- the offset
+          when STORE_WORD =>
+          -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
+            val_a <= rs.data; -- the base address
+            val_b <= rt.data; -- the word to store
+            i_sign_extended <= signExtend(immediate); -- the offset
 
-        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-          val_a <= rs.data;
-          val_b <= rt.data;
-          i_sign_extended <= signExtend(immediate);
+          when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+            val_a <= rs.data;
+            val_b <= rt.data;
+            i_sign_extended <= signExtend(immediate);
 
-        when JUMP =>
-          -- do nothing
+          when JUMP =>
+            -- do nothing
 
-        when JUMP_AND_LINK =>
-          link_register.data := std_logic_vector(to_unsigned(PC + 8, 32));
+          when JUMP_AND_LINK =>
+            link_register.data := std_logic_vector(to_unsigned(PC + 8, 32));
 
-        when JUMP_TO_REGISTER =>
-          -- TODO: Clarify this with Asher
-          val_a <= rs.data;
+          when JUMP_TO_REGISTER =>
+            -- TODO: Clarify this with Asher
+            val_a <= rs.data;
 
-        when UNKNOWN =>
-           report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
-
-      end case;
+          when UNKNOWN =>
+            report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
+        
+        end case;
 
       else
-      -- A stall was detected/required, so output a NO_OP.
-        instruction_out <= NO_OP_INSTRUCTION;
+      
         val_a <= (others => '0');
-        val_b <= (others => '0');
+        val_b <= (others => '0');   
       end if;
     end if;
   end process read_from_registers;
@@ -212,10 +214,12 @@ begin
 
 
   write_to_registers : process(clock, write_back_instruction, write_back_data, register_file)
-    variable rs : REGISTER_ENTRY := register_file(write_back_instruction.rs);
-    variable rt : REGISTER_ENTRY := register_file(write_back_instruction.rt);
-    variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
+    variable rs, rt, rd : REGISTER_ENTRY;
   begin
+    rs := register_file(write_back_instruction.rs);
+    rt := register_file(write_back_instruction.rt);
+    rd := register_file(write_back_instruction.rd);
+
     if clock = '1' then
 
       -- first half of clock cycle: write result of instruction to the registers.
@@ -258,10 +262,12 @@ begin
 
 
   stall_detection : process(instruction_in, register_file)
-    variable rs : REGISTER_ENTRY := register_file(instruction_in.rs);
-    variable rt : REGISTER_ENTRY := register_file(instruction_in.rt);
-    variable rd : REGISTER_ENTRY := register_file(instruction_in.rd);
+    variable rs, rt, rd : REGISTER_ENTRY;
   begin
+    rs := register_file(instruction_in.rs);
+    rt := register_file(instruction_in.rt);
+    rd := register_file(instruction_in.rd);
+
     case instruction_in.instruction_type is
       -- TODO: Maybe this has to only happen on the second half of the clock cycle ?
 
@@ -336,5 +342,21 @@ begin
   end process stall_detection;
 
 
+  send_instruction_out : process(stall_reg, instruction_in)
+  begin
+    if stall_reg <= '1' then      
+      instruction_out <= NO_OP_INSTRUCTION;
+    else
+      case instruction_in.instruction_type is 
+
+        when MOVE_FROM_HI | MOVE_FROM_LOW | LOAD_UPPER_IMMEDIATE =>
+          instruction_out <= NO_OP_INSTRUCTION;
+        
+        when others =>
+          instruction_out <= instruction_in;
+
+      end case;
+    end if;
+  end process send_instruction_out;
 
 end architecture ; -- arch
