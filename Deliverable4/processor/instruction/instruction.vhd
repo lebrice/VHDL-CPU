@@ -99,6 +99,7 @@ package INSTRUCTION_TOOLS is
         immediate_vect : std_logic_vector(15 downto 0);
         address_vect : std_logic_vector(25 downto 0);
 
+        vector : std_logic_vector(31 downto 0);
     end record;
 
     function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
@@ -206,6 +207,8 @@ package body INSTRUCTION_TOOLS is
         inst.shamt := to_integer(unsigned(inst.shamt_vect));
         inst.immediate := to_integer(unsigned(inst.immediate_vect));
         inst.address := to_integer(unsigned(inst.address_vect));
+
+        inst.vector := instruction_vector;
 
         return inst;
     end getInstruction;
