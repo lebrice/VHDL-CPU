@@ -43,11 +43,23 @@ architecture decodeStage_arch of decodeStage is
   signal rs_reg, rt_reg, rd_reg : REGISTER_ENTRY;
   signal stall_reg : std_logic;
   signal LOW, HI : REGISTER_ENTRY;
-begin
-  rs_reg <= register_file(instruction_in.rs);
-  rt_reg <= register_file(instruction_in.rt);
-  rd_reg <= register_file(instruction_in.rd);
 
+  function signExtend(immediate : std_logic_vector(15 downto 0))
+    return std_logic_vector is
+  begin
+    if(immediate(15) = '1') then
+      return X"FFFF" & immediate;
+    else
+      return X"0000" & immediate;
+    end if;
+  end signExtend;
+
+  function zeroExtend(immediate : std_logic_vector(15 downto 0))
+    return std_logic_vector is
+  begin
+    return X"0000" & immediate;
+  end zeroExtend;
+begin
   stall_out <= stall_reg;
 
   -- Rough Pseudocode:
@@ -93,7 +105,7 @@ begin
   -- JUMP_AND_LINK,
   -- UNKNOWN
 
-  write_to_registers : process(write_back_instruction, write_back_data, register_file)
+  write_to_registers : process(clock, write_back_instruction, write_back_data, register_file)
   variable rs : REGISTER_ENTRY := register_file(write_back_instruction.rs);
   variable rt : REGISTER_ENTRY := register_file(write_back_instruction.rt);
   variable rd : REGISTER_ENTRY := register_file(write_back_instruction.rd);
@@ -127,15 +139,46 @@ begin
    end if;
   end process write_to_registers;
 
-  read_from_registers : process(instruction_in, write_back_instruction, register_file)
+
+
+
+  read_from_registers : process(clock, instruction_in, register_file)
+  variable rs : REGISTER_ENTRY := register_file(instruction_in.rs);
+  variable rt : REGISTER_ENTRY := register_file(instruction_in.rt);
+  variable rd : REGISTER_ENTRY := register_file(instruction_in.rd);
+  variable immediate : std_logic_vector(15 downto 0) := instruction_in.immediate_vect;
   begin
     if clock = '0' then
       if stall_reg = '0' then
       -- second half of clock cycle: read data from registers, and output the correct instruction.
-      -- TODO: There is no need to go through the rest of the pipeline stages in the case of Move from Low and move from hi,
+      -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
       -- since they only move data from the HI or LOW special registers to another register.
       -- (they move half of the result from a MULTIPLY instruction.)
+      
+      case instruction_in.instruction_type is 
+        when ADD | SUBTRACT =>
+          val_a <= rs.data;
+          val_b <= rt.data;
+          rd.busy := '1';
+        when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
+          val_a <= rs.data;
+          val_b <= signExtend(immediate);
+          rt.busy := '1';        
+        when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
+          val_a <= rs.data;
+          val_b <= zeroExtend(immediate);
+          rt.busy := '1';
+        when MULTIPLY | DIVIDE =>
+          val_a <= rs.data;
+          val_b <= rt.data;
+          LOW.busy <= '1';
+          HI.busy <= '1';
+        when others =>
+
+      end case;
+
       else
+      -- A stall was detected/required, so output a NO_OP.
         instruction_out <= NO_OP_INSTRUCTION;
         val_a <= (others => '0');
         val_b <= (others => '0');
