@@ -23,7 +23,9 @@ END memory;
 
 ARCHITECTURE rtl OF memory IS
 	TYPE MEM IS ARRAY(ram_size-1 downto 0) OF STD_LOGIC_VECTOR(bit_width-1 DOWNTO 0);
-	SIGNAL ram_block: MEM;
+	
+  	constant empty_ram_block : MEM := (others => (others => '0'));
+	SIGNAL ram_block: MEM := empty_ram_block;
 	SIGNAL read_address_reg: INTEGER RANGE 0 to ram_size-1;
 	SIGNAL write_waitreq_reg: STD_LOGIC := '1';
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
@@ -32,11 +34,11 @@ BEGIN
 	mem_process: PROCESS (clock)
 	BEGIN
 		--This is a cheap trick to initialize the SRAM in simulation
-		IF(now < 1 ps)THEN
-			For i in 0 to ram_size-1 LOOP
-				ram_block(i) <= std_logic_vector(to_unsigned(i,bit_width));
-			END LOOP;
-		end if;
+		-- IF(now < 1 ps)THEN
+		-- 	For i in 0 to ram_size-1 LOOP
+		-- 		ram_block(i) <= std_logic_vector(to_unsigned(i,bit_width));
+		-- 	END LOOP;
+		-- end if;
 
 		--This is the actual synthesizable SRAM block
 		IF (clock'event AND clock = '1') THEN
