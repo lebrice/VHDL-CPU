@@ -7,12 +7,12 @@ use work.INSTRUCTION_TOOLS.all;
 entity executeStage is
   port (
     clock : in std_logic;
-    instructionIn : in Instruction;
-    valA : in std_logic_vector(31 downto 0);
-    valB : in std_logic_vector(31 downto 0);
-    iSignExtended : in std_logic_vector(31 downto 0);
+    instruction_in : in Instruction;
+    val_a : in std_logic_vector(31 downto 0);
+    val_b : in std_logic_vector(31 downto 0);
+    imm_sign_extended : in std_logic_vector(31 downto 0);
     PC : in integer; 
-    instructionOut : out Instruction;
+    instruction_out : out Instruction;
     branch : out std_logic;
     ALU_Result : out std_logic_vector(31 downto 0)
   ) ;
@@ -34,23 +34,23 @@ architecture executeStage_arch of executeStage is
   SIGNAL input_b: std_logic_vector(31 downto 0);
 begin
   --define alu component
-  exAlu: ALU port map (clock, instructionIn, input_a, input_b, ALU_Result);
+  exAlu: ALU port map (clock, instruction_in, input_a, input_b, ALU_Result);
 
-  computation : process( instructionIn, iSignExtended, branch, input_a, input_b)
+  computation : process( instruction_in, imm_sign_extended, branch, input_a, input_b)
 
   begin
     -- first we will compute the "branch" output
-    case instructionIn.INSTRUCTION_TYPE is
+    case instruction_in.INSTRUCTION_TYPE is
 
       when BRANCH_IF_EQUAL =>
-        if ((signed(op_b)-signed(iSignExtended)) = 0) then
+        if ((signed(op_b)-signed(imm_sign_extended)) = 0) then
           branch <= 1;
         else
           branch <= 0;
         end if;
 
       when BRANCH_IF_NOT_EQUAL =>
-        if ((signed(op_b)-signed(iSignExtended)) /= 0) then
+        if ((signed(op_b)-signed(imm_sign_extended)) /= 0) then
           branch <= 1;
         else
           branch <= 0;
@@ -66,40 +66,40 @@ begin
     --  c) address vector
     --  d) immediate sign extended
     --  e) branch target
-    case instructionIn.INSTRUCTION_FORMAT is
+    case instruction_in.INSTRUCTION_FORMAT is
       
       --if it's an R-type, we pass in values (unless shifting)
       when R_TYPE =>
         --if it is a shift, we store the shamt in "a"
-        case instructionIn.INSTRUCTION_TYPE is
+        case instruction_in.INSTRUCTION_TYPE is
           
           when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-            input_a <= (31 downto 5 => '0') & instructionIn.shamt_vect; --padded with 0s
+            input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect; --padded with 0s
           
           when others =>
-            input_a <= valA;
+            input_a <= val_a;
         end case; 
         
-        input_b <= valB;
+        input_b <= val_b;
      
       --if it's a J-type, we pass in the address vector and b value
       when J_TYPE =>
-        input_a <= "000000" & instructionIn.address_vect;
-        input_b <= valB; --doesn't matter
+        input_a <= "000000" & instruction_in.address_vect;
+        input_b <= val_b; --doesn't matter
       
       --if it's an I-type we pass in the value A and the immediate sign extended
       when I_TYPE =>
         --we need to check if it's a branch (in which case we do PC + 4)
-        case instructionIn.INSTRUCTION_TYPE is
+        case instruction_in.INSTRUCTION_TYPE is
           
           when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
             --with branches, we want "a" to have the PC
             input_a <= std_logic_vector(to_unsigned(PC));
           
           when others =>
-            input_a <= valA;   
+            input_a <= val_a;   
         end case;
-        input_b <= iSignExtended;
+        input_b <= imm_sign_extended;
       
       when UNKNOWN => --this is unknown. report an error.
         report "ERROR: unknown instruction format in execute stage!" severity FAILURE;
