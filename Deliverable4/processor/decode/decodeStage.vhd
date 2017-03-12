@@ -261,7 +261,7 @@ begin
 
 
 
-  stall_detection : process(instruction_in, register_file)
+  stall_detection : process(clock, instruction_in, register_file)
     variable rs, rt, rd : REGISTER_ENTRY;
   begin
     rs := register_file(instruction_in.rs);
@@ -342,21 +342,28 @@ begin
   end process stall_detection;
 
 
-  send_instruction_out : process(stall_reg, instruction_in)
-  begin
-    if stall_reg <= '1' then      
-      instruction_out <= NO_OP_INSTRUCTION;
-    else
-      case instruction_in.instruction_type is 
+  instruction_out <= 
+    NO_OP_INSTRUCTION when stall_reg = '1' 
+      OR instruction_in.instruction_type = MOVE_FROM_HI
+      OR instruction_in.instruction_type = MOVE_FROM_LOW
+      OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
+    else instruction_in;
 
-        when MOVE_FROM_HI | MOVE_FROM_LOW | LOAD_UPPER_IMMEDIATE =>
-          instruction_out <= NO_OP_INSTRUCTION;
+  -- send_instruction_out : process(clock, stall_reg, instruction_in)
+  -- begin
+  --   if stall_reg <= '1' then      
+  --     instruction_out <= NO_OP_INSTRUCTION;
+  --   else
+  --     case instruction_in.instruction_type is 
+
+  --       when MOVE_FROM_HI | MOVE_FROM_LOW | LOAD_UPPER_IMMEDIATE =>
+  --         instruction_out <= NO_OP_INSTRUCTION;
         
-        when others =>
-          instruction_out <= instruction_in;
+  --       when others =>
+  --         instruction_out <= instruction_in;
 
-      end case;
-    end if;
-  end process send_instruction_out;
+  --     end case;
+  --   end if;
+  -- end process send_instruction_out;
 
 end architecture ; -- arch
