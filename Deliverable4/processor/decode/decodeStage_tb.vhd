@@ -126,6 +126,7 @@ begin
         
         wait for clock_period;
         
+        
         assert register_file_out(1).data = std_logic_vector(to_unsigned(10, 32)) report "Data was not correctly written into the register." severity failure;
         assert register_file_out(1).busy = '0' report "The Busy bit was set for no reason!" severity ERROR;
 

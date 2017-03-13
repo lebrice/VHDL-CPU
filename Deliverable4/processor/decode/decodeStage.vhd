@@ -119,13 +119,17 @@ begin
 
 
 
-  read_from_registers : process(clock, instruction_in)
+  read_from_registers : process(clock, instruction_in, write_back_instruction, write_back_data)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
+    variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
   begin
     rs := instruction_in.rs;
     rt := instruction_in.rt;
     rd := instruction_in.rd;
+    wb_rs := write_back_instruction.rs;
+    wb_rt := write_back_instruction.rt;
+    wb_rd := write_back_instruction.rd;
     immediate := instruction_in.immediate_vect;
     
 
@@ -146,13 +150,13 @@ begin
             if (rd = 0) then
               -- we don't ever set register zero as busy, since it's hard-wired to zero!
             else
-              register_file(rd).busy <= '1';
+              -- register_file(rd).busy <= '1';
             end if;
 
           when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
             val_a <= register_file(rs).data;
             val_b <= signExtend(immediate);
-            register_file(rt).busy <= '1'; 
+            -- register_file(rt).busy <= '1'; 
 
           when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
             val_a <= register_file(rs).data;
@@ -166,29 +170,29 @@ begin
             HI.busy <= '1';
 
           when MOVE_FROM_HI =>
-            register_file(rd).data <= HI.data;
+            -- register_file(rd).data <= HI.data;
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when MOVE_FROM_LOW =>
-            register_file(rd).data <= LOW.data;
+            -- register_file(rd).data <= LOW.data;
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when LOAD_UPPER_IMMEDIATE =>
-            register_file(rt).data <= immediate & (15 downto 0 => '0');
+            -- register_file(rt).data <= immediate & (15 downto 0 => '0');
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
             val_b <= register_file(rt).data;
             val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
-            register_file(rd).busy <= '1';
+            -- register_file(rd).busy <= '1';
 
           when LOAD_WORD =>
             val_a <= register_file(rs).data;
             i_sign_extended <= signExtend(immediate);
-            register_file(rt).busy <= '1';
+            -- register_file(rt).busy <= '1';
 
           when STORE_WORD =>
           -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
@@ -221,19 +225,7 @@ begin
         val_a <= (others => '0');
         val_b <= (others => '0');   
       end if;
-    end if;
-  end process read_from_registers;
-
-
-
-  write_to_registers : process(clock, write_back_instruction, write_back_data)
-    variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
-  begin
-    rs := write_back_instruction.rs;
-    rt := write_back_instruction.rt;
-    rd := write_back_instruction.rd;
-
-    if reset_register_file = '1' then
+    elsif reset_register_file = '1' then
       -- reset register file
       register_file <= reset_register_block(register_file);
       -- FOR i in 0 to NUM_REGISTERS-1 LOOP
@@ -251,17 +243,17 @@ begin
         when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           -- instructions where we simply write back the data to the "rd" register:
             
-          if (rd = 0) then
+          if (wb_rd = 0) then
             -- Instructions can't write into register 0! it's always zero!
           else
-            register_file(rd).data <= write_back_data(31 downto 0);
+            register_file(wb_rd).data <= write_back_data(31 downto 0);
           end if;
-          register_file(rd).busy <= '0';
+          register_file(wb_rd).busy <= '0';
 
         when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
           -- instructions where we use "rt" as a destination
-          register_file(rt).data <= write_back_data(31 downto 0);
-          register_file(rt).busy <= '0';
+          register_file(wb_rt).data <= write_back_data(31 downto 0);
+          register_file(wb_rt).busy <= '0';
 
         when MULTIPLY | DIVIDE =>
           LOW.data <= write_back_data(31 downto 0);
@@ -283,6 +275,67 @@ begin
 
       end case;
    end if;
+  end process read_from_registers;
+
+
+
+  write_to_registers : process(clock, write_back_instruction, write_back_data)
+    variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
+  begin
+    rs := write_back_instruction.rs;
+    rt := write_back_instruction.rt;
+    rd := write_back_instruction.rd;
+
+  --   if reset_register_file = '1' then
+  --     -- reset register file
+  --     register_file <= reset_register_block(register_file);
+  --     -- FOR i in 0 to NUM_REGISTERS-1 LOOP
+  --     --   register_file(i).data <= (others => '0');
+  --     --   register_file(i).busy <= '0';
+  --     -- end loop;
+
+  --   elsif clock = '1' AND stall_in = '0' then
+
+  --     -- first half of clock cycle: write result of instruction to the registers.
+  --     case write_back_instruction.instruction_type is
+
+  --       -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
+  --       -- behave in exactly the same way. (might be wrong though).
+  --       when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+  --         -- instructions where we simply write back the data to the "rd" register:
+            
+  --         if (rd = 0) then
+  --           -- Instructions can't write into register 0! it's always zero!
+  --         else
+  --           register_file(rd).data <= write_back_data(31 downto 0);
+  --         end if;
+  --         register_file(rd).busy <= '0';
+
+  --       when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
+  --         -- -- instructions where we use "rt" as a destination
+  --         -- register_file(rt).data <= write_back_data(31 downto 0);
+  --         -- register_file(rt).busy <= '0';
+
+  --       when MULTIPLY | DIVIDE =>
+  --         -- LOW.data <= write_back_data(31 downto 0);
+  --         -- LOW.busy <= '0';
+  --         -- HI.data <= write_back_data(63 downto 32);
+  --         -- HI.busy <= '0';
+
+  --       when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
+  --         -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
+
+  --       when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
+  --         -- TODO: Not 100% sure if we're supposed to do anything here.
+
+  --       when STORE_WORD =>
+  --         -- Do Nothing.
+
+  --       when UNKNOWN =>
+  --         report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
+
+  --     end case;
+  --  end if;
   end process write_to_registers;
 
 
