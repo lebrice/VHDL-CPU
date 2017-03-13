@@ -107,7 +107,8 @@ begin
           input_a <= std_logic_vector(to_signed(PC, 6) & instruction_in.address_vect; --TODO: Unsigned? signed? etc? I don't know
           input_b <= val_b; --doesn't matter
         when JUMP_AND_LINK =>
-          --TODO:
+          input_a <= val_a; --this should contain the new PC (the place we want to jump to)
+          input_a <= val_b; --doesn't matter
         when UNKNOWN => --this is unknown: report an error.
           report "ERROR: unknown instruction format in execute stage!" severity WARNING;
     end case;
