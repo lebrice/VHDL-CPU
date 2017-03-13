@@ -43,8 +43,6 @@ begin
   --variable sign_extended_immediate : signed(31 downto 0) := signed(sign_extended_immediate_vector);
   --shamt is stored in last 5 bits of "a"
   variable shift_amount : integer := to_integer(op_a(4 downto 0));
-  --jump address will be last 26 bits of "a"
-  variable jump_address : std_logic_vector(25 downto 0) := op_a(25 downto 0);
   begin
     
     case instruction_type is
@@ -86,9 +84,11 @@ begin
       when MOVE_FROM_HI =>
         -- This case is never reached (handled in decode)
         report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
+
       when MOVE_FROM_LOW =>
         -- This case is never reached (handled in decode)
         report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
+
       when LOAD_UPPER_IMMEDIATE =>
         -- loads the upper 16 bits of RT with the 16 bit immediate, and all the lower bits to '0'.
         ALU_out <= op_b(31 downto 16) & X"0000";
@@ -102,12 +102,10 @@ begin
       when SHIFT_RIGHT_ARITHMETIC =>
         ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra shift_amount);      
       
-      when JUMP | JUMP_AND_LINK =>
+      when JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER =>
+        --assumes the correctly formatted new address is set to a.
         ALU_out <= op_a;
-      when JUMP_TO_REGISTER =>
-      -- TODO: Figure out if this is right...
-      -- NOTE: assuming that the content of register is given in A, just passing it along.
-        ALU_out <= op_a;
+
       when UNKNOWN =>
         report "ERROR: unknown instruction given to ALU!" severity FAILURE;
     end case;
