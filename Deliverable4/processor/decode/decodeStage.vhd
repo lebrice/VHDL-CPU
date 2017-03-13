@@ -27,8 +27,9 @@ entity decodeStage is
     instruction_out : out INSTRUCTION;
 
     -- Register file
-    register_file : in REGISTER_BLOCK;
-
+    register_file_out : out REGISTER_BLOCK;
+    write_register_file : in std_logic;
+    reset_register_file : in std_logic;
 
     -- might have to add this in at some point:
     -- stall_in : in std_logic;
@@ -59,9 +60,11 @@ architecture decodeStage_arch of decodeStage is
 
   signal stall_reg : std_logic;
   signal LOW, HI : REGISTER_ENTRY;
+  signal register_file : REGISTER_BLOCK;
 begin
   stall_out <= stall_reg;
   PC_out <= PC;
+  register_file_out <= register_file;
 
   -- Rough Pseudocode:
   -- Conditions that create a stall:
@@ -219,8 +222,11 @@ begin
     rs := register_file(write_back_instruction.rs);
     rt := register_file(write_back_instruction.rt);
     rd := register_file(write_back_instruction.rd);
+    if reset_register_file = '1' then
+      -- reset register file
+      register_file <= reset_register_block(register_file);
 
-    if clock = '1' then
+    elsif clock = '1' then
 
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
@@ -349,21 +355,11 @@ begin
       OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
     else instruction_in;
 
-  -- send_instruction_out : process(clock, stall_reg, instruction_in)
-  -- begin
-  --   if stall_reg <= '1' then      
-  --     instruction_out <= NO_OP_INSTRUCTION;
-  --   else
-  --     case instruction_in.instruction_type is 
-
-  --       when MOVE_FROM_HI | MOVE_FROM_LOW | LOAD_UPPER_IMMEDIATE =>
-  --         instruction_out <= NO_OP_INSTRUCTION;
-        
-  --       when others =>
-  --         instruction_out <= instruction_in;
-
-  --     end case;
-  --   end if;
-  -- end process send_instruction_out;
+  write_registers_to_file : process( write_register_file )
+  begin
+    if write_register_file = '1' then
+      -- TODO: call the procedure to write out the register_file to a file.
+    end if;    
+  end process ; -- write_registers_to_file
 
 end architecture ; -- arch
