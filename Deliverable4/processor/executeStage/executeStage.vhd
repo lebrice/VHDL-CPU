@@ -36,7 +36,7 @@ begin
   --define alu component
   exAlu: ALU port map (clock, instruction_in, input_a, input_b, ALU_Result);
 
-  computation : process( instruction_in, imm_sign_extended, branch, input_a, input_b)
+  computation : process( instruction_in, imm_sign_extended, branch, input_a, input_b) --TODO: ask about this. Should just be clock?
 
   begin
     -- first we will compute the "branch" output

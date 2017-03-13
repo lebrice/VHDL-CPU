@@ -42,14 +42,64 @@ begin
     exAlu: EXECUTE port map (clock, instruction_in, val_a, val_b, imm_sign_extended, PC, instruction_out, branch, ALU_Result);
     test_process : PROCESS(clock)
     BEGIN
+        -- Add
         instruction_in <= x"014B4820"; --add t1 t2 t3
         val_a <= x"0000000A"; --10
         val_b <= x"000000AB"; --171
         imm_sign_extended <= x"00000000"; --0
         PC <= "50";
         WAIT FOR clk_period; 
+        ASSERT (ALU_Result = x"000000b5") REPORT "ALU_Result should = 0xb5, but wasn't... " SEVERITY ERROR;
 
-        ASSERT (ALU_Result = x"000000b5") REPORT "ALU_Result should = b5, but wasn't... " SEVERITY ERROR;
+        -- Addi
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"00010009") REPORT "ALU_Result should = 0x10009, but wasn't... " SEVERITY ERROR;
+
+        -- ?
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- ?
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- ?
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- ?
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- ?
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
         wait;
     END PROCESS;
 END;
