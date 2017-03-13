@@ -57,8 +57,7 @@ begin
         ALU_out <= std_logic_vector(a + b); 
       
       when SUBTRACT =>
-        ALU_out <= std_logic_vector(a - b);
-      
+        ALU_out <= std_logic_vector(a - b); -- rs - rt
       when MULTIPLY =>
         ALU_out <= std_logic_vector(a * b);
       
@@ -66,7 +65,7 @@ begin
         ALU_out <= std_logic_vector(a / b);
       
       when SET_LESS_THAN | SET_LESS_THAN_IMMEDIATE =>
-        if a < b then 
+        if a < b then  -- if rs < rd
           ALU_out <= "1";
         else 
           ALU_out <= "0";
@@ -89,7 +88,7 @@ begin
         report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
       when MOVE_FROM_LOW =>
         -- This case is never reached (handled in decode)
-        report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
+        report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
       when LOAD_UPPER_IMMEDIATE =>
         -- loads the upper 16 bits of RT with the 16 bit immediate, and all the lower bits to '0'.
         ALU_out <= op_b(31 downto 16) & X"0000";
