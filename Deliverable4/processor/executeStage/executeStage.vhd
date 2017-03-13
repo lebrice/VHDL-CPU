@@ -58,7 +58,7 @@ begin
 
       when BRANCH_IF_NOT_EQUAL =>
         --check if the two values from regs are equal
-        if (valDiff /= 0) then
+        if (op_a /= op_b) then
           internal_branch <= 1;
         else
           internal_branch <= 0;
