@@ -36,8 +36,7 @@ begin
   --define alu component
   exAlu: ALU port map (clock, instruction_in, input_a, input_b, ALU_Result);
 
-  computation : process( instruction_in, imm_sign_extended, branch, input_a, input_b) --TODO: ask about this. Should just be clock?
-
+  branch_condition : process(instruction_in)
   begin
     -- first we will compute the "branch" output
     case instruction_in.INSTRUCTION_TYPE is
@@ -59,6 +58,13 @@ begin
       when others =>
         branch <= 0;
     end case; --TODO: figure out why there's an error here 
+  end process ; -- branch_condition  
+
+
+  compute_inputs : process( instruction_in, imm_sign_extended, branch, input_a, input_b) --TODO: ask about this. Should just be clock?
+
+  begin
+ 
     -- The instruction changes what is passed to the ALU
     -- We either pass in:
     --  a) values read from registers
@@ -104,5 +110,5 @@ begin
       when UNKNOWN => --this is unknown. report an error.
         report "ERROR: unknown instruction format in execute stage!" severity FAILURE;
     end case;
-  end process; -- computation
+  end process; -- compute_inputs
 end architecture ; -- arch
