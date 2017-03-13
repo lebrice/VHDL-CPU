@@ -127,7 +127,7 @@ begin
     rt := instruction_in.rt;
     rd := instruction_in.rd;
     immediate := instruction_in.immediate_vect;
-
+    
 
 
     if clock = '0' AND stall_in = '0' then
@@ -143,7 +143,11 @@ begin
           when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
             val_a <= register_file(rs).data;
             val_b <= register_file(rt).data;
-            register_file(rd).busy <= '1';
+            if (rd = 0) then
+              -- we don't ever set register zero as busy, since it's hard-wired to zero!
+            else
+              register_file(rd).busy <= '1';
+            end if;
 
           when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
             val_a <= register_file(rs).data;
@@ -246,7 +250,12 @@ begin
         -- behave in exactly the same way. (might be wrong though).
         when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           -- instructions where we simply write back the data to the "rd" register:
-          register_file(rd).data <= write_back_data(31 downto 0);
+            
+          if (rd = 0) then
+            -- Instructions can't write into register 0! it's always zero!
+          else
+            register_file(rd).data <= write_back_data(31 downto 0);
+          end if;
           register_file(rd).busy <= '0';
 
         when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>

@@ -101,11 +101,11 @@ begin
     test_process : process
     begin
         
+        PC <= 0;
         reset_register_file <= '1';
         stall_in <= '1';
 
         wait for clock_period;
-        reset_register_file <= '0';
 
         for I in 0 to NUM_REGISTERS-1 loop
             -- check that each register was properly initialized.
@@ -113,13 +113,22 @@ begin
             assert register_file_out(I).busy = '0' report "Registers did not have their busy bit initialized properly!" severity failure;
         end loop;
 
+        reset_register_file <= '0';
         stall_in <= '0';
-        wait for clock_period;
         
-        write_back_instruction <= makeInstruction(ALU_OP, 10,10,10,0, ADD_FN);
-        write_back_data_int <= 0;
-        PC <= 0;
-        instruction_in <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- ADD R1 R2 R3
+        wait for clock_period;
+        -- instruction_in <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- ADD R1 R2 R3
+
+        -- Test 1, we're testing the data is written into the register file.
+        instruction_in <= NO_OP_INSTRUCTION;
+        write_back_instruction <= makeInstruction(ALU_OP, 1,1,1,0, ADD_FN); -- ADD R1 R1 R1
+        write_back_data_int <= 10;
+        assert register_file_out(1).data = std_logic_vector(to_unsigned(10, 32)) report "Data was not correctly written into the register." severity ERROR;
+        assert register_file_out(1).busy = '1' report "The Busy bit was set for no reason!" severity ERROR;
+
+
+
+        
 
         wait for clock_period;
 
