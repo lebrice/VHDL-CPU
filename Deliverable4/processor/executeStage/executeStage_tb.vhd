@@ -129,8 +129,8 @@ begin
 
         -- SET_LESS_THAN
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, SLT_FN); --x"014B482A"; --slt t1 t2 t3
-        val_a <= std_logic_vector(to_signed(20,32)); --20
-        val_b <= std_logic_vector(to_signed(10,32)); --10
+        val_a <= std_logic_vector(to_signed(10,32)); --10
+        val_b <= std_logic_vector(to_signed(20,32)); --20
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
@@ -143,7 +143,7 @@ begin
         imm_sign_extended <= std_logic_vector(to_signed(10,32)); --10 (as per instruction)
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 1) REPORT "SLTI: ALU_Result should be 1, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 0) REPORT "SLTI: ALU_Result should be 0, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
 
         -- BITWISE_AND
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, AND_FN); --and t1 t2 t3
