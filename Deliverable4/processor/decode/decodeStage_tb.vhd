@@ -105,6 +105,7 @@ begin
         reset_register_file <= '1';
         stall_in <= '1';
 
+        wait until rising_edge(clock);
         wait for clock_period;
 
         for I in 0 to NUM_REGISTERS-1 loop
@@ -123,15 +124,15 @@ begin
         instruction_in <= NO_OP_INSTRUCTION;
         write_back_instruction <= makeInstruction(ALU_OP, 1,1,1,0, ADD_FN); -- ADD R1 R1 R1
         write_back_data_int <= 10;
-        
-        wait for clock_period;
-        
-        
-        assert register_file_out(1).data = std_logic_vector(to_unsigned(10, 32)) report "Data was not correctly written into the register." severity failure;
-        assert register_file_out(1).busy = '0' report "The Busy bit was set for no reason!" severity ERROR;
 
-
-
+        -- weird: we somehow have to
+        wait for 1 ps;
+        
+        wait until rising_edge(clock);
+        
+        
+        assert register_file_out(1).data = std_logic_vector(to_unsigned(10, 32)) report "Data was not correctly written into the register." severity FAILURE;
+        assert register_file_out(1).busy = '0' report "The Busy bit was set for no reason!" severity FAILURE;
         
 
         wait for clock_period;
