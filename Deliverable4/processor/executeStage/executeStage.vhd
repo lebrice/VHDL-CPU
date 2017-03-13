@@ -44,15 +44,13 @@ begin
 
   -- Process 1: calculate branch boolean (whether we branch or not)
   branch_condition : process(instruction_in)
-  variable valDiff : integer;
   begin
-    valDiff := (signed(op_b)-signed(op_a));
     -- first we will compute the "branch" output
     case instruction_in.INSTRUCTION_TYPE is
 
       when BRANCH_IF_EQUAL =>
         --check if the two values from regs are equal
-        if (valDiff = 0) then
+        if (op_b = op_a) then
           internal_branch <= 1;
         else
           internal_branch <= 0;
