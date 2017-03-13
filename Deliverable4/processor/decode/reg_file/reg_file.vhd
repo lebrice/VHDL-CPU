@@ -53,7 +53,7 @@ package body registers is
         return r_block;
     end set_register;
 
-    -- function to dump all register contents to a file "register_dump.txt"
+    -- procedure to dump all register contents to a file "register_dump.txt"
     procedure dump_registers(reg_block  : register_block) is
         file      outfile  : text;
         variable  outline  : line;
