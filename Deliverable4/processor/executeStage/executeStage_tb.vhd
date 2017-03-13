@@ -60,7 +60,7 @@ begin
         WAIT FOR clk_period;
         ASSERT (ALU_Result = x"00010009") REPORT "ALU_Result should = 0x10009, but wasn't... " SEVERITY ERROR;
 
-        -- LOAD_WORD
+        -- LOAD_WORD -TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -68,7 +68,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- STORE_WORD
+        -- STORE_WORD -TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -77,22 +77,33 @@ begin
         WAIT FOR clk_period;
 
         -- BRANCH_IF_EQUAL
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"112A0000"; --beq t1,t2,0x0000
         val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
-        imm_sign_extended <= x"FFFFFFFF"; --full
+        val_b <= x"0000000A"; --0
+        imm_sign_extended <= x"00000000"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"0000003C") REPORT "ALU_Result should = 0x0000003C, but wasn't... " SEVERITY ERROR;
 
         -- BRANCH_IF_NOT_EQUAL
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"152A0000"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
-        imm_sign_extended <= x"FFFFFFFF"; --full
+        val_b <= x"0000000A"; --0
+        imm_sign_extended <= x"00000000"; --full
         PC <= "50";
         WAIT FOR clk_period;
-
+        ASSERT (ALU_Result = x"0000003C") REPORT "ALU_Result should = 0x0000003C, but wasn't... " SEVERITY ERROR;
+   
         -- SUBTRACT
+        instruction_in <= x"014B4822"; --addi t1 t2 FFFF
+        val_a <= x"000000AA"; --10
+        val_b <= x"00000099"; --0
+        imm_sign_extended <= x"00000000"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"00000022") REPORT "ALU_Result should = 0x0000003C, but wasn't... " SEVERITY ERROR;
+
+        -- MULTIPLY -TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -100,15 +111,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- MULTIPLY
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
-        val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
-        imm_sign_extended <= x"FFFFFFFF"; --full
-        PC <= "50";
-        WAIT FOR clk_period;
-
-        -- DIVIDE
+        -- DIVIDE -TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -117,70 +120,89 @@ begin
         WAIT FOR clk_period;
 
         -- SET_LESS_THAN
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"014B482A"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
+        val_b <= x"0000000B"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"00000001") REPORT "ALU_Result should = 0x00000001, but wasn't... " SEVERITY ERROR;
+
 
         -- SET_LESS_THAN_IMMEDIATE
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"29490000"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
+        val_b <= x"0000000B"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"00000001") REPORT "ALU_Result should = 0x00000001, but wasn't... " SEVERITY ERROR;
+
 
         -- BITWISE_AND
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"014B4824"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
+        val_b <= x"0000000B"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"0000000A") REPORT "ALU_Result should = 0x0000000A, but wasn't... " SEVERITY ERROR;
 
-        -- BITWISE_AND_IMMEDIATE
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        -- BITWISE_AND_IMMEDIATE 
+        instruction_in <= x"3149FFFF"; --andi t1, t2, 0xffff
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"0000000A") REPORT "ALU_Result should = 0x0000000A, but wasn't... " SEVERITY ERROR;
 
         -- BITWISE_OR
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"014B4825"; --or t1, t2, t3
         val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
+        val_b <= x"0000000B"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"0000000B") REPORT "ALU_Result should = 0x0000000B, but wasn't... " SEVERITY ERROR;
 
         -- BITWISE_OR_IMMEDIATE
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"3549FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"FFFFFFFF") REPORT "ALU_Result should = 0xFFFFFFFF, but wasn't... " SEVERITY ERROR;
 
         -- BITWISE_NOR
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
-        val_a <= x"0000000A"; --10
+        instruction_in <= x"014B4827"; --addi t1 t2 FFFF
+        val_a <= x"0000000F"; --10
         val_b <= x"00000000"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"FFFFFFF0") REPORT "ALU_Result should = 0xFFFFFFF0, but wasn't... " SEVERITY ERROR;
 
         -- BITWISE_XOR
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        instruction_in <= x"014B4826"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
+        val_b <= x"0000000B"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= "50";
         WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"00000006") REPORT "ALU_Result should = 0x00000006, but wasn't... " SEVERITY ERROR;   
 
         -- BITWISE_XOR_IMMEDIATE
+        instruction_in <= x"3949000A"; --addi t1 t2 FFFF
+        val_a <= x"0000000B"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"0000000A"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+        ASSERT (ALU_Result = x"00000006") REPORT "ALU_Result should = 0x00000006, but wasn't... " SEVERITY ERROR;   
+
+        -- MOVE_FROM_HI --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -188,7 +210,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- MOVE_FROM_HI
+        -- MOVE_FROM_LOW --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -196,7 +218,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- MOVE_FROM_LOW
+        -- LOAD_UPPER_IMMEDIATE --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -204,7 +226,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- LOAD_UPPER_IMMEDIATE
+        -- SHIFT_LEFT_LOGICAL --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -212,7 +234,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- SHIFT_LEFT_LOGICAL
+        -- SHIFT_RIGHT_LOGICAL --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -220,7 +242,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- SHIFT_RIGHT_LOGICAL
+        -- SHIFT_RIGHT_ARITHMETIC --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -228,7 +250,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- SHIFT_RIGHT_ARITHMETIC
+        -- JUMP --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -236,7 +258,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- JUMP
+        -- JUMP_AND_LINK --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -244,15 +266,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- JUMP_AND_LINK
-        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
-        val_a <= x"0000000A"; --10
-        val_b <= x"00000000"; --0
-        imm_sign_extended <= x"FFFFFFFF"; --full
-        PC <= "50";
-        WAIT FOR clk_period;
-
-        -- JUMP_TO_REGISTER
+        -- JUMP_TO_REGISTER --TODO
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
