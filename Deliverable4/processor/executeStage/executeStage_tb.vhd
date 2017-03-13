@@ -60,7 +60,7 @@ begin
         WAIT FOR clk_period;
         ASSERT (ALU_Result = x"00010009") REPORT "ALU_Result should = 0x10009, but wasn't... " SEVERITY ERROR;
 
-        -- ?
+        -- LOAD_WORD
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -68,7 +68,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- ?
+        -- STORE_WORD
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -76,7 +76,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- ?
+        -- BRANCH_IF_EQUAL
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -84,7 +84,7 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- ?
+        -- BRANCH_IF_NOT_EQUAL
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
@@ -92,7 +92,167 @@ begin
         PC <= "50";
         WAIT FOR clk_period;
 
-        -- ?
+        -- SUBTRACT
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- MULTIPLY
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- DIVIDE
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- SET_LESS_THAN
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- SET_LESS_THAN_IMMEDIATE
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- BITWISE_AND
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- BITWISE_AND_IMMEDIATE
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- BITWISE_OR
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- BITWISE_OR_IMMEDIATE
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- BITWISE_NOR
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- BITWISE_XOR
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- BITWISE_XOR_IMMEDIATE
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- MOVE_FROM_HI
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- MOVE_FROM_LOW
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- LOAD_UPPER_IMMEDIATE
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- SHIFT_LEFT_LOGICAL
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- SHIFT_RIGHT_LOGICAL
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- SHIFT_RIGHT_ARITHMETIC
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- JUMP
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- JUMP_AND_LINK
+        instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
+        val_a <= x"0000000A"; --10
+        val_b <= x"00000000"; --0
+        imm_sign_extended <= x"FFFFFFFF"; --full
+        PC <= "50";
+        WAIT FOR clk_period;
+
+        -- JUMP_TO_REGISTER
         instruction_in <= x"2149FFFF"; --addi t1 t2 FFFF
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
