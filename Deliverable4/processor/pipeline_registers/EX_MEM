@@ -1,14 +1,15 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
+USE work.instruction_tools.all;
 
-ENTITY id_ex_entity IS
+ENTITY ex_mem_entity IS
 	PORT (
         clock: IN STD_LOGIC;
         pc_in: IN INTEGER;
         pc_out: OUT INTEGER;
-        instruction_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        instruction_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        instruction_in: IN INSTRUCTION;
+        instruction_out: OUT INSTRUCTION;
         does_branch_in: IN STD_LOGIC;
         does_branch_out: OUT STD_LOGIC;
         alu_result_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -16,17 +17,17 @@ ENTITY id_ex_entity IS
         b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
-END id_ex_entity;
+END ex_mem_entity;
 
-ARCHITECTURE id_ex_architecture OF id_ex_entity IS
+ARCHITECTURE ex_mem_architecture OF ex_mem_entity IS
     SIGNAL pc_intermediate: INTEGER;
-    SIGNAL instruction_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL instruction_intermediate: INSTRUCTION;
     SIGNAL does_branch_intermediate: STD_LOGIC;
     SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL b_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
-    if_id_process: PROCESS (clock)
+    ex_mem_process: PROCESS (clock)
     BEGIN
         IF(clock'EVENT AND clock = '1') THEN
             pc_intermediate <= pc_in;
@@ -46,4 +47,4 @@ BEGIN
         END IF;
     END PROCESS;
 
-END id_ex_architecture;
+END ex_mem_architecture;
