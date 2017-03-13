@@ -92,7 +92,7 @@ begin
       
       when LOAD_UPPER_IMMEDIATE =>
         -- loads the upper 16 bits of RT with the 16 bit immediate, and all the lower bits to '0'.
-        ALU_out <= op_a(31 downto 16) & X"0000";
+        ALU_out <= op_b(31 downto 16) & X"0000";
       
       when SHIFT_LEFT_LOGICAL =>
         ALU_out <= std_logic_vector(b SLL shift_amount); 
