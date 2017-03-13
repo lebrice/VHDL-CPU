@@ -85,11 +85,11 @@ begin
         ALU_out <= op_a XOR op_b;
       
       when MOVE_FROM_HI =>
-        -- TODO:  understand what's happening in this case.
-      
+        -- This case is never reached (handled in decode)
+        report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
       when MOVE_FROM_LOW =>
-        -- TODO:  understand what's happening in this case.
-      
+        -- This case is never reached (handled in decode)
+        report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
       when LOAD_UPPER_IMMEDIATE =>
         -- loads the upper 16 bits of RT with the 16 bit immediate, and all the lower bits to '0'.
         ALU_out <= op_b(31 downto 16) & X"0000";
