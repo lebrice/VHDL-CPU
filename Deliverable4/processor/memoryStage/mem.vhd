@@ -8,10 +8,11 @@ ENTITY mem is
         clock : in std_logic;
         ALU_result_in : in std_logic_vector(31 downto 0);
         ALU_result_out : out std_logic_vector(31 downto 0);
-        instruction_in : in std_logic_vector(31 downto 0);
-        instruction_out : out std_logic_vector(31 downto 0);
+        instruction_in : in INSTRUCTION;
+        instruction_out : out INSTRUCTION;
         branch_taken_in : in  std_logic;
         branch_taken_out : out  std_logic;
+        branch_target : out std_logic_vector(31 downto 0);
         val_b : in std_logic_vector(31 downto 0);
         mem_data : out std_logic_vector(31 downto 0);
 
@@ -49,5 +50,6 @@ BEGIN
         END CASE;
         instruction_out <= instruction_in;
         ALU_result_out <= ALU_result_in;
+        branch_target <= ALU_result_in;
     END PROCESS;
 END ARCHITECTURE;
