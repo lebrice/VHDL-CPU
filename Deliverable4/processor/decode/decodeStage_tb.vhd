@@ -109,8 +109,8 @@ begin
 
         for I in 0 to NUM_REGISTERS-1 loop
             -- check that each register was properly initialized.
-            assert register_file_out(I).data = std_logic_vector(to_unsigned(0, 32)) report "Register wasn't initialized properly!" severity failure;
-            assert register_file_out(I).busy = '0' report "Registers did not have their busy bit initialized properly!" severity failure;
+            assert register_file_out(I).data = std_logic_vector(to_unsigned(0, 32)) report "Register wasn't initialized properly!" severity ERROR;
+            assert register_file_out(I).busy = '0' report "Registers did not have their busy bit initialized properly!" severity ERROR;
         end loop;
 
         reset_register_file <= '0';
@@ -123,10 +123,13 @@ begin
         instruction_in <= NO_OP_INSTRUCTION;
         write_back_instruction <= makeInstruction(ALU_OP, 1,1,1,0, ADD_FN); -- ADD R1 R1 R1
         write_back_data_int <= 10;
-        assert register_file_out(1).data = std_logic_vector(to_unsigned(10, 32)) report "Data was not correctly written into the register." severity ERROR;
+        
+        wait for clock_period;
+        
+        assert register_file_out(1).data = std_logic_vector(to_unsigned(10, 32)) report "Data was not correctly written into the register." severity failure;
         assert register_file_out(1).busy = '0' report "The Busy bit was set for no reason!" severity ERROR;
 
-        
+
 
         
 

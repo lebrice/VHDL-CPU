@@ -64,8 +64,8 @@ architecture decodeStage_arch of decodeStage is
   constant empty_register_file : REGISTER_BLOCK := (others => empty_register);
   
 
-  signal stall_reg : std_logic;
-  signal LOW, HI : REGISTER_ENTRY;
+  signal stall_reg : std_logic := '0';
+  signal LOW, HI : REGISTER_ENTRY := empty_register;
   signal register_file : REGISTER_BLOCK := empty_register_file;
 
 
