@@ -22,27 +22,14 @@ architecture ALU_arch of ALU is
   -- I-Instructions: addi, slti, bne, sw, beq, lw, lb, sb, lui, andi, ori, xori, asrt, asrti, halt;
   -- J-Instructions: jal, jr, j;
   -- Custom test instructions: asrt, asrti, halt
-
-  -- function signExtend(immediate : std_logic_vector(15 downto 0))
-  --   return std_logic_vector is
-  -- begin
-  --   if(immediate(15) = '1') then
-  --     return X"FFFF" & immediate;
-  --   else
-  --     return X"0000" & immediate;
-  --   end if;
-  -- end signExtend;
-
 begin
   
   computation : process( instruction_typ, op_a, op_b )
   variable a : signed(31 downto 0) := signed(op_a);
   variable b : signed(31 downto 0) := signed(op_b);
-
-  --variable sign_extended_immediate_vector : std_logic_vector(31 downto 0) := signExtend(instruction.immediate_vect);
-  --variable sign_extended_immediate : signed(31 downto 0) := signed(sign_extended_immediate_vector);
   --shamt is stored in last 5 bits of "a"
   variable shift_amount : integer := to_integer(op_a(4 downto 0));
+  
   begin
     
     case instruction_type is
