@@ -105,10 +105,9 @@ begin
       when JUMP | JUMP_AND_LINK =>
         ALU_out <= op_a;
       when JUMP_TO_REGISTER =>
-      -- TODO: Not sure this is handled here.
+      -- TODO: Figure out if this is right...
       -- NOTE: assuming that the content of register is given in A, just passing it along.
         ALU_out <= op_a;
-      
       when UNKNOWN =>
         report "ERROR: unknown instruction given to ALU!" severity FAILURE;
     end case;
