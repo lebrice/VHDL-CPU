@@ -50,4 +50,5 @@ BEGIN
         instruction_out <= instruction_in;
         ALU_result_out <= ALU_result_in;
     END PROCESS;
+
 END ARCHITECTURE;
