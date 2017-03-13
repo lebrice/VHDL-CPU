@@ -144,15 +144,15 @@ begin
 
         wait until rising_edge(clock);
 
-        instruction_in <= makeInstruction(ALU_OP, 1,2,3,0,ADD_FN);
+        instruction_in <= makeInstruction(ALU_OP, 1,2,10,0,ADD_FN);
         wait for 1 ps;
         wait for clock_period;
         
-        assert instruction_in.rd = 3 report "instruciton_in should have rd=3!" severity failure; 
+        assert instruction_in.rd = 10 report "instruciton_in should have rd=3!" severity failure; 
         assert PC_out = 0 report "PC isn't output correctly" severity failure;
         assert val_a_int = 10 report "Value A should be 10, but we have " & integer'image(val_a_int) severity failure;
         assert val_b_int = 20 report "Value B should be 20, but we have " & integer'image(val_b_int) severity failure;
-        assert register_file_out(3).busy = '1' report "Register R3 should be busy, since the result of the addition is going into it." severity failure;
+        assert register_file_out(10).busy = '1' report "Register R10 should be busy, since the result of the addition is going into it." severity failure;
         
         
         assert stall_out = '0' report "Stall_Out should definitely NOT be '1' right here." severity failure;
@@ -160,41 +160,52 @@ begin
         assert instruction_out.instruction_type = ADD report "The output instruction does NOT have the right type (expecting Add)" severity failure;
         assert instruction_out.rs = 1 report "Instruction RS is wrong! (got " & integer'image(instruction_out.rs) & ", was expecting 1" severity failure;
         assert instruction_out.rt = 2 report "Instruction RT is wrong! (got " & integer'image(instruction_out.rt) & ", was expecting 2" severity failure;
-        assert instruction_out.rd = 3 report "Instruction RD is wrong! (got " & integer'image(instruction_out.rd) & ", was expecting 3" severity failure;
+        assert instruction_out.rd = 10 report "Instruction RD is wrong! (got " & integer'image(instruction_out.rd) & ", was expecting 3" severity failure;
         assert instruction_out.shamt = 0 report "Instruction shift amount should be 0." severity failure;
 
         wait for clock_period;    
 
-        -- instruction_in <= NO_OP_INSTRUCTION;
-        -- assert register_file_out(3).busy = '1' report "Register R3 should still be busy, since we haven't received the Write-Back instruction writing its result." severity error;
+        instruction_in <= NO_OP_INSTRUCTION;
+        assert register_file_out(10).busy = '1' report "Register R10 should still be busy, since we haven't received the Write-Back instruction writing its result." severity error;
         
-        -- wait for clock_period;
+        wait for clock_period;
 
         -- -- simulate the data coming back from the Write-Back stage, and check that it is written correctly.
-        -- write_back_instruction <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- the "same" instruction comes back from WB
-        -- write_back_data_int <= 30; -- result of 10 + 20.
+        write_back_instruction <= makeInstruction(ALU_OP, 1,2,10,0, ADD_FN); -- the "same" instruction comes back from WB
+        write_back_data_int <= 30; -- result of 10 + 20.
 
-        -- assert register_file_out(3).data = std_logic_vector(to_unsigned(30, 32)) report "The result (30) should have been written back!" severity error;
-        -- assert register_file_out(3).busy = '0' report "$R3 should not be busy, since we just wrote the result back in from WB." severity error;
+        wait for 1 ps;
 
-        -- wait for clock_period;
+        assert register_file_out(10).data = std_logic_vector(to_unsigned(30, 32)) report "The result (30) should have been written back!" severity failure;
+        assert register_file_out(10).busy = '0' report "$R10 should not be busy, since we just wrote the result back in from WB." severity failure;
 
-        -- write_back_instruction <= NO_OP_INSTRUCTION;
-        -- instruction_in <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
+
+        wait until rising_edge(clock);
+
+        write_back_instruction <= NO_OP_INSTRUCTION;
+        instruction_in <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
+        wait for 1 ps;
+        wait for clock_period;
         
-        -- wait for clock_period;
-        -- assert register_file_out(25).busy = '1' report "Last cycle, we started an operation using $R25, it should be busy!" severity error;
-        -- -- this instruction would use $R25, but since it's busy, we would expect a STALL_OUT to arise.
-        -- instruction_in <= makeInstruction(ALU_OP, 20, 25, 10, 0, ADD_FN); -- ADD $R20, $R25, $R10 
-        -- assert stall_out = '1' report "Stall_out should be '1', since there's a data dependency, and the instruction hasn't come back from WB yet." severity error;
+        assert register_file_out(25).busy = '1' report "Last cycle, we started an operation using $R25, it should be busy!" severity failure;
+              
+        wait until rising_edge(clock);
+        
+        -- this instruction would use $R25, but since it's busy, we would expect a STALL_OUT to arise.
+        instruction_in <= makeInstruction(ALU_OP, 20, 25, 10, 0, ADD_FN); -- ADD $R20, $R25, $R10 
+        wait for 1 ps;
+        wait for clock_period;
+        assert stall_out = '1' report "Stall_out should be '1', since there's a data dependency, and the instruction hasn't come back from WB yet." severity failure;
 
-        -- wait for clock_period;
+        wait until rising_edge(clock);
         -- -- the instruction came back from the WB stage.
-        -- write_back_instruction <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
-        -- write_back_data_int <= 250;
-        -- assert stall_out = '0' report "The Instruction coming back from WB should de-assert Stall_out" severity error;
-        -- assert register_file_out(25).busy = '0' report "Register should be marked with 'busy'='0' after the instruction comes back from WB." severity error;
-        -- assert register_file_out(25).data = write_back_data(31 downto 0) report "Write-Back data didn't get written out to the register properly!" severity error;
+        write_back_instruction <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
+        write_back_data_int <= 250;
+        wait for 1 ps;
+        wait for clock_period;
+        assert stall_out = '0' report "The Instruction coming back from WB should de-assert Stall_out" severity failure;
+        assert register_file_out(25).busy = '0' report "Register should be marked with 'busy'='0' after the instruction comes back from WB." severity failure;
+        assert register_file_out(25).data = write_back_data(31 downto 0) report "Write-Back data didn't get written out to the register properly!" severity failure;
 
         report "Done testing decode stage." severity NOTE;
         wait;

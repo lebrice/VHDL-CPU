@@ -126,7 +126,7 @@ current_state <=
   WRITING when clock = '1' AND stall_in = '0' else
   IDLE;
 
-  computation : process(clock, instruction_in, write_back_instruction, write_back_data)
+  computation : process(clock, instruction_in, write_back_instruction, write_back_data, register_file)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
