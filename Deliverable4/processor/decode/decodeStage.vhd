@@ -58,9 +58,14 @@ architecture decodeStage_arch of decodeStage is
     return X"0000" & immediate;
   end zeroExtend;
 
+  constant link_register : integer := 31;
+  
+
   signal stall_reg : std_logic;
   signal LOW, HI : REGISTER_ENTRY;
   signal register_file : REGISTER_BLOCK;
+
+
 begin
   stall_out <= stall_reg;
   PC_out <= PC;
@@ -112,15 +117,13 @@ begin
 
 
   read_from_registers : process(clock, instruction_in, register_file)
-    variable rs, rt, rd : REGISTER_ENTRY;
+    variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
-    variable link_register : REGISTER_ENTRY;
   begin
-    rs := register_file(instruction_in.rs);
-    rt := register_file(instruction_in.rt);
-    rd := register_file(instruction_in.rd);
+    rs := instruction_in.rs;
+    rt := instruction_in.rt;
+    rd := instruction_in.rd;
     immediate := instruction_in.immediate_vect;
-    link_register := register_file(31);
 
 
 
@@ -135,71 +138,71 @@ begin
           -- TODO: Make sure that we're clear on what exactly EX or ID handles in each case.
 
           when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
-            val_a <= rs.data;
-            val_b <= rt.data;
-            rd.busy := '1';
+            val_a <= register_file(rs).data;
+            val_b <= register_file(rt).data;
+            register_file(rd).busy <= '1';
 
           when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
-            val_a <= rs.data;
+            val_a <= register_file(rs).data;
             val_b <= signExtend(immediate);
-            rt.busy := '1';   
+            register_file(rt).busy <= '1'; 
 
           when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
-            val_a <= rs.data;
+            val_a <= register_file(rs).data;
             i_sign_extended <= zeroExtend(immediate);
-            rt.busy := '1';
+            register_file(rt).busy <= '1';
 
           when MULTIPLY | DIVIDE =>
-            val_a <= rs.data;
-            val_b <= rt.data;
+            val_a <= register_file(rs).data;
+            val_b <= register_file(rt).data;
             LOW.busy <= '1';
             HI.busy <= '1';
 
           when MOVE_FROM_HI =>
-            rd.data := HI.data;
+            register_file(rd).data <= HI.data;
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when MOVE_FROM_LOW =>
-            rd.data := LOW.data;
+            register_file(rd).data <= LOW.data;
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when LOAD_UPPER_IMMEDIATE =>
-            rt.data := immediate & (15 downto 0 => '0');
+            register_file(rt).data <= immediate & (15 downto 0 => '0');
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-            val_b <= rt.data;
+            val_b <= register_file(rt).data;
             val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
-            rd.busy := '1';
+            register_file(rd).busy <= '1';
 
           when LOAD_WORD =>
-            val_a <= rs.data;
+            val_a <= register_file(rs).data;
             i_sign_extended <= signExtend(immediate);
-            rt.busy := '1';
+            register_file(rt).busy <= '1';
 
           when STORE_WORD =>
           -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
-            val_a <= rs.data; -- the base address
-            val_b <= rt.data; -- the word to store
+            val_a <= register_file(rs).data; -- the base address
+            val_b <= register_file(rt).data; -- the word to store
             i_sign_extended <= signExtend(immediate); -- the offset
 
           when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-            val_a <= rs.data;
-            val_b <= rt.data;
+            val_a <= register_file(rs).data;
+            val_b <= register_file(rt).data;
             i_sign_extended <= signExtend(immediate);
 
           when JUMP =>
             -- do nothing
 
           when JUMP_AND_LINK =>
-            link_register.data := std_logic_vector(to_unsigned(PC + 8, 32));
+            register_file(link_register).data <= std_logic_vector(to_unsigned(PC + 8, 32));
 
           when JUMP_TO_REGISTER =>
             -- TODO: Clarify this with Asher
-            val_a <= rs.data;
+            val_a <= register_file(rs).data;
 
           when UNKNOWN =>
             report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
@@ -217,11 +220,12 @@ begin
 
 
   write_to_registers : process(clock, write_back_instruction, write_back_data, register_file)
-    variable rs, rt, rd : REGISTER_ENTRY;
+    variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
   begin
-    rs := register_file(write_back_instruction.rs);
-    rt := register_file(write_back_instruction.rt);
-    rd := register_file(write_back_instruction.rd);
+    rs := write_back_instruction.rs;
+    rt := write_back_instruction.rt;
+    rd := write_back_instruction.rd;
+
     if reset_register_file = '1' then
       -- reset register file
       register_file <= reset_register_block(register_file);
@@ -235,13 +239,13 @@ begin
         -- behave in exactly the same way. (might be wrong though).
         when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           -- instructions where we simply write back the data to the "rd" register:
-          rd.data := write_back_data(31 downto 0);
-          rd.busy := '0';
+          register_file(rd).data <= write_back_data(31 downto 0);
+          register_file(rd).busy <= '0';
 
         when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
           -- instructions where we use "rt" as a destination
-          rt.data := write_back_data(31 downto 0);
-          rt.busy := '0';
+          register_file(rt).data <= write_back_data(31 downto 0);
+          register_file(rt).busy <= '0';
 
         when MULTIPLY | DIVIDE =>
           LOW.data <= write_back_data(31 downto 0);
