@@ -66,7 +66,7 @@ begin
 
       when others =>
         internal_branch <= 0;
-    end case; --TODO: figure out why there's an error here 
+    end case;
   end process ; -- branch_condition  
 
   -- Process 2: Pass in values to ALU and get result
