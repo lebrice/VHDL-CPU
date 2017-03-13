@@ -38,6 +38,7 @@ architecture behaviour of decodeStage_tb is
             reset_register_file : in std_logic;      
 
             -- Stall signal out.
+            stall_in : std_logic;
             stall_out : out std_logic
             
         );
@@ -56,6 +57,8 @@ signal instruction_out : INSTRUCTION;
 signal register_file_out : REGISTER_BLOCK;
 signal write_register_file : std_logic;
 signal reset_register_file : std_logic;
+
+signal stall_in : std_logic := '0';
 signal stall_out : std_logic;
 
 signal val_a_int : integer;
@@ -78,6 +81,7 @@ begin
         register_file_out,
         write_register_file,
         reset_register_file,
+        stall_in,
         stall_out
     );
 
@@ -98,6 +102,7 @@ begin
     begin
         
         reset_register_file <= '1';
+        stall_in <= '1';
 
         wait for clock_period;
         reset_register_file <= '0';
@@ -107,8 +112,11 @@ begin
             assert register_file_out(I).data = std_logic_vector(to_unsigned(0, 32)) report "Register wasn't initialized properly!" severity failure;
             assert register_file_out(I).busy = '0' report "Registers did not have their busy bit initialized properly!" severity failure;
         end loop;
+
+        stall_in <= '0';
+        wait for clock_period;
         
-        write_back_instruction <= NO_OP_INSTRUCTION;
+        write_back_instruction <= makeInstruction(ALU_OP, 10,10,10,0, ADD_FN);
         write_back_data_int <= 0;
         PC <= 0;
         instruction_in <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- ADD R1 R2 R3

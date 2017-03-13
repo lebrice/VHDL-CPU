@@ -32,7 +32,7 @@ entity decodeStage is
     reset_register_file : in std_logic;
 
     -- might have to add this in at some point:
-    -- stall_in : in std_logic;
+    stall_in : in std_logic;
 
     -- Stall signal out.
     stall_out : out std_logic
@@ -59,11 +59,14 @@ architecture decodeStage_arch of decodeStage is
   end zeroExtend;
 
   constant link_register : integer := 31;
+
+  constant empty_register : REGISTER_ENTRY := (busy => '0', data => (others => '0'));
+  constant empty_register_file : REGISTER_BLOCK := (others => empty_register);
   
 
   signal stall_reg : std_logic;
   signal LOW, HI : REGISTER_ENTRY;
-  signal register_file : REGISTER_BLOCK;
+  signal register_file : REGISTER_BLOCK := empty_register_file;
 
 
 begin
@@ -127,7 +130,7 @@ begin
 
 
 
-    if clock = '0' then
+    if clock = '0' AND stall_in = '0' then
       if stall_reg = '0' then        
         -- second half of clock cycle: read data from registers, and output the correct instruction.
         -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
@@ -229,8 +232,12 @@ begin
     if reset_register_file = '1' then
       -- reset register file
       register_file <= reset_register_block(register_file);
+      -- FOR i in 0 to NUM_REGISTERS-1 LOOP
+      --   register_file(i).data <= (others => '0');
+      --   register_file(i).busy <= '0';
+      -- end loop;
 
-    elsif clock = '1' then
+    elsif clock = '1' AND stall_in = '0' then
 
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
