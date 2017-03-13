@@ -32,37 +32,47 @@ architecture executeStage_arch of executeStage is
   --Signals for what go into the ALU
   SIGNAL input_a: std_logic_vector(31 downto 0);
   SIGNAL input_b: std_logic_vector(31 downto 0);
+  SIGNAL internal_branch : std_logic;
 begin
   --define alu component
   exAlu: ALU port map (clock, instruction_in, input_a, input_b, ALU_Result);
 
+  --here are our output values
+  branch <= internal_branch; --from first process below
+  ALU_Result <= ALU_out; --from alu
+  instruction_out <= instruction_in; --pass through
+
+  -- Process 1: calculate branch boolean (whether we branch or not)
   branch_condition : process(instruction_in)
+  variable valDiff : integer;
   begin
+    valDiff := (signed(op_b)-signed(op_a));
     -- first we will compute the "branch" output
     case instruction_in.INSTRUCTION_TYPE is
 
       when BRANCH_IF_EQUAL =>
-        if ((signed(op_b)-signed(imm_sign_extended)) = 0) then
-          branch <= 1;
+        --check if the two values from regs are equal
+        if (valDiff = 0) then
+          internal_branch <= 1;
         else
-          branch <= 0;
+          internal_branch <= 0;
         end if;
 
       when BRANCH_IF_NOT_EQUAL =>
-        if ((signed(op_b)-signed(imm_sign_extended)) /= 0) then
-          branch <= 1;
+        --check if the two values from regs are equal
+        if (valDiff /= 0) then
+          internal_branch <= 1;
         else
-          branch <= 0;
+          internal_branch <= 0;
         end if;
 
       when others =>
-        branch <= 0;
+        internal_branch <= 0;
     end case; --TODO: figure out why there's an error here 
   end process ; -- branch_condition  
 
-
+  -- Process 2: Pass in values to ALU and get result
   compute_inputs : process( instruction_in, imm_sign_extended, branch, input_a, input_b) --TODO: ask about this. Should just be clock?
-
   begin
  
     -- The instruction changes what is passed to the ALU
@@ -72,43 +82,39 @@ begin
     --  c) address vector
     --  d) immediate sign extended
     --  e) branch target
-    case instruction_in.INSTRUCTION_FORMAT is
-      
-      --if it's an R-type, we pass in values (unless shifting)
-      when R_TYPE =>
-        --if it is a shift, we store the shamt in "a"
-        case instruction_in.INSTRUCTION_TYPE is
-          
-          when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-            input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect; --padded with 0s
-          
-          when others =>
-            input_a <= val_a;
-        end case; 
-        
-        input_b <= val_b;
-     
-      --if it's a J-type, we pass in the address vector and b value
-      when J_TYPE =>
-        input_a <= "000000" & instruction_in.address_vect;
-        input_b <= val_b; --doesn't matter
-      
-      --if it's an I-type we pass in the value A and the immediate sign extended
-      when I_TYPE =>
-        --we need to check if it's a branch (in which case we do PC + 4)
-        case instruction_in.INSTRUCTION_TYPE is
-          
-          when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-            --with branches, we want "a" to have the PC
-            input_a <= std_logic_vector(to_unsigned(PC));
-          
-          when others =>
-            input_a <= val_a;   
-        end case;
-        input_b <= imm_sign_extended;
-      
-      when UNKNOWN => --this is unknown. report an error.
-        report "ERROR: unknown instruction format in execute stage!" severity FAILURE;
+
+    --TODO: Check divide mips command with hi lo stuff
+
+    -- just going to go through every instruction type and act accordingly
+    case instruction_in.INSTRUCTION_TYPE is
+        when ADD | SUBTRACT | MULTIPLY | DIVIDE | SET_LESS_THAN | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR =>
+          input_a <= val_a; -- rs
+          input_b <= val_b; -- rt
+        when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | LOAD_UPPER_IMMEDIATE | LOAD_WORD | STORE_WORD =>
+          input_a <= val_a; -- rs
+          input_b <= imm_sign_extended;
+        when MOVE_FROM_HI =>
+          -- This case is never reached (handled in decode)
+          report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
+        when MOVE_FROM_LOW =>
+          -- This case is never reached (handled in decode)
+          report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
+        when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+          input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect; --TODO: should I do this? Fab did it in decode. Should he?
+        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+          --with branches, we want "a" to have the PC, b the immediate
+          input_a <= std_logic_vector(to_unsigned(PC)); --TODO: signed or unsigned?
+          input_b <= imm_sign_extended;
+        when JUMP =>
+          --TODO: this isn't right
+          input_a <= "000000" & instruction_in.address_vect;
+          input_b <= val_b; --doesn't matter
+        when JUMP_TO_REGISTER =>
+          --TODO:
+        when JUMP_AND_LINK =>
+          --TODO:
+        when UNKNOWN => --this is unknown: report an error.
+          report "ERROR: unknown instruction format in execute stage!" severity WARNING;
     end case;
   end process; -- compute_inputs
 end architecture ; -- arch
