@@ -119,7 +119,7 @@ begin
 
 
 
-  read_from_registers : process(clock, instruction_in, register_file)
+  read_from_registers : process(clock, instruction_in)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
   begin
@@ -226,7 +226,7 @@ begin
 
 
 
-  write_to_registers : process(clock, write_back_instruction, write_back_data, register_file)
+  write_to_registers : process(clock, write_back_instruction, write_back_data)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
   begin
     rs := write_back_instruction.rs;
