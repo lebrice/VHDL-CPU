@@ -102,20 +102,8 @@ begin
       when SHIFT_RIGHT_ARITHMETIC =>
         ALU_out <= to_stdlogicvector(to_bitvector(op_b) sra shift_amount);      
       
-      when JUMP =>
-      -- JUMP:
-      -- PC = PC(31 downto 26) & jump_address;
-      -- Assuming that PC is given as input.
-      -- TODO: this should probably be done in ID or in IF, not sure it belongs in EX stage.
-      
-        ALU_out <= op_a(31 downto 26) & jump_address;
-      
-      when JUMP_AND_LINK =>
-      -- JUMP_AND_LINK:
-      -- TODO: also put the current PC into Register 31.
-
-        ALU_out <= op_a(31 downto 26) & jump_address;
-      
+      when JUMP | JUMP_AND_LINK =>
+        ALU_out <= op_a;
       when JUMP_TO_REGISTER =>
       -- TODO: Not sure this is handled here.
       -- NOTE: assuming that the content of register is given in A, just passing it along.
