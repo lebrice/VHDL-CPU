@@ -33,8 +33,9 @@ architecture behaviour of decodeStage_tb is
             PC_out : out integer;
             instruction_out : out INSTRUCTION;
 
-            -- Register file
-            register_file : in REGISTER_BLOCK;            
+            register_file_out : out REGISTER_BLOCK;
+            write_register_file : in std_logic;
+            reset_register_file : in std_logic;      
 
             -- Stall signal out.
             stall_out : out std_logic
@@ -52,7 +53,9 @@ signal val_b : std_logic_vector(31 downto 0);
 signal i_sign_extended : std_logic_vector(31 downto 0);
 signal PC_out : integer;
 signal instruction_out : INSTRUCTION;
-signal register_file : REGISTER_BLOCK;
+signal register_file_out : REGISTER_BLOCK;
+signal write_register_file : std_logic;
+signal reset_register_file : std_logic;
 signal stall_out : std_logic;
 
 signal val_a_int : integer;
@@ -72,7 +75,9 @@ begin
         i_sign_extended,
         PC_out,
         instruction_out,
-        register_file,
+        register_file_out,
+        write_register_file,
+        reset_register_file,
         stall_out
     );
 
@@ -91,21 +96,16 @@ begin
 
     test_process : process
     begin
-        -- TODO: figure out if the return value really needs to be used or not.
-        -- register_file <= reset_register_block(register_file);
-
-        for I in 0 to NUM_REGISTERS-1 loop
-            -- Each register contains the integer value of 10 times their index. (i.e. R1 = 10, R17 = 170, etc.)
-            register_file(I).data <= std_logic_vector(to_unsigned(I * 10, 32));
-            register_file(I).busy <= '0';
-        end loop;
+        
+        reset_register_file <= '1';
 
         wait for clock_period;
-        
+        reset_register_file <= '0';
+
         for I in 0 to NUM_REGISTERS-1 loop
-            -- Each register contains the integer value of 10 times their index. (i.e. R1 = 10, R17 = 170, etc.)
-            assert register_file(I).data = std_logic_vector(to_unsigned(I * 10, 32)) report "Register wasn't initialized properly!" severity failure;
-            assert register_file(I).busy = '0' report "Registers did not have their busy bit initialized properly!" severity failure;
+            -- check that each register was properly initialized.
+            assert register_file_out(I).data = std_logic_vector(to_unsigned(0, 32)) report "Register wasn't initialized properly!" severity failure;
+            assert register_file_out(I).busy = '0' report "Registers did not have their busy bit initialized properly!" severity failure;
         end loop;
         
         write_back_instruction <= NO_OP_INSTRUCTION;
@@ -119,7 +119,7 @@ begin
         assert PC_out = 0 report "PC isn't output correctly" severity error;
         assert val_a_int = 10 report "Value A should be 10, but we have " & integer'image(val_a_int) severity error;
         assert val_b_int = 20 report "Value B should be 20, but we have " & integer'image(val_b_int) severity error;
-        assert register_file(3).busy = '1' report "Register R3 should be busy, since the result of the addition is going into it." severity error;
+        assert register_file_out(3).busy = '1' report "Register R3 should be busy, since the result of the addition is going into it." severity error;
         assert stall_out = '0' report "Stall_Out should definitely NOT be '1' right here." severity error;
         assert instruction_out.format = R_TYPE report "The output instruction does not have the right format! (Should have R Type)" severity error;
         assert instruction_out.instruction_type = ADD report "The output instruction does NOT have the right type (expecting Add)" severity error;
@@ -131,7 +131,7 @@ begin
         wait for clock_period;    
 
         instruction_in <= NO_OP_INSTRUCTION;
-        assert register_file(3).busy = '1' report "Register R3 should still be busy, since we haven't received the Write-Back instruction writing its result." severity error;
+        assert register_file_out(3).busy = '1' report "Register R3 should still be busy, since we haven't received the Write-Back instruction writing its result." severity error;
         
         wait for clock_period;
 
@@ -139,8 +139,8 @@ begin
         write_back_instruction <= makeInstruction(ALU_OP, 1,2,3,0, ADD_FN); -- the "same" instruction comes back from WB
         write_back_data_int <= 30; -- result of 10 + 20.
 
-        assert register_file(3).data = std_logic_vector(to_unsigned(30, 32)) report "The result (30) should have been written back!" severity error;
-        assert register_file(3).busy = '0' report "$R3 should not be busy, since we just wrote the result back in from WB." severity error;
+        assert register_file_out(3).data = std_logic_vector(to_unsigned(30, 32)) report "The result (30) should have been written back!" severity error;
+        assert register_file_out(3).busy = '0' report "$R3 should not be busy, since we just wrote the result back in from WB." severity error;
 
         wait for clock_period;
 
@@ -148,7 +148,7 @@ begin
         instruction_in <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
         
         wait for clock_period;
-        assert register_file(25).busy = '1' report "Last cycle, we started an operation using $R25, it should be busy!" severity error;
+        assert register_file_out(25).busy = '1' report "Last cycle, we started an operation using $R25, it should be busy!" severity error;
         -- this instruction would use $R25, but since it's busy, we would expect a STALL_OUT to arise.
         instruction_in <= makeInstruction(ALU_OP, 20, 25, 10, 0, ADD_FN); -- ADD $R20, $R25, $R10 
         assert stall_out = '1' report "Stall_out should be '1', since there's a data dependency, and the instruction hasn't come back from WB yet." severity error;
@@ -158,8 +158,8 @@ begin
         write_back_instruction <= makeInstruction(ALU_OP, 10,15,25,0, ADD_FN); -- ADD $R10, $R15, $R25.
         write_back_data_int <= 250;
         assert stall_out = '0' report "The Instruction coming back from WB should de-assert Stall_out" severity error;
-        assert register_file(25).busy = '0' report "Register should be marked with 'busy'='0' after the instruction comes back from WB." severity error;
-        assert register_file(25).data = write_back_data(31 downto 0) report "Write-Back data didn't get written out to the register properly!" severity error;
+        assert register_file_out(25).busy = '0' report "Register should be marked with 'busy'='0' after the instruction comes back from WB." severity error;
+        assert register_file_out(25).data = write_back_data(31 downto 0) report "Write-Back data didn't get written out to the register properly!" severity error;
 
         report "Done testing decode stage." severity NOTE;
         wait;
