@@ -156,13 +156,13 @@ current_state <=
             if (rd = 0) then
               -- we don't ever set register zero as busy, since it's hard-wired to zero!
             else
-              -- register_file(rd).busy <= '1';
+              register_file(rd).busy <= '1';
             end if;
 
           when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
             val_a <= register_file(rs).data;
             val_b <= signExtend(immediate);
-            -- register_file(rt).busy <= '1'; 
+            register_file(rt).busy <= '1'; 
 
           when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
             val_a <= register_file(rs).data;
@@ -176,17 +176,17 @@ current_state <=
             HI.busy <= '1';
 
           when MOVE_FROM_HI =>
-            -- register_file(rd).data <= HI.data;
+            register_file(rd).data <= HI.data;
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when MOVE_FROM_LOW =>
-            -- register_file(rd).data <= LOW.data;
+            register_file(rd).data <= LOW.data;
             val_a <= (others => '0');
             val_b <= (others => '0');
 
           when LOAD_UPPER_IMMEDIATE =>
-            -- register_file(rt).data <= immediate & (15 downto 0 => '0');
+            register_file(rt).data <= immediate & (15 downto 0 => '0');
             val_a <= (others => '0');
             val_b <= (others => '0');
 
@@ -292,6 +292,9 @@ current_state <=
     rt := register_file(instruction_in.rt);
     rd := register_file(instruction_in.rd);
 
+    if clock = '0' OR rising_edge(clock) then
+      -- we can only set stall_out to '1' during the second part of the cycle.
+      
     case instruction_in.instruction_type is
       -- TODO: Maybe this has to only happen on the second half of the clock cycle ?
 
@@ -363,6 +366,8 @@ current_state <=
         report "ERROR: unknown Instruction type in Decode stage!" severity failure;
 
     end case;
+    else
+    end if;
   end process stall_detection;
 
 

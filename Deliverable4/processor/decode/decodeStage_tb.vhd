@@ -126,31 +126,44 @@ begin
         write_back_data_int <= 10;
 
         -- weird: we somehow have to
-        wait for 1 ps;
-        
-        wait until rising_edge(clock);
-        
+        wait for 1 ps;        
         
         assert register_file_out(1).data = std_logic_vector(to_unsigned(10, 32)) report "Data was not correctly written into the register." severity FAILURE;
         assert register_file_out(1).busy = '0' report "The Busy bit was set for no reason!" severity FAILURE;
         
+        FOR i in 1 to NUM_REGISTERS-2 loop
+            -- Test 1, we're testing the data is written into the register file.
+            instruction_in <= NO_OP_INSTRUCTION;
+            write_back_instruction <= makeInstruction(ALU_OP, i,i,i,0, ADD_FN); -- ADD R1 R1 R1
+            write_back_data_int <= i * 10;
+            wait for 1 ps;
 
+            assert register_file_out(i).data = std_logic_vector(to_unsigned(i * 10, 32)) report "Data was not correctly written into the register." severity FAILURE;
+            assert register_file_out(i).busy = '0' report "The Busy bit was set for no reason!" severity FAILURE;
+        end loop;
+
+        wait until rising_edge(clock);
+
+        instruction_in <= makeInstruction(ALU_OP, 1,2,3,0,ADD_FN);
+        wait for 1 ps;
         wait for clock_period;
+        
+        assert instruction_in.rd = 3 report "instruciton_in should have rd=3!" severity failure; 
+        assert PC_out = 0 report "PC isn't output correctly" severity failure;
+        assert val_a_int = 10 report "Value A should be 10, but we have " & integer'image(val_a_int) severity failure;
+        assert val_b_int = 20 report "Value B should be 20, but we have " & integer'image(val_b_int) severity failure;
+        assert register_file_out(3).busy = '1' report "Register R3 should be busy, since the result of the addition is going into it." severity failure;
+        
+        
+        assert stall_out = '0' report "Stall_Out should definitely NOT be '1' right here." severity failure;
+        assert instruction_out.format = R_TYPE report "The output instruction does not have the right format! (Should have R Type)" severity failure;
+        assert instruction_out.instruction_type = ADD report "The output instruction does NOT have the right type (expecting Add)" severity failure;
+        assert instruction_out.rs = 1 report "Instruction RS is wrong! (got " & integer'image(instruction_out.rs) & ", was expecting 1" severity failure;
+        assert instruction_out.rt = 2 report "Instruction RT is wrong! (got " & integer'image(instruction_out.rt) & ", was expecting 2" severity failure;
+        assert instruction_out.rd = 3 report "Instruction RD is wrong! (got " & integer'image(instruction_out.rd) & ", was expecting 3" severity failure;
+        assert instruction_out.shamt = 0 report "Instruction shift amount should be 0." severity failure;
 
-        -- assert instruction_in.rd = 3 report "instruciton_in should have rd=3!" severity failure; 
-        -- assert PC_out = 0 report "PC isn't output correctly" severity error;
-        -- assert val_a_int = 10 report "Value A should be 10, but we have " & integer'image(val_a_int) severity error;
-        -- assert val_b_int = 20 report "Value B should be 20, but we have " & integer'image(val_b_int) severity error;
-        -- assert register_file_out(3).busy = '1' report "Register R3 should be busy, since the result of the addition is going into it." severity error;
-        -- assert stall_out = '0' report "Stall_Out should definitely NOT be '1' right here." severity error;
-        -- assert instruction_out.format = R_TYPE report "The output instruction does not have the right format! (Should have R Type)" severity error;
-        -- assert instruction_out.instruction_type = ADD report "The output instruction does NOT have the right type (expecting Add)" severity error;
-        -- assert instruction_out.rs = 1 report "Instruction RS is wrong! (got " & integer'image(instruction_out.rs) & ", was expecting 1" severity error;
-        -- assert instruction_out.rt = 2 report "Instruction RT is wrong! (got " & integer'image(instruction_out.rt) & ", was expecting 2" severity error;
-        -- assert instruction_out.rd = 3 report "Instruction RD is wrong! (got " & integer'image(instruction_out.rd) & ", was expecting 3" severity error;
-        -- assert instruction_out.shamt = 0 report "Instruction shift amount should be 0." severity error;
-
-        -- wait for clock_period;    
+        wait for clock_period;    
 
         -- instruction_in <= NO_OP_INSTRUCTION;
         -- assert register_file_out(3).busy = '1' report "Register R3 should still be busy, since we haven't received the Write-Back instruction writing its result." severity error;
