@@ -78,12 +78,17 @@ ARCHITECTURE behaviour OF memStage_tb IS
     signal test_addr : integer range 0 to ram_size-1;
     signal accessing_memory : std_logic;
     signal test_mem_read : std_logic;
+    signal test_mem_write : std_logic;
+    
+    signal mem_component_addr : integer range 0 to ram_size-1;
+    signal mem_component_read : std_logic;
+    signal mem_component_write : std_logic;
 
 BEGIN
 
-    mem_addr <= test_addr when accessing_memory = '1' else mem_addr;
-    mem_read <= test_mem_read when accessing_memory = '1' else mem_read;
-    
+    mem_addr <= test_addr when accessing_memory = '1' else mem_component_addr;
+    mem_read <= test_mem_read when accessing_memory = '1' else mem_component_read;
+    mem_write <= test_mem_write when accessing_memory = '1' else mem_component_write;
     -- Memory component which will be linked to the fetchStage under test.
     dut: memory 
     PORT MAP(
@@ -107,11 +112,11 @@ BEGIN
         branch_taken_out,
         val_b,
         mem_data,
-        mem_addr,
-        mem_read,
+        mem_component_addr,
+        mem_component_read,
         mem_readdata,
         mem_writedata,
-        mem_write,
+        mem_component_write,
         mem_waitrequest
     );
 
@@ -125,7 +130,7 @@ BEGIN
     end process;
 
     -- Testing process.
-    test_process : process;
+    test_process : process
     BEGIN
         -- Store instruction
         ALU_result_in <= x"0000FF00";
@@ -135,24 +140,25 @@ BEGIN
         wait for clock_period;
         
         accessing_memory <= '1';
-        test_addr <= X"0000FF00";
+        test_addr <= 37;
         test_mem_read <= '1';
-        assert mem_read_data = X"FEFEFEFE" report "The wrong value was read from memory!" severity error;
+        wait for 1 ps;
+        assert mem_readdata = X"FEFEFEFE" report "The wrong value was read from memory!" severity failure;
         accessing_memory <= '0';
 
         -- Load instruction
-        ALU_result_in <= x"0000FF00";
+        ALU_result_in <=  std_logic_vector(to_unsigned(37, 32));
         -- instruction_in <= LOAD_WORD;
         instruction_in <= makeInstruction(LW_OP, 1, 1, 0);
         branch_taken_in <= '0';
         wait for clock_period;
-        assert mem_data = x"FEFEFEFE" report "mem_data should be FEFEFEFE; Did not correctly load or store!" severity error;
+        assert mem_data = x"FEFEFEFE" report "mem_data should be FEFEFEFE; Did not correctly load or store!" severity failure;
 
         -- Branch
         instruction_in <= makeInstruction(BEQ_OP, 1, 1, 8);
         branch_taken_in <= '1';
         wait for clock_period;
-        assert branch_taken_out = '1' report "branch_taken_out should be 1" severity error;
+        assert branch_taken_out = '1' report "branch_taken_out should be 1" severity failure;
 
     end process;
 

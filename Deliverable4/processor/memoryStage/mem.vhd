@@ -4,6 +4,10 @@ USE ieee.numeric_std.all;
 USE work.instruction_tools.all;
 
 ENTITY mem is
+    generic (
+      ram_size : integer := 8196;
+      bit_width  : integer := 32
+    );
     port (
         clock : in std_logic;
         ALU_result_in : in std_logic_vector(31 downto 0);
@@ -39,13 +43,15 @@ BEGIN
             WHEN load_word =>
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_read <= '1';
-                m_addr <= ALU_result_in;
+                m_addr <= to_integer(unsigned(ALU_result_in));
                 mem_data <= m_readdata;
             WHEN store_word =>
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_write <= '1';
-                m_addr <= ALU_result_in;
+                m_addr <= to_integer(unsigned(ALU_result_in));
                 m_writedata <= val_b;
+            WHEN others =>
+              -- do nothing.
                 
         END CASE;
         instruction_out <= instruction_in;
