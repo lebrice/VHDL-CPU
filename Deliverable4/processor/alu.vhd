@@ -27,7 +27,6 @@ begin
   computation : process( instruction_type, op_a, op_b )
   variable a : signed(31 downto 0) := signed(op_a);
   variable b : signed(31 downto 0) := signed(op_b);
-  variable c : signed(61 downto 0);
   --shamt is stored in last 5 bits of "a"
   variable shift_amount : integer := to_integer(unsigned(op_a(4 downto 0))); --TODO: find out if this is unsigned or signed... (shamt is positive, I think)
 
@@ -45,8 +44,7 @@ begin
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b); -- rs - rt
       when MULTIPLY =>
-        c <= a * b;
-        ALU_out <= std_logic_vector(c(31 downto 0));
+        ALU_out <= std_logic_vector(to_unsigned(std_logic_vector(a*b), 32)); -- a bit round about...
       
       when DIVIDE =>
         ALU_out <= std_logic_vector(a / b);
