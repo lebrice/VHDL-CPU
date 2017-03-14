@@ -71,7 +71,7 @@ begin
   end process ; -- branch_condition  
 
   -- Process 2: Pass in values to ALU and get result
-  compute_inputs : process( instruction_in, imm_sign_extended, branch, input_a, input_b) --TODO: ask about this. Should just be clock?
+  compute_inputs : process(input_a, input_b) --TODO: ask about this. Should just be clock?
   begin
  
     -- The instruction changes what is passed to the ALU
