@@ -44,16 +44,16 @@ begin
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b); -- rs - rt
       when MULTIPLY =>
-        ALU_out <= std_logic_vector(a * b);
+        ALU_out <= std_logic_vector(a * b)(31 downto 0);
       
       when DIVIDE =>
         ALU_out <= std_logic_vector(a / b);
       
       when SET_LESS_THAN | SET_LESS_THAN_IMMEDIATE =>
         if a < b then  -- if rs < rd
-          ALU_out <= "1";
+          ALU_out <= x"00000001";
         else 
-          ALU_out <= "0";
+          ALU_out <= x"00000000";
         end if;  
       
       when BITWISE_AND | BITWISE_AND_IMMEDIATE=>
