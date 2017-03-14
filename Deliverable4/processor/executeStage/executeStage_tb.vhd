@@ -38,7 +38,7 @@ begin
 
     --TODO: think carefully about signed vs unsigned and the format of values
     exAlu: EXECUTE port map (instruction_in, val_a, val_b, imm_sign_extended, PC, instruction_out, branch, ALU_Result);
-    test_process : PROCESS()
+    test_process : PROCESS
     BEGIN
 
         -- Add
