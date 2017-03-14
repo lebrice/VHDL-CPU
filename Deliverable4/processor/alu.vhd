@@ -28,11 +28,14 @@ begin
   variable a : signed(31 downto 0);
   variable b : signed(31 downto 0);
   --shamt is stored in last 5 bits of "a"
-  variable shift_amount : integer := to_integer(unsigned(op_a(4 downto 0))); --TODO: find out if this is unsigned or signed... (shamt is positive, I think)
+  variable shift_amount : integer; 
 
   begin
+    --set initial values
     a := signed(op_a);
     b := signed(op_b);
+    shift_amount := to_integer(unsigned(op_a(4 downto 0))); --TODO: find out if this is unsigned or signed... (shamt is positive, I think)
+
     case instruction_type is
       
       when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
