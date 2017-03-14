@@ -7,7 +7,6 @@ use work.INSTRUCTION_TOOLS.all;
 
 entity ALU is
   port (
-    clock : in std_logic;
     instruction_type : in INSTRUCTION_TYPE;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
