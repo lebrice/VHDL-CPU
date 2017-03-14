@@ -25,13 +25,14 @@ architecture ALU_arch of ALU is
 begin
   
   computation : process( instruction_type, op_a, op_b )
-  variable a : signed(31 downto 0) := signed(op_a);
-  variable b : signed(31 downto 0) := signed(op_b);
+  variable a : signed(31 downto 0);
+  variable b : signed(31 downto 0);
   --shamt is stored in last 5 bits of "a"
   variable shift_amount : integer := to_integer(unsigned(op_a(4 downto 0))); --TODO: find out if this is unsigned or signed... (shamt is positive, I think)
 
   begin
-    
+    a := signed(op_a);
+    b := signed(op_b);
     case instruction_type is
       
       when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
