@@ -33,14 +33,13 @@ architecture executeStage_arch of executeStage is
   SIGNAL input_a: std_logic_vector(31 downto 0);
   SIGNAL input_b: std_logic_vector(31 downto 0);
   SIGNAL internal_branch : std_logic;
-  SIGNAL ALU_Result : std_logic_vector(31 downto 0);
 begin
   --define alu component
   exAlu: ALU port map (clock, instruction_in, input_a, input_b, ALU_Result);
 
   --here are our output values
   branch <= internal_branch; --from first process below
-  ALU_Result <= ALU_Result; --from alu
+  --ALU_Result <= ALU_Result; --not needed, already done above in port map
   instruction_out <= instruction_in; --pass through
 
   -- Process 1: calculate branch boolean (whether we branch or not)
