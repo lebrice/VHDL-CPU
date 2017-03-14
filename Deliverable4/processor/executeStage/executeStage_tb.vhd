@@ -10,8 +10,7 @@ END executeStage_tb;
 ARCHITECTURE behaviour OF executeStage_tb IS
 --components go here
 COMPONENT EXECUTE IS
-    port(clock : in std_logic;
-    instruction_in : in Instruction;
+    port(instruction_in : in Instruction;
     val_a : in std_logic_vector(31 downto 0);
     val_b : in std_logic_vector(31 downto 0);
     imm_sign_extended : in std_logic_vector(31 downto 0);
@@ -33,18 +32,10 @@ CONSTANT clk_period : time := 1 ns; --TODO: figure out how long we wait here for
 signal val_a_int, val_b_int, immediate_int : integer;
 begin
     -- val_a <= std_logic_vector(to_unsigned(val_a_int,32));
-    --TODO: figure out: maybe don't need the clock process?
-    -- clk_process : PROCESS
-    -- BEGIN
-    --     clock <= '0';
-    --     WAIT FOR clk_period/2;
-    --     clock <= '1';
-    --     WAIT FOR clk_period/2;
-    -- END PROCESS;
 
     --TODO: think carefully about signed vs unsigned and the format of values
-    exAlu: EXECUTE port map (clock, instruction_in, val_a, val_b, imm_sign_extended, PC, instruction_out, branch, ALU_Result);
-    test_process : PROCESS(clock)
+    exAlu: EXECUTE port map (instruction_in, val_a, val_b, imm_sign_extended, PC, instruction_out, branch, ALU_Result);
+    test_process : PROCESS()
     BEGIN
 
         -- Add
