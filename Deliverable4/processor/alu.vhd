@@ -8,7 +8,7 @@ use work.INSTRUCTION_TOOLS.all;
 entity ALU is
   port (
     clock : in std_logic;
-    instruction_type : in INSTRUCTION.instruction_type;
+    instruction_type : in INSTRUCTION_TYPE;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
     ALU_out : out std_logic_vector(63 downto 0) -- RD
@@ -24,12 +24,12 @@ architecture ALU_arch of ALU is
   -- Custom test instructions: asrt, asrti, halt
 begin
   
-  computation : process( instruction_typ, op_a, op_b )
+  computation : process( instruction_type, op_a, op_b )
   variable a : signed(31 downto 0) := signed(op_a);
   variable b : signed(31 downto 0) := signed(op_b);
   --shamt is stored in last 5 bits of "a"
-  variable shift_amount : integer := to_integer(op_a(4 downto 0));
-  
+  variable shift_amount : integer := to_integer(unsigned(op_a(4 downto 0())); --TODO: find out if this is unsigned or signed... (shamt is positive, I think)
+
   begin
     
     case instruction_type is
