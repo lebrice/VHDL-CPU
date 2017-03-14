@@ -26,6 +26,8 @@ package registers is
         return register_block;
     function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : register_block)
         return register_block;
+    impure function load_registers
+        return register_block;
     procedure dump_registers(reg_block  : register_block);
 
 end registers;
@@ -69,5 +71,22 @@ package body registers is
         end loop;
         file_close(outfile);
     end procedure dump_registers;
+
+
+    -- function to read registers in from file "register_load.txt"
+    impure function load_registers
+        return register_block is
+        file     infile : text;
+        variable inline : line;
+        variable r_block : register_block;
+        -- variable data : std_logic_vector(31 downto 0);
+    begin
+        file_open(infile, "register_load.txt", read_mode);
+        for i in r_block' reverse_range loop
+            readline(infile, inline);
+            read(inline, r_block(i).data);
+        end loop;
+        return r_block;
+    end load_registers;
 
 end registers;
