@@ -44,7 +44,7 @@ begin
       when SUBTRACT =>
         ALU_out <= std_logic_vector(a - b); -- rs - rt
       when MULTIPLY =>
-        ALU_out <= std_logic_vector(to_unsigned(std_logic_vector(a*b), 32)); -- a bit round about...
+        ALU_out <= std_logic_vector(a*b); --TODO: figure out bit issue
       
       when DIVIDE =>
         ALU_out <= std_logic_vector(a / b);
