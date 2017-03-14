@@ -23,7 +23,7 @@ COMPONENT EXECUTE IS
 END COMPONENT;
 
 --these are our input signals 
-signal instruction_in Instruction;
+signal instruction_in : Instruction;
 signal val_a : std_logic_vector(31 downto 0);
 signal val_b : std_logic_vector(31 downto 0);
 signal imm_sign_extended : std_logic_vector(31 downto 0);
