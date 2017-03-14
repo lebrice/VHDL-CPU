@@ -25,7 +25,7 @@ architecture executeStage_arch of executeStage is
     instruction : in INSTRUCTION;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
-    ALU_out : out std_logic_vector(63 downto 0) -- RD
+    ALU_out : out std_logic_vector(31 downto 0) -- RD
   );
   END COMPONENT;
   
