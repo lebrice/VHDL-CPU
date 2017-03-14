@@ -51,7 +51,7 @@ begin
 
       when BRANCH_IF_EQUAL =>
         --check if the two values from regs are equal
-        if (op_b = op_a) then
+        if (val_a = val_b) then
           internal_branch <= 1;
         else
           internal_branch <= 0;
@@ -59,7 +59,7 @@ begin
 
       when BRANCH_IF_NOT_EQUAL =>
         --check if the two values from regs are equal
-        if (op_a /= op_b) then
+        if (val_a /= val_b) then
           internal_branch <= 1;
         else
           internal_branch <= 0;
