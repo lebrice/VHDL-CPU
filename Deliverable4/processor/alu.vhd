@@ -28,7 +28,7 @@ begin
   variable a : signed(31 downto 0) := signed(op_a);
   variable b : signed(31 downto 0) := signed(op_b);
   --shamt is stored in last 5 bits of "a"
-  variable shift_amount : integer := to_integer(unsigned(op_a(4 downto 0())); --TODO: find out if this is unsigned or signed... (shamt is positive, I think)
+  variable shift_amount : integer := to_integer(unsigned(op_a(4 downto 0))); --TODO: find out if this is unsigned or signed... (shamt is positive, I think)
 
   begin
     
