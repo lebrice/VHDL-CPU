@@ -6,7 +6,6 @@ use work.INSTRUCTION_TOOLS.all;
 
 entity executeStage is
   port (
-    clock : in std_logic;
     instruction_in : in Instruction;
     val_a : in std_logic_vector(31 downto 0);
     val_b : in std_logic_vector(31 downto 0);
@@ -21,7 +20,6 @@ end executeStage ;
 architecture executeStage_arch of executeStage is
   COMPONENT ALU
   port (
-    clock : in std_logic;
     instruction : in INSTRUCTION;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
@@ -36,7 +34,7 @@ architecture executeStage_arch of executeStage is
   --SIGNAL ALU_Result : std_logic_vector(31 downto 0);
 begin
   --define alu component
-  exAlu: ALU port map (clock, instruction_in, input_a, input_b, ALU_Result);
+  exAlu: ALU port map (instruction_in, input_a, input_b, ALU_Result);
 
   --here are our output values
   branch <= internal_branch; --from first process below
@@ -71,7 +69,7 @@ begin
   end process ; -- branch_condition  
 
   -- Process 2: Pass in values to ALU and get result
-  compute_inputs : process(input_a, input_b) --TODO: ask about this. Should just be clock?
+  compute_inputs : process(input_a, input_b) --TODO: ask about this. 
   begin
  
     -- The instruction changes what is passed to the ALU
