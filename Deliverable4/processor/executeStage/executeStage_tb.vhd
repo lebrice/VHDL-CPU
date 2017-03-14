@@ -169,7 +169,7 @@ begin
         ASSERT (ALU_Result = x"0000000B") REPORT "OR: ALU_Result should be 0x0000000B, but wasn't" SEVERITY ERROR;
 
         -- BITWISE_OR_IMMEDIATE
-        instruction_in <= makeInstruction(ORI_OP, 1, 2, to_integer(unsigned("0000000B"))); --ori t1 t2 0xB
+        instruction_in <= makeInstruction(ORI_OP, 1, 2, 11); --ori t1 t2 0xB
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
         imm_sign_extended <= x"0000000B"; --0xB
@@ -196,7 +196,7 @@ begin
         ASSERT (ALU_Result = x"00000006") REPORT "XOR: ALU_Result should be 0x00000006, but wasn't" SEVERITY ERROR;   
 
         -- BITWISE_XOR_IMMEDIATE
-        instruction_in <= makeInstruction(XORI, 1, 2, to_integer(unsigned("0000000B"))); --xori t1 t2 0xB
+        instruction_in <= makeInstruction(XORI_OP, 1, 2, 11); --xori t1 t2 0xB
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
         imm_sign_extended <= x"0000000B"; --0xB
@@ -211,7 +211,7 @@ begin
         -- The execute stage will never reach MOVE_FROM_LOW (handled in decode)
 
         -- LOAD_UPPER_IMMEDIATE
-        instruction_in <= makeInstruction(LUI_OP, 1, 2, to_integer(unsigned("FFFFFFFF"))); --addi t1 t2 FFFF
+        instruction_in <= makeInstruction(LUI_OP, 1, 2, INTEGER'high); --addi t1 t2 FFFF
         val_a <= x"00000000"; --10
         val_b <= x"00000000"; --0
         imm_sign_extended <= x"FFFFFFFF"; --full
