@@ -27,6 +27,9 @@ signal val_a : std_logic_vector(31 downto 0);
 signal val_b : std_logic_vector(31 downto 0);
 signal imm_sign_extended : std_logic_vector(31 downto 0);
 signal PC : integer;
+signal INSTRUCTION_OUT : Instruction;
+signal branch : std_logic;
+signal ALU_Result : std_logic_vector(31 downto 0);
 
 CONSTANT clk_period : time := 1 ns; --TODO: figure out how long we wait here for...
 signal val_a_int, val_b_int, immediate_int : integer;
