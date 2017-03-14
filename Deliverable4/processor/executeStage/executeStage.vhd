@@ -52,21 +52,21 @@ begin
       when BRANCH_IF_EQUAL =>
         --check if the two values from regs are equal
         if (val_a = val_b) then
-          internal_branch <= 1;
+          internal_branch <= '1';
         else
-          internal_branch <= 0;
+          internal_branch <= '0';
         end if;
 
       when BRANCH_IF_NOT_EQUAL =>
         --check if the two values from regs are equal
         if (val_a /= val_b) then
-          internal_branch <= 1;
+          internal_branch <= '1';
         else
-          internal_branch <= 0;
+          internal_branch <= '0';
         end if;
 
       when others =>
-        internal_branch <= 0;
+        internal_branch <= '0';
     end case;
   end process ; -- branch_condition  
 
