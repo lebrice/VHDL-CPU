@@ -306,14 +306,14 @@ architecture CPU_arch of CPU is
 
     --Memory Writeback register
     signal MEM_WB_register_pc_in: INTEGER;
-    signal MEM_WB_register_pc_out:  INTEGER;
+    signal MEM_WB_register_pc_out: INTEGER;
     signal MEM_WB_register_instruction_in: INSTRUCTION;
-    signal MEM_WB_register_instruction_out:  INSTRUCTION;
-    signal MEM_WB_register_alu_result_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal MEM_WB_register_alu_result_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal MEM_WB_register_instruction_out: INSTRUCTION;
+    signal MEM_WB_register_alu_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
+    signal MEM_WB_register_alu_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
     signal MEM_WB_register_data_mem_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal MEM_WB_register_data_mem_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
-
+    signal MEM_WB_register_data_mem_out: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    
     --Write back
     signal write_back_stage_memDataIn : std_logic_vector(31 downto 0);
     signal write_back_stage_ALU_ResultIn : std_logic_vector(31 downto 0);
