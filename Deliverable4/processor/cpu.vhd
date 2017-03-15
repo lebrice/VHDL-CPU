@@ -158,8 +158,8 @@ architecture CPU_arch of CPU is
             pc_out: OUT INTEGER;
             instruction_in: IN INSTRUCTION;
             instruction_out: OUT INSTRUCTION;
-            alu_result_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            alu_result_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
+            alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
             data_mem_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             data_mem_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
@@ -168,7 +168,7 @@ architecture CPU_arch of CPU is
     COMPONENT writebackStage is
         port (
             memDataIn : in std_logic_vector(31 downto 0);
-            ALU_ResultIn : in std_logic_vector(31 downto 0);
+            ALU_ResultIn : in std_logic_vector(63 downto 0);
             instructionIn : in instruction;
             writeData : out std_logic_vector(31 downto 0);
             -- writeRegister : out integer range 0 to 31; -- uncomment if you wish to implement register choice here

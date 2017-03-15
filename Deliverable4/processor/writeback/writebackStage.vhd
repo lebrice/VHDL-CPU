@@ -8,9 +8,9 @@ use work.instruction_tools.all;
 entity writebackStage is
   port (
     memDataIn : in std_logic_vector(31 downto 0);
-    ALU_ResultIn : in std_logic_vector(31 downto 0);
+    ALU_ResultIn : in std_logic_vector(63 downto 0);
     instructionIn : in instruction;
-    writeData : out std_logic_vector(31 downto 0);
+    writeData : out std_logic_vector(31 downto 0); --TODO: should this be 31 or 63?
     -- writeRegister : out integer range 0 to 31; -- uncomment if you wish to implement register choice here
     instructionOut : out instruction
   ) ;
@@ -38,7 +38,7 @@ begin
           if (instructionIn.instruction_type = LOAD_WORD) then
             writeData <= memDataIn;
           else
-            writeData <= ALU_ResultIn;
+            writeData <= ALU_ResultIn; --TODO: currently this is wrong (32 to 64 bits)
           end if;
 
 -- uncomment if you wish to implement register choice here     
