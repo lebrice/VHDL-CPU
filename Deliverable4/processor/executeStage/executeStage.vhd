@@ -83,10 +83,10 @@ begin
           input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
         when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
           --with branches, we want "a" to have the PC, b the immediate
-          input_a <= std_logic_vector(to_unsigned(PC, 32)); --TODO: signed or unsigned?
+          input_a <= std_logic_vector(to_unsigned(PC, 32)); 
           input_b <= imm_sign_extended;
         when JUMP | JUMP_TO_REGISTER =>
-          input_a <= std_logic_vector(to_unsigned(PC,32)(31 downto 26)) & instruction_in.address_vect; --TODO: Unsigned? signed? etc? I don't know
+          input_a <= std_logic_vector(to_unsigned(PC,32)(31 downto 26)) & instruction_in.address_vect; 
           input_b <= val_b; --doesn't matter
         when JUMP_AND_LINK =>
           input_a <= val_a; --this should contain the new PC (the place we want to jump to)
