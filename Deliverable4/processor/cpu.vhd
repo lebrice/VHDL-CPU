@@ -290,20 +290,19 @@ architecture CPU_arch of CPU is
     signal EX_MEM_b_value_out: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     --Memory Stage
-    signal memory_stage_ALU_result_in : std_logic_vector(31 downto 0);
-    signal memory_stage_ALU_result_out :  std_logic_vector(31 downto 0);
+    signal memory_stage_ALU_result_in : std_logic_vector(63 downto 0);
+    signal memory_stage_ALU_result_out : std_logic_vector(63 downto 0);
     signal memory_stage_instruction_in : INSTRUCTION;
-    signal memory_stage_instruction_out :  INSTRUCTION;
-    signal memory_stage_branch_taken_in :  std_logic;
-    signal memory_stage_branch_taken_out :   std_logic;
+    signal memory_stage_instruction_out : INSTRUCTION;
     signal memory_stage_val_b : std_logic_vector(31 downto 0);
-    signal memory_stage_mem_data :  std_logic_vector(31 downto 0);
+    signal memory_stage_mem_data : std_logic_vector(31 downto 0);
     signal memory_stage_m_addr : integer range 0 to ram_size-1;
-    signal memory_stage_m_read :  std_logic;
+    signal memory_stage_m_read : std_logic;
     signal memory_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);        
-    signal memory_stage_m_writedata :  std_logic_vector (bit_width-1 downto 0);
-    signal memory_stage_m_write :  std_logic;
-    signal memory_stage_m_waitrequest : std_logic;-- Unused until the Avalon Interface is added.
+    signal memory_stage_m_writedata : std_logic_vector (bit_width-1 downto 0);
+    signal memory_stage_m_write : std_logic;
+    signal memory_stage_m_waitrequest : std_logic; -- Unused until the Avalon Interface is added.
+
 
     --Memory Writeback register
     signal MEM_WB_register_pc_in: INTEGER;
