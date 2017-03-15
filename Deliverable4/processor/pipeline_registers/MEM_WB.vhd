@@ -10,8 +10,8 @@ ENTITY mem_wb_entity IS
         pc_out: OUT INTEGER;
         instruction_in: IN INSTRUCTION;
         instruction_out: OUT INSTRUCTION;
-        alu_result_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        alu_result_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
+        alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
         data_mem_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         data_mem_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
@@ -20,7 +20,7 @@ END mem_wb_entity;
 ARCHITECTURE mem_wb_architecture OF mem_wb_entity IS
     SIGNAL pc_intermediate: INTEGER;
     SIGNAL instruction_intermediate: INSTRUCTION;
-    SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(63 DOWNTO 0);
     SIGNAL data_mem_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
