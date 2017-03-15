@@ -1,7 +1,11 @@
 --Adapted from Example 12-15 of Quartus Design and Synthesis handbook
 LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-USE ieee.numeric_std.all;
+	USE ieee.std_logic_1164.all;
+	USE ieee.numeric_std.all;
+	USE ieee.std_logic_textio.all;
+
+library std;
+    use std.textio.all;
 
 ENTITY memory IS
 	GENERIC(
@@ -16,6 +20,8 @@ ENTITY memory IS
 		address: IN INTEGER RANGE 0 TO ram_size-1;
 		memwrite: IN STD_LOGIC;
 		memread: IN STD_LOGIC;
+		memdump: IN STD_LOGIC;
+		memload: IN STD_LOGIC;
 		readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
 		waitrequest: OUT STD_LOGIC
 	);
@@ -31,7 +37,28 @@ ARCHITECTURE rtl OF memory IS
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
 BEGIN
 	--This is the main section of the SRAM model
-	mem_process: PROCESS (clock)
+
+	-- process to dump memory to file
+	dump_process: PROCESS(memdump)
+		file     outfile  : text;
+		variable outline : line;
+	BEGIN
+		IF(rising_edge(memdump)) THEN
+			file_open(outfile, "memory_dump.txt", write_mode);
+        	for i in ram_block' reverse_range loop
+				write(outline, ram_block(i));
+				writeline(outfile, outline);
+        	end loop;
+			file_close(outfile);
+
+		END IF;
+	END PROCESS;
+
+
+	mem_process: PROCESS (clock, memload)
+		file 	 infile: text;
+		variable inline: line;
+		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
 	BEGIN
 		--This is a cheap trick to initialize the SRAM in simulation
 		-- IF(now < 1 ps)THEN
@@ -39,9 +66,21 @@ BEGIN
 		-- 		ram_block(i) <= std_logic_vector(to_unsigned(i,bit_width));
 		-- 	END LOOP;
 		-- end if;
+	
 
-		--This is the actual synthesizable SRAM block
-		IF (clock'event AND clock = '1') THEN
+	-- load memory from file "memory_load.text" when a rising edge is see on memload
+	-- load memory is used for testing only, file IO is not synthesizeable	
+	if(rising_edge(memload)) then
+			file_open(infile, "memory_load.txt", read_mode);
+			for i in ram_block' reverse_range loop
+				readline(infile, inline);
+				read(inline, data);
+				-- writedata <= data;
+				ram_block(i) <= data;
+			end loop;
+			file_close(infile);
+	-- This is the actual synthesizable SRAM block 
+	elsif (rising_edge(clock)) THEN
 			IF (memwrite = '1') THEN
 				ram_block(address) <= writedata;
 			END IF;
