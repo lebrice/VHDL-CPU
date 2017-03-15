@@ -38,7 +38,7 @@ architecture CPU_arch of CPU is
             m_read : out std_logic;
             m_readdata : in std_logic_vector (bit_width-1 downto 0);
             -- m_write : out std_logic;
-            -- m_writedata : out std_logic_vector (bit_width-1 downto 0);
+            -- m_write_data : out std_logic_vector (bit_width-1 downto 0);
             m_waitrequest : in std_logic -- unused until the Avalon Interface is added.
         );
     END COMPONENT;
@@ -119,7 +119,7 @@ architecture CPU_arch of CPU is
             PC : in integer; 
             instruction_out : out Instruction;
             branch : out std_logic;
-            ALU_Result : out std_logic_vector(63 downto 0);
+            ALU_result : out std_logic_vector(63 downto 0);
             branch_target_out : out std_logic_vector(31 downto 0);
             PC_out : out integer
     );
@@ -135,8 +135,8 @@ architecture CPU_arch of CPU is
             instruction_out: OUT INSTRUCTION;
             does_branch_in: IN STD_LOGIC;
             does_branch_out: OUT STD_LOGIC;
-            alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
-            alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
+            ALU_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
+            ALU_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
             branch_target_in : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             branch_target_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
             b_value_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -157,7 +157,7 @@ architecture CPU_arch of CPU is
             m_addr : out integer range 0 to ram_size-1;
             m_read : out std_logic;
             m_readdata : in std_logic_vector (bit_width-1 downto 0);        
-            m_writedata : out std_logic_vector (bit_width-1 downto 0);
+            m_write_data : out std_logic_vector (bit_width-1 downto 0);
             m_write : out std_logic;
             m_waitrequest : in std_logic -- Unused until the Avalon Interface is added.
 
@@ -172,8 +172,8 @@ architecture CPU_arch of CPU is
             pc_out: OUT INTEGER;
             instruction_in: IN INSTRUCTION;
             instruction_out: OUT INSTRUCTION;
-            alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
-            alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
+            ALU_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
+            ALU_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
             data_mem_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             data_mem_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
@@ -182,12 +182,12 @@ architecture CPU_arch of CPU is
     --Writeback
     COMPONENT writebackStage is
         port (
-            memDataIn : in std_logic_vector(31 downto 0);
-            ALU_ResultIn : in std_logic_vector(63 downto 0);
-            instructionIn : in instruction;
-            writeData : out std_logic_vector(31 downto 0);
+            mem_data_in : in std_logic_vector(31 downto 0);
+            ALU_result_in : in std_logic_vector(63 downto 0);
+            instruction_in : in instruction;
+            write_data : out std_logic_vector(31 downto 0);
             -- writeRegister : out integer range 0 to 31; -- uncomment if you wish to implement register choice here
-            instructionOut : out instruction
+            instruction_out : out instruction
         );
     end COMPONENT;
     
@@ -224,7 +224,7 @@ architecture CPU_arch of CPU is
     signal fetch_stage_m_read : std_logic;
     signal fetch_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);
     signal fetch_stage_m_waitrequest : std_logic; -- unused until the Avalon Interface is added.
-    signal fetch_stage_m_writedata : std_logic_vector(bit_width-1 downto 0); -- unused;
+    signal fetch_stage_m_write_data : std_logic_vector(bit_width-1 downto 0); -- unused;
     signal fetch_stage_m_write : std_logic; -- unused;
     
     --Fetch Decode Register
@@ -271,7 +271,7 @@ architecture CPU_arch of CPU is
     signal execute_stage_PC : integer; 
     signal execute_stage_instruction_out : Instruction;
     signal execute_stage_branch : std_logic;
-    signal execute_stage_ALU_Result : std_logic_vector(63 downto 0);
+    signal execute_stage_ALU_result : std_logic_vector(63 downto 0);
     signal execute_stage_branch_target_out : std_logic_vector(31 downto 0);
     signal execute_stage_PC_out : integer;
 
@@ -282,8 +282,8 @@ architecture CPU_arch of CPU is
     signal EX_MEM_instruction_out: INSTRUCTION;
     signal EX_MEM_does_branch_in: STD_LOGIC;
     signal EX_MEM_does_branch_out: STD_LOGIC;
-    signal EX_MEM_alu_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
-    signal EX_MEM_alu_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
+    signal EX_MEM_ALU_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
+    signal EX_MEM_ALU_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
     signal EX_MEM_branch_target_in : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal EX_MEM_branch_target_out : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal EX_MEM_b_value_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -299,7 +299,7 @@ architecture CPU_arch of CPU is
     signal memory_stage_m_addr : integer range 0 to ram_size-1;
     signal memory_stage_m_read : std_logic;
     signal memory_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);        
-    signal memory_stage_m_writedata : std_logic_vector (bit_width-1 downto 0);
+    signal memory_stage_m_write_data : std_logic_vector (bit_width-1 downto 0);
     signal memory_stage_m_write : std_logic;
     signal memory_stage_m_waitrequest : std_logic; -- Unused until the Avalon Interface is added.
 
@@ -309,18 +309,18 @@ architecture CPU_arch of CPU is
     signal MEM_WB_register_pc_out: INTEGER;
     signal MEM_WB_register_instruction_in: INSTRUCTION;
     signal MEM_WB_register_instruction_out: INSTRUCTION;
-    signal MEM_WB_register_alu_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
-    signal MEM_WB_register_alu_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
+    signal MEM_WB_register_ALU_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
+    signal MEM_WB_register_ALU_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
     signal MEM_WB_register_data_mem_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal MEM_WB_register_data_mem_out: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     --Write back
-    signal write_back_stage_memDataIn : std_logic_vector(31 downto 0);
-    signal write_back_stage_ALU_ResultIn : std_logic_vector(63 downto 0);
-    signal write_back_stage_instructionIn : instruction;
-    signal write_back_stage_writeData : std_logic_vector(31 downto 0);
-    signal write_back_stage_instructionOut : instruction;
-    
+    signal write_back_stage_mem_data_in : std_logic_vector(31 downto 0);
+    signal write_back_stage_ALU_result_in : std_logic_vector(63 downto 0);
+    signal write_back_stage_instruction_in : instruction;
+    signal write_back_stage_write_data : std_logic_vector(31 downto 0);
+    signal write_back_stage_instruction_out : instruction;
+
     --memory
     signal instruction_memory_dump : std_logic := '0';
     signal instruction_memory_load : std_logic := '0';
@@ -352,7 +352,7 @@ begin
     )
     PORT MAP(
         clock,
-        fetch_stage_m_writedata, -- unused in this case;
+        fetch_stage_m_write_data, -- unused in this case;
         fetch_stage_m_addr,
         fetch_stage_m_write, -- unused in this case.
         fetch_stage_m_read,
@@ -411,7 +411,9 @@ begin
         execute_stage_PC, 
         execute_stage_instruction_out,
         execute_stage_branch,
-        execute_stage_ALU_Result
+        execute_stage_ALU_result,
+        execute_stage_branch_target_out,
+        execute_stage_PC_out
     );
 
     EX_MEM_register : EX_MEM_ENTITY PORT MAP (
@@ -422,26 +424,25 @@ begin
         EX_MEM_register_instruction_out,
         EX_MEM_register_does_branch_in,
         EX_MEM_register_does_branch_out,
-        EX_MEM_register_alu_result_in,
-        EX_MEM_register_alu_result_out,
-        EX_MEM_register_b_in,
-        EX_MEM_register_b_out
+        EX_MEM_register_ALU_result_in,
+        EX_MEM_register_ALU_result_out,
+        EX_MEM_register_branch_target_in,
+        EX_MEM_register_branch_target_out,
+        EX_MEM_register_b_value_in,
+        EX_MEM_register_b_value_out
     );
 
     memory_stage : memoryStage PORT MAP (
-        clock,
         memory_stage_ALU_result_in,
         memory_stage_ALU_result_out,
         memory_stage_instruction_in,
         memory_stage_instruction_out,
-        memory_stage_branch_taken_in,
-        memory_stage_branch_taken_out,
         memory_stage_val_b,
         memory_stage_mem_data,
         memory_stage_m_addr,
         memory_stage_m_read,
         memory_stage_m_readdata,      
-        memory_stage_m_writedata,
+        memory_stage_m_write_data,
         memory_stage_m_write,
         memory_stage_m_waitrequest
     );
@@ -452,7 +453,7 @@ begin
     )
     PORT MAP(
         clock,
-        memory_stage_m_writedata, -- unused in this case;
+        memory_stage_m_write_data, -- unused in this case;
         memory_stage_m_addr,
         memory_stage_m_write, -- unused in this case.
         memory_stage_m_read,
@@ -468,22 +469,22 @@ begin
         MEM_WB_register_pc_out,
         MEM_WB_register_instruction_in,
         MEM_WB_register_instruction_out,
-        MEM_WB_register_alu_result_in,
-        MEM_WB_register_alu_result_out,
+        MEM_WB_register_ALU_result_in,
+        MEM_WB_register_ALU_result_out,
         MEM_WB_register_data_mem_in,
         MEM_WB_register_data_mem_out
     );
 
     write_back_stage : writebackStage PORT MAP (
-        write_back_stage_memDataIn,
-        write_back_stage_ALU_ResultIn,
-        write_back_stage_instructionIn,
-        write_back_stage_writeData,
-        write_back_stage_instructionOut
+        write_back_stage_mem_data_in,
+        write_back_stage_ALU_result_in,
+        write_back_stage_instruction_in,
+        write_back_stage_write_data,
+        write_back_stage_instruction_out
     );
 
     -- TODO: SIGNAL CONNECTIONS BETWEEN COMPONENTS
-    fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_alu_result_out));
+    fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_ALU_result_ou));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
 
     IF_ID_register_instruction_in <= fetch_stage_instruction_out;
@@ -492,8 +493,8 @@ begin
 
     decode_stage_PC <= IF_ID_register_pc_out;
     decode_stage_instruction_in <= IF_ID_register_instruction_out;
-    decode_stage_write_back_data <= x"00000000" & write_back_stage_writeData; -- TODO: Length problem: write_back stage should have write_data be 64 bits, not 32.
-    decode_stage_write_back_instruction <= write_back_stage_instructionOut;
+    decode_stage_write_back_data <= x"00000000" & write_back_stage_write_data; -- TODO: Length problem: write_back stage should have write_data be 64 bits, not 32.
+    decode_stage_write_back_instruction <= write_back_stage_instruction_out;
 
     ID_EX_register_a_in <= decode_stage_val_a;
     ID_EX_register_b_in <= decode_stage_val_b;
@@ -507,25 +508,25 @@ begin
     execute_stage_val_b <= ID_EX_register_b_out;
     execute_stage_imm_sign_extended <= std_logic_vector(to_unsigned(ID_EX_register_sign_extend_imm_out,32));
     
-    EX_MEM_register_alu_result_in <= execute_stage_ALU_Result;
-    EX_MEM_register_b_in <= execute_stage_ALU_Result; -- TODO: is this right ?
+    EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
+    EX_MEM_register_b_in <= execute_stage_ALU_result; -- TODO: is this right ?
     EX_MEM_register_does_branch_in <= execute_stage_branch;
     -- EX_MEM_register_pc_in <= execute_stage_PC_out; -- TODO: missing port in execute stage!
     EX_MEM_register_instruction_in <= execute_stage_instruction_out;
 
-    memory_stage_ALU_result_in <= EX_MEM_register_alu_result_out;
+    memory_stage_ALU_result_in <= EX_MEM_register_ALU_result_ou;
     memory_stage_branch_taken_in <= EX_MEM_register_does_branch_out; -- TODO: This signal is useless, the branch taken bit is coming out of the EX_MEM Register already.
     memory_stage_instruction_in <= EX_MEM_register_instruction_out;
     memory_stage_val_b <= EX_MEM_register_b_out;
 
-    MEM_WB_register_alu_result_in <= memory_stage_ALU_result_out;
+    MEM_WB_register_ALU_result_in <= memory_stage_ALU_result_out;
     MEM_WB_register_data_mem_in <= memory_stage_mem_data;
     MEM_WB_register_instruction_in <= memory_stage_instruction_out;
     -- MEM_WB_register_pc_in <= memory_stage_PC; -- TODO: Port issue: MEM_WB has PC_in, but memory stage doesn't have that output. (I think MEM_WB doesn't need PC.);
     
-    write_back_stage_ALU_ResultIn <= MEM_WB_register_alu_result_out;
-    write_back_stage_instructionIn <= MEM_WB_register_instruction_out;
-    write_back_stage_memDataIn <= MEM_WB_register_data_mem_out;
+    write_back_stage_ALU_result_in <= MEM_WB_register_ALU_result_out;
+    write_back_stage_instruction_in <= MEM_WB_register_instruction_out;
+    write_back_stage_mem_data_in <= MEM_WB_register_data_mem_out;
 
     -- TODO: Later, Take a look at page 684 (C-40) of the textbook "Computer Architecture : a quantitative approach"
     -- for some neat pseudo-code about forwarding.
