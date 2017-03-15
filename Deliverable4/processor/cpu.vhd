@@ -5,7 +5,7 @@ use IEEE.numeric_std.all;
 -- opcode tool library
 use work.INSTRUCTION_TOOLS.all;
 
-
+use work.REGISTERS.all;
 --entity declaration
 entity CPU is
   port (
@@ -15,7 +15,13 @@ end CPU ;
 
 
 architecture CPU_arch of ALU is
+  constant ram_size : integer := 8196;
+  constant bit_width : integer := 32;
    COMPONENT fetchStage IS
+        generic(
+            bit_width : integer := bit_width;
+            ram_size : integer := ram_size
+        );
         PORT (
             clock : in std_logic;
             reset : in std_logic;
@@ -63,6 +69,7 @@ architecture CPU_arch of ALU is
             instruction_out : out INSTRUCTION;
 
             -- Register file
+            -- TODO: Figure out why there's an error here (Won't compile!)
             register_file_out : out REGISTER_BLOCK;
             write_register_file : in std_logic;
             reset_register_file : in std_logic;
@@ -154,8 +161,7 @@ architecture CPU_arch of ALU is
         GENERIC(
           ram_size : INTEGER := ram_size;
 		      bit_width : INTEGER := bit_width;
-		      mem_delay : time := 0.1 ns;
-		      clock_period : time := clock_period
+		      mem_delay : time := 0.1 ns
         );
         PORT (
             clock: IN STD_LOGIC;
