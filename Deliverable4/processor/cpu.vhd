@@ -331,5 +331,22 @@ begin
         IF_ID_register_stall
 	);
 
+    decode : decodeStage port map (
+        clock,
+        decode_stage_PC,
+        decode_stage_instruction_in,
+        decode_stage_write_back_instruction,
+        decode_stage_write_back_data,
+        decode_stage_val_a,
+        decode_stage_val_b,
+        decode_stage_i_sign_extended,
+        decode_stage_PC_out,
+        decode_stage_instruction_out,
+        decode_stage_register_file_out,
+        decode_stage_write_register_file,
+        decode_stage_reset_register_file,
+        decode_stage_stall_in,
+        decode_stage_stall_out
+    );
     
 end architecture;
