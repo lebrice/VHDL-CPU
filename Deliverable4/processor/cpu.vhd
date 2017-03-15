@@ -20,6 +20,7 @@ end CPU ;
 
 
 architecture CPU_arch of CPU is
+    --Fetch
    COMPONENT fetchStage IS
         generic(
             bit_width : integer := bit_width;
@@ -42,6 +43,7 @@ architecture CPU_arch of CPU is
         );
     END COMPONENT;
 
+    --Fetch decode Register
     COMPONENT IF_ID_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
@@ -52,6 +54,8 @@ architecture CPU_arch of CPU is
             stall: IN STD_LOGIC
         );
     END COMPONENT;
+
+    --Decode
     COMPONENT decodeStage IS
         port (
             clock : in std_logic;
@@ -87,6 +91,8 @@ architecture CPU_arch of CPU is
             
         ) ;
     END COMPONENT;
+
+    --Decode Execute Register
     COMPONENT ID_EX_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
@@ -102,6 +108,8 @@ architecture CPU_arch of CPU is
             b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
     END COMPONENT;
+    
+    --Execute
     COMPONENT executeStage IS
         port(
             instruction_in : in Instruction;
@@ -116,6 +124,8 @@ architecture CPU_arch of CPU is
             PC_out : out integer
     );
     END COMPONENT;
+
+    --Execute Memory Register
     COMPONENT EX_MEM_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
@@ -133,6 +143,8 @@ architecture CPU_arch of CPU is
             b_value_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         ); 
     END COMPONENT;
+
+    --Memory
     COMPONENT memoryStage IS
         PORT (
             ALU_result_in : in std_logic_vector(63 downto 0);
@@ -151,6 +163,8 @@ architecture CPU_arch of CPU is
 
         );
     END COMPONENT;
+
+    --Memory writeback register
     COMPONENT MEM_WB_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
@@ -165,6 +179,7 @@ architecture CPU_arch of CPU is
         );
     END COMPONENT;
 
+    --Writeback
     COMPONENT writebackStage is
         port (
             memDataIn : in std_logic_vector(31 downto 0);
@@ -175,8 +190,8 @@ architecture CPU_arch of CPU is
             instructionOut : out instruction
         );
     end COMPONENT;
-
-
+    
+    --memory component
     COMPONENT memory IS
         GENERIC(
           ram_size : INTEGER := ram_size;
@@ -198,7 +213,7 @@ architecture CPU_arch of CPU is
     
     
     -- SIGNALS
-    
+    --Fetch
     signal fetch_stage_reset : std_logic;
     signal fetch_stage_branch_target : integer;
     signal fetch_stage_branch_condition : std_logic;
@@ -212,13 +227,14 @@ architecture CPU_arch of CPU is
     signal fetch_stage_m_writedata : std_logic_vector(bit_width-1 downto 0); -- unused;
     signal fetch_stage_m_write : std_logic; -- unused;
     
-
+    --Fetch Decode Register
     signal IF_ID_register_pc_in: INTEGER;
     signal IF_ID_register_pc_out:  INTEGER;
     signal IF_ID_register_instruction_in: INSTRUCTION;
     signal IF_ID_register_instruction_out:  INSTRUCTION;
     signal IF_ID_register_stall: STD_LOGIC;
 
+    --Decode
     signal decode_stage_PC : integer;
     signal decode_stage_instruction_in : INSTRUCTION;
     signal decode_stage_write_back_instruction : INSTRUCTION;
@@ -233,7 +249,8 @@ architecture CPU_arch of CPU is
     signal decode_stage_reset_register_file : std_logic;
     signal decode_stage_stall_in : std_logic;
     signal decode_stage_stall_out :  std_logic;
-        
+
+    --Decode Execute Register 
     signal ID_EX_register_pc_in: INTEGER;
     signal ID_EX_register_pc_out:  INTEGER;
     signal ID_EX_register_instruction_in: INSTRUCTION;
@@ -245,7 +262,7 @@ architecture CPU_arch of CPU is
     signal ID_EX_register_b_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal ID_EX_register_b_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-
+    --Execute
     signal execute_stage_instruction_in : Instruction;
     signal execute_stage_val_a : std_logic_vector(31 downto 0);
     signal execute_stage_val_b : std_logic_vector(31 downto 0);
@@ -255,7 +272,7 @@ architecture CPU_arch of CPU is
     signal execute_stage_branch :  std_logic;
     signal execute_stage_ALU_Result :  std_logic_vector(31 downto 0);
 
-
+    --Execute Writeback register
     signal EX_MEM_register_pc_in: INTEGER;
     signal EX_MEM_register_pc_out:  INTEGER;
     signal EX_MEM_register_instruction_in: INSTRUCTION;
@@ -267,6 +284,7 @@ architecture CPU_arch of CPU is
     signal EX_MEM_register_b_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal EX_MEM_register_b_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
 
+    --Memory Stage
     signal memory_stage_ALU_result_in : std_logic_vector(31 downto 0);
     signal memory_stage_ALU_result_out :  std_logic_vector(31 downto 0);
     signal memory_stage_instruction_in : INSTRUCTION;
@@ -282,6 +300,7 @@ architecture CPU_arch of CPU is
     signal memory_stage_m_write :  std_logic;
     signal memory_stage_m_waitrequest : std_logic;-- Unused until the Avalon Interface is added.
 
+    --Memory Writeback register
     signal MEM_WB_register_pc_in: INTEGER;
     signal MEM_WB_register_pc_out:  INTEGER;
     signal MEM_WB_register_instruction_in: INSTRUCTION;
@@ -291,17 +310,20 @@ architecture CPU_arch of CPU is
     signal MEM_WB_register_data_mem_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal MEM_WB_register_data_mem_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
 
+    --Write back
     signal write_back_stage_memDataIn : std_logic_vector(31 downto 0);
     signal write_back_stage_ALU_ResultIn : std_logic_vector(31 downto 0);
     signal write_back_stage_instructionIn : instruction;
     signal write_back_stage_writeData :  std_logic_vector(31 downto 0);
     signal write_back_stage_instructionOut :  instruction;
 
+    --memory
     signal instruction_memory_dump : std_logic := '0';
     signal instruction_memory_load : std_logic := '0';
     signal data_memory_dump : std_logic := '0';
     signal data_memory_load : std_logic := '0';
 
+    --misc
     signal initialized : std_logic := '0';
 
 begin
