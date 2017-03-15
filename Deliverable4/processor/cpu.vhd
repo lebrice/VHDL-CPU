@@ -362,5 +362,16 @@ begin
         ID_EX_register_b_in,
         ID_EX_register_b_out
     );
+
+     execute_stage : executeStage PORT MAP (
+        execute_stage_instruction_in,
+        execute_stage_val_a,
+        execute_stage_val_b,
+        execute_stage_imm_sign_extended,
+        execute_stage_PC, 
+        execute_stage_instruction_out,
+        execute_stage_branch,
+        execute_stage_ALU_Result
+    );
     
 end architecture;
