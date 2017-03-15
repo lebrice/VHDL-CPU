@@ -39,6 +39,7 @@ begin
     --TODO: think carefully about signed vs unsigned and the format of values
     exAlu: EXECUTE port map (instruction_in, val_a, val_b, imm_sign_extended, PC, instruction_out, branch, ALU_Result);
     test_process : PROCESS
+    variable temp : std_logic_vector(31 downto 0) ;
     BEGIN
 
         -- Add
@@ -151,7 +152,8 @@ begin
         ASSERT (ALU_Result = x"0000000A") REPORT "AND: ALU_Result should be 0x0000000A, but wasn't" SEVERITY ERROR;
 
         -- BITWISE_AND_IMMEDIATE 
-        instruction_in <= makeInstruction(ANDI_OP, 1, 2, to_integer(unsigned("0000000B"))); --andi t1, t2, 0xB
+        temp := x"0000000B";
+        instruction_in <= makeInstruction(ANDI_OP, 1, 2, to_integer(unsigned(temp))); --andi t1, t2, 0xB
         val_a <= x"0000000A"; --10
         val_b <= x"00000000"; --0
         imm_sign_extended <= x"0000000B"; --0xB
