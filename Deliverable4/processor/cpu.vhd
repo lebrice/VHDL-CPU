@@ -135,13 +135,10 @@ architecture CPU_arch of CPU is
     END COMPONENT;
     COMPONENT memoryStage IS
         PORT (
-            clock : in std_logic;
-            ALU_result_in : in std_logic_vector(31 downto 0);
-            ALU_result_out : out std_logic_vector(31 downto 0);
+            ALU_result_in : in std_logic_vector(63 downto 0);
+            ALU_result_out : out std_logic_vector(63 downto 0);
             instruction_in : in INSTRUCTION;
             instruction_out : out INSTRUCTION;
-            branch_taken_in : in  std_logic;
-            branch_taken_out : out  std_logic;
             val_b : in std_logic_vector(31 downto 0);
             mem_data : out std_logic_vector(31 downto 0);
 
@@ -151,6 +148,7 @@ architecture CPU_arch of CPU is
             m_writedata : out std_logic_vector (bit_width-1 downto 0);
             m_write : out std_logic;
             m_waitrequest : in std_logic -- Unused until the Avalon Interface is added.
+
         );
     END COMPONENT;
     COMPONENT MEM_WB_ENTITY IS
