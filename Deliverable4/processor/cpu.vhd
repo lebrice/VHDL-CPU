@@ -32,8 +32,14 @@ architecture CPU_arch of ALU is
             m_waitrequest : in std_logic -- unused until the Avalon Interface is added.
         );
     END COMPONENT;
-    
-    
+    COMPONENT fetchDecodeReg IS
+        PORT (
+            instruction_in : in Instruction;
+            PC_in : in integer;            
+            instruction_out : out Instruction;
+            PC_out : out integer;
+        );
+    END COMPONENT;
 begin
 
 end architecture;
