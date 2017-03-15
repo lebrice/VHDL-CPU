@@ -15,7 +15,6 @@ ARCHITECTURE behaviour OF memStage_tb IS
     -- Component under test.
     COMPONENT memStage IS
         PORT (
-            clock : in std_logic;
             ALU_result_in : in std_logic_vector(31 downto 0);
             ALU_result_out : out std_logic_vector(31 downto 0);
             instruction_in : in INSTRUCTION;
@@ -103,7 +102,6 @@ BEGIN
     -- Stage under test.
     mem_stage: memStage 
     PORT MAP(
-        clock,
         ALU_result_in,
         ALU_result_out,
         instruction_in,
