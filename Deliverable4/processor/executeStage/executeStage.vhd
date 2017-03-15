@@ -14,6 +14,7 @@ entity executeStage is
     instruction_out : out Instruction;
     branch : out std_logic;
     ALU_Result : out std_logic_vector(63 downto 0);
+    branch_target_out : out std_logic_vector(31 downto 0);
     PC_out : out integer
   ) ;
 end executeStage ;
@@ -32,10 +33,11 @@ architecture executeStage_arch of executeStage is
   SIGNAL input_a: std_logic_vector(31 downto 0);
   SIGNAL input_b: std_logic_vector(31 downto 0);
   SIGNAL internal_branch : std_logic;
+  SIGNAL internal_ALU_Result : std_logic(63 downto 0);
   --SIGNAL ALU_Result : std_logic_vector(31 downto 0);
 begin
   --define alu component
-  exAlu: ALU port map (instruction_in, input_a, input_b, ALU_Result);
+  exAlu: ALU port map (instruction_in, input_a, input_b, internal_ALU_Result);
 
   --calculate the branch target
   branch <=
@@ -47,7 +49,8 @@ begin
   --ALU_Result <= ALU_Result; --from alu --not needed since done in port map
   instruction_out <= instruction_in; --pass through
   PC_out <= PC;
-
+  branch_target_out <= internal_ALU_Result(31 downto 0); --this won't always be a branch.
+  ALU_Result <= internal_ALU_Result;
   -- Process 2: Pass in values to ALU and get result
   compute_inputs : process(input_a, input_b) --TODO: ask about this. 
   begin

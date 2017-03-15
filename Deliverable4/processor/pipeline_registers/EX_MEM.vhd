@@ -14,6 +14,7 @@ ENTITY ex_mem_entity IS
         does_branch_out: OUT STD_LOGIC;
         alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
         alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
+        branch_target_in : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         branch_target_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_value_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_value_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
@@ -46,7 +47,7 @@ BEGIN
             does_branch_intermediate <= does_branch_in;
             alu_result_intermediate <= alu_result_in;
             b_value_intermediate <= b_value_in;
-            branch_target_intermediate <= alu_result_in(31 downto 0);
+            branch_target_intermediate <= branch_target_in;
         END IF;
     END PROCESS;
 
