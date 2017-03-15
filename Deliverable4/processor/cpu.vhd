@@ -37,7 +37,7 @@ architecture CPU_arch of ALU is
             instruction_in : in Instruction;
             PC_in : in integer;            
             instruction_out : out Instruction;
-            PC_out : out integer;
+            PC_out : out integer
         );
     END COMPONENT;
 begin
