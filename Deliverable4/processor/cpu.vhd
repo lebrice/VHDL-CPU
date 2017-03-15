@@ -262,16 +262,19 @@ architecture CPU_arch of CPU is
     signal ID_EX_register_b_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal ID_EX_register_b_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
 
+
     --Execute
     signal execute_stage_instruction_in : Instruction;
     signal execute_stage_val_a : std_logic_vector(31 downto 0);
     signal execute_stage_val_b : std_logic_vector(31 downto 0);
     signal execute_stage_imm_sign_extended : std_logic_vector(31 downto 0);
     signal execute_stage_PC : integer; 
-    signal execute_stage_instruction_out :  Instruction;
-    signal execute_stage_branch :  std_logic;
-    signal execute_stage_ALU_Result :  std_logic_vector(31 downto 0);
-
+    signal execute_stage_instruction_out : Instruction;
+    signal execute_stage_branch : std_logic;
+    signal execute_stage_ALU_Result : std_logic_vector(63 downto 0);
+    signal execute_stage_branch_target_out : std_logic_vector(31 downto 0);
+    signal execute_stage_PC_out : integer;
+    
     --Execute Writeback register
     signal EX_MEM_register_pc_in: INTEGER;
     signal EX_MEM_register_pc_out:  INTEGER;
