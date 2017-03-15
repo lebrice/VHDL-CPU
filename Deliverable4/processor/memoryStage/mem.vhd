@@ -58,4 +58,5 @@ BEGIN
         ALU_result_out <= ALU_result_in;
         branch_target <= ALU_result_in;
     END PROCESS;
+
 END ARCHITECTURE;
