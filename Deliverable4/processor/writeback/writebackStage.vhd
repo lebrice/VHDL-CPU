@@ -10,7 +10,7 @@ entity writebackStage is
     memDataIn : in std_logic_vector(31 downto 0);
     ALU_ResultIn : in std_logic_vector(63 downto 0);
     instructionIn : in instruction;
-    writeData : out std_logic_vector(31 downto 0); --TODO: should this be 31 or 63?
+    writeData : out std_logic_vector(63 downto 0); --TODO: should this be 31 or 63?
     -- writeRegister : out integer range 0 to 31; -- uncomment if you wish to implement register choice here
     instructionOut : out instruction
   ) ;
