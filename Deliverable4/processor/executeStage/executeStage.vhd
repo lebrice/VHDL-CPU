@@ -37,7 +37,7 @@ begin
   --define alu component
   exAlu: ALU port map (instruction_in, input_a, input_b, ALU_Result);
 
-  --here are our output values
+  --calculate the branch target
   branch <=
     '1' when instruction_in.INSTRUCTION_TYPE is BRANCH_IF_EQUAL and val_a = val_b else
     '1' when instrcution_in.INSTRUCTION_TYPE IS BRANCH_IF_NOT_EQUAL and val_a /= val_b else
