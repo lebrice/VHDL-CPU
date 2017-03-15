@@ -386,6 +386,38 @@ begin
             EX_MEM_register_alu_result_out,
             EX_MEM_register_b_in,
             EX_MEM_register_b_out
-        );
+    );
+
+    memory_stage : memoryStage PORT MAP (
+            clock,
+            memory_stage_ALU_result_in,
+            memory_stage_ALU_result_out,
+            memory_stage_instruction_in,
+            memory_stage_instruction_out,
+            memory_stage_branch_taken_in,
+            memory_stage_branch_taken_out,
+            memory_stage_val_b,
+            memory_stage_mem_data,
+            memory_stage_m_addr,
+            memory_stage_m_read,
+            memory_stage_m_readdata,      
+            memory_stage_m_writedata,
+            memory_stage_m_write,
+            memory_stage_m_waitrequest
+    );
+
+    memory_stage_memory : memory GENERIC MAP(
+        ram_size => ram_size,
+        bit_width => bit_width
+    )
+    PORT MAP(
+        clock,
+        memory_stage_m_writedata, -- unused in this case;
+        memory_stage_m_addr,
+        memory_stage_m_write, -- unused in this case.
+        memory_stage_m_read,
+        memory_stage_m_readdata,
+        memory_stage_m_waitrequest
+    );
     
 end architecture;
