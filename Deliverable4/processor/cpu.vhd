@@ -86,7 +86,7 @@ architecture CPU_arch of CPU is
             
         ) ;
     END COMPONENT;
-    COMPONENT decodeExecuteReg IS
+    COMPONENT ID_EX_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
             pc_in: IN INTEGER;
@@ -347,6 +347,20 @@ begin
         decode_stage_reset_register_file,
         decode_stage_stall_in,
         decode_stage_stall_out
+    );
+
+    ID_EX_register : ID_EX_ENTITY PORT MAP (
+        clock,
+        ID_EX_register_pc_in,
+        ID_EX_register_pc_out,
+        ID_EX_register_instruction_in,
+        ID_EX_register_instruction_out,
+        ID_EX_register_sign_extend_imm_in,
+        ID_EX_register_sign_extend_imm_out,
+        ID_EX_register_a_in,
+        ID_EX_register_a_out,
+        ID_EX_register_b_in,
+        ID_EX_register_b_out
     );
     
 end architecture;
