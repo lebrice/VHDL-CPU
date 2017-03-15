@@ -10,8 +10,8 @@ ENTITY mem is
     );
     port (
         clock : in std_logic;
-        ALU_result_in : in std_logic_vector(31 downto 0);
-        ALU_result_out : out std_logic_vector(31 downto 0);
+        ALU_result_in : in std_logic_vector(63 downto 0);
+        ALU_result_out : out std_logic_vector(63 downto 0);
         instruction_in : in INSTRUCTION;
         instruction_out : out INSTRUCTION;
         val_b : in std_logic_vector(31 downto 0);
