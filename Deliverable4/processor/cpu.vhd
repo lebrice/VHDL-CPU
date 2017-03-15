@@ -148,7 +148,7 @@ architecture CPU_arch of CPU is
             m_waitrequest : in std_logic -- Unused until the Avalon Interface is added.
         );
     END COMPONENT;
-    COMPONENT memoryWritebackReg IS
+    COMPONENT MEM_WB_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
             pc_in: IN INTEGER;
@@ -375,35 +375,35 @@ begin
     );
 
     EX_MEM_register : EX_MEM_ENTITY PORT MAP (
-            clock,
-            EX_MEM_register_pc_in,
-            EX_MEM_register_pc_out,
-            EX_MEM_register_instruction_in,
-            EX_MEM_register_instruction_out,
-            EX_MEM_register_does_branch_in,
-            EX_MEM_register_does_branch_out,
-            EX_MEM_register_alu_result_in,
-            EX_MEM_register_alu_result_out,
-            EX_MEM_register_b_in,
-            EX_MEM_register_b_out
+        clock,
+        EX_MEM_register_pc_in,
+        EX_MEM_register_pc_out,
+        EX_MEM_register_instruction_in,
+        EX_MEM_register_instruction_out,
+        EX_MEM_register_does_branch_in,
+        EX_MEM_register_does_branch_out,
+        EX_MEM_register_alu_result_in,
+        EX_MEM_register_alu_result_out,
+        EX_MEM_register_b_in,
+        EX_MEM_register_b_out
     );
 
     memory_stage : memoryStage PORT MAP (
-            clock,
-            memory_stage_ALU_result_in,
-            memory_stage_ALU_result_out,
-            memory_stage_instruction_in,
-            memory_stage_instruction_out,
-            memory_stage_branch_taken_in,
-            memory_stage_branch_taken_out,
-            memory_stage_val_b,
-            memory_stage_mem_data,
-            memory_stage_m_addr,
-            memory_stage_m_read,
-            memory_stage_m_readdata,      
-            memory_stage_m_writedata,
-            memory_stage_m_write,
-            memory_stage_m_waitrequest
+        clock,
+        memory_stage_ALU_result_in,
+        memory_stage_ALU_result_out,
+        memory_stage_instruction_in,
+        memory_stage_instruction_out,
+        memory_stage_branch_taken_in,
+        memory_stage_branch_taken_out,
+        memory_stage_val_b,
+        memory_stage_mem_data,
+        memory_stage_m_addr,
+        memory_stage_m_read,
+        memory_stage_m_readdata,      
+        memory_stage_m_writedata,
+        memory_stage_m_write,
+        memory_stage_m_waitrequest
     );
 
     memory_stage_memory : memory GENERIC MAP(
@@ -418,6 +418,18 @@ begin
         memory_stage_m_read,
         memory_stage_m_readdata,
         memory_stage_m_waitrequest
+    );
+
+    MEM_WB_register : MEM_WB_ENTITY PORT MAP (
+        clock,
+        MEM_WB_register_pc_in,
+        MEM_WB_register_pc_out,
+        MEM_WB_register_instruction_in,
+        MEM_WB_register_instruction_out,
+        MEM_WB_register_alu_result_in,
+        MEM_WB_register_alu_result_out,
+        MEM_WB_register_data_mem_in,
+        MEM_WB_register_data_mem_out
     );
     
 end architecture;
