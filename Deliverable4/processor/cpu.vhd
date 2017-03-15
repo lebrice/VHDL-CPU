@@ -431,5 +431,13 @@ begin
         MEM_WB_register_data_mem_in,
         MEM_WB_register_data_mem_out
     );
+
+    write_back_stage : writebackStage PORT MAP (
+        write_back_stage_memDataIn,
+        write_back_stage_ALU_ResultIn,
+        write_back_stage_instructionIn,
+        write_back_stage_writeData,
+        write_back_stage_instructionOut
+    );
     
 end architecture;
