@@ -33,10 +33,6 @@ BEGIN
     mem_process : process(clock, m_waitrequest)
     BEGIN
         CASE instruction_in.INSTRUCTION_TYPE IS
-            WHEN branch_if_equal | branch_if_not_equal =>
-                IF(branch_taken_in = '1') THEN
-                    branch_taken_out <= '1';
-                END IF;
             WHEN load_word =>
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_read <= '1';
@@ -53,7 +49,6 @@ BEGIN
         END CASE;
         instruction_out <= instruction_in;
         ALU_result_out <= ALU_result_in;
-        branch_target <= ALU_result_in;
     END PROCESS;
 
 END ARCHITECTURE;
