@@ -8,6 +8,10 @@ use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 --entity declaration
 entity CPU is
+    generic(
+        ram_size : integer := 8196;
+        bit_width : integer := 32
+    );
   port (
     clock : in std_logic
   );
@@ -15,8 +19,6 @@ end CPU ;
 
 
 architecture CPU_arch of CPU is
-  constant ram_size : integer := 8196;
-  constant bit_width : integer := 32;
    COMPONENT fetchStage IS
         generic(
             bit_width : integer := bit_width;
@@ -98,7 +100,8 @@ architecture CPU_arch of CPU is
         );
     END COMPONENT;
     COMPONENT executeStage IS
-        port(instruction_in : in Instruction;
+        port(
+            instruction_in : in Instruction;
             val_a : in std_logic_vector(31 downto 0);
             val_b : in std_logic_vector(31 downto 0);
             imm_sign_extended : in std_logic_vector(31 downto 0);
@@ -157,6 +160,18 @@ architecture CPU_arch of CPU is
         );
     END COMPONENT;
 
+    COMPONENT writebackStage is
+        port (
+            memDataIn : in std_logic_vector(31 downto 0);
+            ALU_ResultIn : in std_logic_vector(31 downto 0);
+            instructionIn : in instruction;
+            writeData : out std_logic_vector(31 downto 0);
+            -- writeRegister : out integer range 0 to 31; -- uncomment if you wish to implement register choice here
+            instructionOut : out instruction
+        );
+    end COMPONENT;
+
+
     COMPONENT memory IS
         GENERIC(
           ram_size : INTEGER := ram_size;
@@ -173,6 +188,112 @@ architecture CPU_arch of CPU is
             waitrequest: OUT STD_LOGIC
         );
     END COMPONENT;
-begin
+    
+    
+    -- SIGNALS
+    
+    signal fetch_stage_clock : std_logic;
+    signal fetch_stage_reset : std_logic;
+    signal fetch_stage_branch_target : integer;
+    signal fetch_stage_branch_condition : std_logic;
+    signal fetch_stage_stall : std_logic;
+    signal fetch_stage_instruction_out : Instruction;
+    signal fetch_stage_PC : integer;
+    signal fetch_stage_m_addr : integer;
+    signal fetch_stage_m_read : std_logic;
+    signal fetch_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);
+    signal fetch_stage_m_waitrequest : std_logic; -- unused until the Avalon Interface is added.
+  
+    signal IF_ID_register_instruction_in : Instruction;
+    signal IF_ID_register_PC_in : integer;            
+    signal IF_ID_register_instruction_out : Instruction;
+    signal IF_ID_register_PC_out : integer;
 
+
+    signal decode_stage_clock : std_logic;
+    signal decode_stage_PC : integer;
+    signal decode_stage_instruction_in : INSTRUCTION;
+    signal decode_stage_write_back_instruction : INSTRUCTION;
+    signal decode_stage_write_back_data : std_logic_vector(63 downto 0);
+    signal decode_stage_val_a :  std_logic_vector(31 downto 0);
+    signal decode_stage_val_b :  std_logic_vector(31 downto 0);
+    signal decode_stage_i_sign_extended :  std_logic_vector(31 downto 0);
+    signal decode_stage_PC_out :  integer;
+    signal decode_stage_instruction_out :  INSTRUCTION;
+    signal decode_stage_register_file_out :  REGISTER_BLOCK;
+    signal decode_stage_write_register_file : std_logic;
+    signal decode_stage_reset_register_file : std_logic;
+    signal decode_stage_stall_in : std_logic;
+    signal decode_stage_stall_out :  std_logic;
+        
+    signal ID_EX_register_clock : STD_LOGIC;
+    signal ID_EX_register_pc_in: INTEGER;
+    signal ID_EX_register_pc_out:  INTEGER;
+    signal ID_EX_register_instruction_in: INSTRUCTION;
+    signal ID_EX_register_instruction_out:  INSTRUCTION;
+    signal ID_EX_register_sign_extend_imm_in: INTEGER;
+    signal ID_EX_register_sign_extend_imm_out:  INTEGER;
+    signal ID_EX_register_a_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal ID_EX_register_a_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal ID_EX_register_b_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal ID_EX_register_b_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
+
+
+    signal execute_stage_instruction_in : Instruction;
+    signal execute_stage_val_a : std_logic_vector(31 downto 0);
+    signal execute_stage_val_b : std_logic_vector(31 downto 0);
+    signal execute_stage_imm_sign_extended : std_logic_vector(31 downto 0);
+    signal execute_stage_PC : integer; 
+    signal execute_stage_instruction_out :  Instruction;
+    signal execute_stage_branch :  std_logic;
+    signal execute_stage_ALU_Result :  std_logic_vector(31 downto 0);
+
+
+    signal EX_MEM_register_clock: STD_LOGIC;
+    signal EX_MEM_register_pc_in: INTEGER;
+    signal EX_MEM_register_pc_out:  INTEGER;
+    signal EX_MEM_register_instruction_in: INSTRUCTION;
+    signal EX_MEM_register_instruction_out:  INSTRUCTION;
+    signal EX_MEM_register_does_branch_in: STD_LOGIC;
+    signal EX_MEM_register_does_branch_out:  STD_LOGIC;
+    signal EX_MEM_register_alu_result_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal EX_MEM_register_alu_result_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal EX_MEM_register_b_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal EX_MEM_register_b_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
+
+    signal memory_stage_clock : std_logic;
+    signal memory_stage_ALU_result_in : std_logic_vector(31 downto 0);
+    signal memory_stage_ALU_result_out :  std_logic_vector(31 downto 0);
+    signal memory_stage_instruction_in : INSTRUCTION;
+    signal memory_stage_instruction_out :  INSTRUCTION;
+    signal memory_stage_branch_taken_in :  std_logic;
+    signal memory_stage_branch_taken_out :   std_logic;
+    signal memory_stage_val_b : std_logic_vector(31 downto 0);
+    signal memory_stage_mem_data :  std_logic_vector(31 downto 0);
+    signal memory_stage_m_addr : integer range 0 to ram_size-1;
+    signal memory_stage_m_read :  std_logic;
+    signal memory_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);        
+    signal memory_stage_m_writedata :  std_logic_vector (bit_width-1 downto 0);
+    signal memory_stage_m_write :  std_logic;
+    signal memory_stage_m_waitrequest : std_logic;-- Unused until the Avalon Interface is added.
+
+    signal MEM_WB_register_clock: STD_LOGIC;
+    signal MEM_WB_register_pc_in: INTEGER;
+    signal MEM_WB_register_pc_out:  INTEGER;
+    signal MEM_WB_register_instruction_in: INSTRUCTION;
+    signal MEM_WB_register_instruction_out:  INSTRUCTION;
+    signal MEM_WB_register_alu_result_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal MEM_WB_register_alu_result_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal MEM_WB_register_data_mem_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal MEM_WB_register_data_mem_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
+
+    signal write_back_stage_memDataIn : std_logic_vector(31 downto 0);
+    signal write_back_stage_ALU_ResultIn : std_logic_vector(31 downto 0);
+    signal write_back_stage_instructionIn : instruction;
+    signal write_back_stage_writeData :  std_logic_vector(31 downto 0);
+    signal write_back_stage_instructionOut :  instruction;
+
+begin
+  
+    
 end architecture;
