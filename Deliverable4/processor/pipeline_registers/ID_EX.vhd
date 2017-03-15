@@ -10,8 +10,8 @@ ENTITY id_ex_entity IS
         pc_out: OUT INTEGER;
         instruction_in: IN INSTRUCTION;
         instruction_out: OUT INSTRUCTION;
-        sign_extend_imm_in: IN INTEGER;
-        sign_extend_imm_out: OUT INTEGER;
+        sign_extend_imm_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        sign_extend_imm_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         a_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         a_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -22,7 +22,7 @@ END id_ex_entity;
 ARCHITECTURE id_ex_architecture OF id_ex_entity IS
     SIGNAL pc_intermediate: INTEGER;
     SIGNAL instruction_intermediate: INSTRUCTION;
-    SIGNAL sign_extend_imm_intermediate: INTEGER;
+    SIGNAL sign_extend_imm_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL a_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL b_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
