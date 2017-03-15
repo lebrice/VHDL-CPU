@@ -511,6 +511,7 @@ begin
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
     EX_MEM_register_b_in <= execute_stage_val_b_out; 
     EX_MEM_register_does_branch_in <= execute_stage_branch;
+    EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
     EX_MEM_register_instruction_in <= execute_stage_instruction_out;
 
