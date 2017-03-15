@@ -38,36 +38,14 @@ begin
   exAlu: ALU port map (instruction_in, input_a, input_b, ALU_Result);
 
   --here are our output values
-  branch <= internal_branch; --from first process below
+  branch <=
+    '1' when instruction_in.INSTRUCTION_TYPE is BRANCH_IF_EQUAL and val_a = val_b else
+    '1' when instrcution_in.INSTRUCTION_TYPE IS BRANCH_IF_NOT_EQUAL and val_a /= val_b else
+    '1' when instruction_in.INSTRUCTION_TYPE IS JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER;
+
   --ALU_Result <= ALU_Result; --from alu --not needed since done in port map
   instruction_out <= instruction_in; --pass through
   PC_out <= PC;
-  -- Process 1: calculate branch boolean (whether we branch or not)
-  branch_condition : process(instruction_in)
-  begin
-    -- first we will compute the "branch" output
-    case instruction_in.INSTRUCTION_TYPE is
-
-      when BRANCH_IF_EQUAL =>
-        --check if the two values from regs are equal
-        if (val_a = val_b) then
-          internal_branch <= '1';
-        else
-          internal_branch <= '0';
-        end if;
-
-      when BRANCH_IF_NOT_EQUAL =>
-        --check if the two values from regs are equal
-        if (val_a /= val_b) then
-          internal_branch <= '1';
-        else
-          internal_branch <= '0';
-        end if;
-
-      when others =>
-        internal_branch <= '0';
-    end case;
-  end process ; -- branch_condition  
 
   -- Process 2: Pass in values to ALU and get result
   compute_inputs : process(input_a, input_b) --TODO: ask about this. 
