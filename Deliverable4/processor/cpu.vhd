@@ -14,7 +14,7 @@ entity CPU is
 end CPU ;
 
 
-architecture CPU_arch of ALU is
+architecture CPU_arch of CPU is
   constant ram_size : integer := 8196;
   constant bit_width : integer := 32;
    COMPONENT fetchStage IS
