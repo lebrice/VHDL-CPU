@@ -13,7 +13,8 @@ entity CPU is
         bit_width : integer := 32
     );
   port (
-    clock : in std_logic
+    clock : in std_logic;
+    initialize : in std_logic -- signals to load Instruciton and Data Memories. Should be held at '1' for at least a few clock cycles.
   );
 end CPU ;
 
@@ -299,6 +300,8 @@ architecture CPU_arch of CPU is
     signal data_memory_dump : std_logic := '0';
     signal data_memory_load : std_logic := '0';
 
+    signal initialized : std_logic := '0';
+
 begin
 
     fetch : fetchStage PORT MAP(
@@ -498,5 +501,20 @@ begin
 
     -- TODO: Later, Take a look at page 684 (C-40) of the textbook "Computer Architecture : a quantitative approach"
     -- for some neat pseudo-code about forwarding.
+
+    init : process( clock, initialize )
+    begin
+        if initialize = '1' AND initialized = '0' then
+            report "Initializing...";
+            data_memory_load <= '1';
+            instruction_memory_load <= '1';
+            initialized <= '1';  
+        else 
+            data_memory_load <= '0';
+            instruction_memory_load <= '0';         
+        end if;
+    end process ; -- init
+
+
 
 end architecture;
