@@ -41,12 +41,16 @@ begin
 
     case instruction_type is
       
-      when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD | BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+      when ADD | ADD_IMMEDIATE | LOAD_WORD | STORE_WORD  =>
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
-
         -- for branch if equal PC = PC + 4 + branch target
         ALU_out <= extend64(std_logic_vector(a + b)); 
-      
+      when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+        --b is the unsigned representation of our PC
+        --a is the signed representation of our movement amount
+        --we will add a and b as integers, and store it in an std_logic_vector (as unsigned)
+        --then we extend by 64 since we want a 64 bit output...
+        ALU_out <= extend64(std_logic_vector(to_unsigned(to_integer(a) + to_integer(unsigned(b))))); 
       when SUBTRACT =>
         ALU_out <= extend64(std_logic_vector(a - b)); -- rs - rt
       when MULTIPLY =>

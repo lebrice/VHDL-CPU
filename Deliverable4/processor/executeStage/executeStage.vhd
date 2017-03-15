@@ -86,7 +86,7 @@ begin
           input_a <= std_logic_vector(to_unsigned(PC, 32)); --TODO: signed or unsigned?
           input_b <= imm_sign_extended;
         when JUMP | JUMP_TO_REGISTER =>
-          input_a <= std_logic_vector(to_signed(PC, 6)) & instruction_in.address_vect; --TODO: Unsigned? signed? etc? I don't know
+          input_a <= std_logic_vector(to_unsigned(PC,32)(31 downto 26)) & instruction_in.address_vect; --TODO: Unsigned? signed? etc? I don't know
           input_b <= val_b; --doesn't matter
         when JUMP_AND_LINK =>
           input_a <= val_a; --this should contain the new PC (the place we want to jump to)
