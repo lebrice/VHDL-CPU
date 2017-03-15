@@ -29,6 +29,9 @@ END mem;
 
 ARCHITECTURE memArch OF mem IS
 BEGIN
+    --set outputs
+    instruction_out <= instruction_in;
+    ALU_result_out <= ALU_result_in;
 
     mem_process : process(clock, m_waitrequest)
     BEGIN
@@ -36,19 +39,18 @@ BEGIN
             WHEN load_word =>
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_read <= '1';
-                m_addr <= to_integer(unsigned(ALU_result_in));
+                m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0)));
                 mem_data <= m_readdata;
             WHEN store_word =>
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_write <= '1';
-                m_addr <= to_integer(unsigned(ALU_result_in));
+                m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0)));
                 m_writedata <= val_b;
             WHEN others =>
               -- do nothing.
                 
         END CASE;
-        instruction_out <= instruction_in;
-        ALU_result_out <= ALU_result_in;
+
     END PROCESS;
 
 END ARCHITECTURE;
