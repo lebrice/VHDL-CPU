@@ -62,10 +62,10 @@ package body registers is
     begin
         file_open(outfile, "register_dump.txt", write_mode);
         for i in reg_block' reverse_range loop
-            write(outline, string'("R"));
-            write(outline, i);
-            write(outline, string'(":"));
-            write(outline, HT);
+            -- write(outline, string'("R"));
+            -- write(outline, i);
+            -- write(outline, string'(":"));
+            -- write(outline, HT);
             write(outline, reg_block(i).data);
             writeline(outfile, outline);
         end loop;
