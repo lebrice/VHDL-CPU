@@ -6,16 +6,22 @@ USE work.instruction_tools.all;
 ENTITY ex_mem_entity IS
 	PORT (
         clock: IN STD_LOGIC;
+        
         pc_in: IN INTEGER;
         pc_out: OUT INTEGER;
+
         instruction_in: IN INSTRUCTION;
         instruction_out: OUT INSTRUCTION;
+
         does_branch_in: IN STD_LOGIC;
         does_branch_out: OUT STD_LOGIC;
+
         alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
         alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
+
         branch_target_in : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         branch_target_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+
         b_value_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_value_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
