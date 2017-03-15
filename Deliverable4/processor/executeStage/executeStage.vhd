@@ -98,7 +98,7 @@ begin
           -- This case is never reached (handled in decode)
           report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
         when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-          input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect; --TODO: should I do this? Fab did it in decode. Should he?
+          input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
         when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
           --with branches, we want "a" to have the PC, b the immediate
           input_a <= std_logic_vector(to_unsigned(PC, 32)); --TODO: signed or unsigned?
