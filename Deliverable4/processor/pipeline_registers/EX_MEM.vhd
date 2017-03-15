@@ -12,8 +12,9 @@ ENTITY ex_mem_entity IS
         instruction_out: OUT INSTRUCTION;
         does_branch_in: IN STD_LOGIC;
         does_branch_out: OUT STD_LOGIC;
-        alu_result_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        alu_result_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
+        alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
+        branch_target_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
@@ -23,7 +24,7 @@ ARCHITECTURE ex_mem_architecture OF ex_mem_entity IS
     SIGNAL pc_intermediate: INTEGER;
     SIGNAL instruction_intermediate: INSTRUCTION;
     SIGNAL does_branch_intermediate: STD_LOGIC;
-    SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(63 DOWNTO 0);
     SIGNAL b_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
