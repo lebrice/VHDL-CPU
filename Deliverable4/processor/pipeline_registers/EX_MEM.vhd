@@ -15,8 +15,8 @@ ENTITY ex_mem_entity IS
         alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
         alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
         branch_target_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-        b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+        b_value_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        b_value_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
 END ex_mem_entity;
 
@@ -25,7 +25,7 @@ ARCHITECTURE ex_mem_architecture OF ex_mem_entity IS
     SIGNAL instruction_intermediate: INSTRUCTION;
     SIGNAL does_branch_intermediate: STD_LOGIC;
     SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(63 DOWNTO 0);
-    SIGNAL b_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL b_value_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL branch_target_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
@@ -33,7 +33,7 @@ BEGIN
     instruction_out <= instruction_intermediate;
     does_branch_out <= does_branch_intermediate;
     alu_result_out <= alu_result_intermediate;
-    b_out <= b_intermediate;
+    b_value_out <= b_value_intermediate;
     branch_target_out <= branch_target_intermediate;
 
 
@@ -45,7 +45,7 @@ BEGIN
             instruction_intermediate <= instruction_in;
             does_branch_intermediate <= does_branch_in;
             alu_result_intermediate <= alu_result_in;
-            b_intermediate <= b_in;
+            b_value_intermediate <= b_value_in;
             branch_target_intermediate <= alu_result_in(31 downto 0);
         END IF;
     END PROCESS;
