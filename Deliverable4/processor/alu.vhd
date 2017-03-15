@@ -57,9 +57,9 @@ begin
       
       when SET_LESS_THAN | SET_LESS_THAN_IMMEDIATE =>
         if a < b then  -- if rs < rd
-          ALU_out <= X"00000000" & x"00000001";
+          ALU_out <= x"0000000000000001";
         else 
-          ALU_out <= X"00000000" & x"00000000";
+          ALU_out <= x"0000000000000000";
         end if;  
       
       when BITWISE_AND | BITWISE_AND_IMMEDIATE=>
