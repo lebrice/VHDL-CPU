@@ -313,14 +313,14 @@ architecture CPU_arch of CPU is
     signal MEM_WB_register_alu_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
     signal MEM_WB_register_data_mem_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal MEM_WB_register_data_mem_out: STD_LOGIC_VECTOR(31 DOWNTO 0);
-    
+
     --Write back
     signal write_back_stage_memDataIn : std_logic_vector(31 downto 0);
-    signal write_back_stage_ALU_ResultIn : std_logic_vector(31 downto 0);
+    signal write_back_stage_ALU_ResultIn : std_logic_vector(63 downto 0);
     signal write_back_stage_instructionIn : instruction;
-    signal write_back_stage_writeData :  std_logic_vector(31 downto 0);
-    signal write_back_stage_instructionOut :  instruction;
-
+    signal write_back_stage_writeData : std_logic_vector(31 downto 0);
+    signal write_back_stage_instructionOut : instruction;
+    
     --memory
     signal instruction_memory_dump : std_logic := '0';
     signal instruction_memory_load : std_logic := '0';
