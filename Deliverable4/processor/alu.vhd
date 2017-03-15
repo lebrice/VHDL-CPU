@@ -45,13 +45,12 @@ begin
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
 
         -- for branch if equal PC = PC + 4 + branch target
-        -- TODO: Assuming that the Branch target is calculated with A being the current PC + 4.
         ALU_out <= extend64(std_logic_vector(a + b)); 
       
       when SUBTRACT =>
         ALU_out <= extend64(std_logic_vector(a - b)); -- rs - rt
       when MULTIPLY =>
-        ALU_out <= std_logic_vector(a*b); --TODO: figure out bit issue
+        ALU_out <= std_logic_vector(a*b); 
       
       when DIVIDE =>
         ALU_out <= extend64(std_logic_vector(a / b));
