@@ -32,6 +32,7 @@ architecture CPU_arch of ALU is
             m_waitrequest : in std_logic -- unused until the Avalon Interface is added.
         );
     END COMPONENT;
+
     COMPONENT fetchDecodeReg IS
         PORT (
             instruction_in : in Instruction;
@@ -73,6 +74,21 @@ architecture CPU_arch of ALU is
             stall_out : out std_logic
             
         ) ;
+    END COMPONENT;
+    COMPONENT decodeExecuteReg IS
+        PORT (
+            clock: IN STD_LOGIC;
+            pc_in: IN INTEGER;
+            pc_out: OUT INTEGER;
+            instruction_in: IN INSTRUCTION;
+            instruction_out: OUT INSTRUCTION;
+            sign_extend_imm_in: IN INTEGER;
+            sign_extend_imm_out: OUT INTEGER;
+            a_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            a_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+        );
     END COMPONENT;
 begin
 
