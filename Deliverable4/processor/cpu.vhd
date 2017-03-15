@@ -515,7 +515,6 @@ begin
     EX_MEM_register_instruction_in <= execute_stage_instruction_out;
 
     memory_stage_ALU_result_in <= EX_MEM_register_ALU_result_ou;
-    memory_stage_branch_taken_in <= EX_MEM_register_does_branch_out; -- TODO: This signal is useless, the branch taken bit is coming out of the EX_MEM Register already.
     memory_stage_instruction_in <= EX_MEM_register_instruction_out;
     memory_stage_val_b <= EX_MEM_register_b_out;
 
