@@ -441,7 +441,7 @@ begin
     );
 
     -- TODO: SIGNAL CONNECTIONS BETWEEN COMPONENTS
-    fetch_stage_branch_target <= EX_MEM_register_alu_result_out
+    fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_alu_result_out));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
 
     IF_ID_register_instruction_in <= fetch_stage_instruction_out;
@@ -450,25 +450,25 @@ begin
 
     decode_stage_PC <= IF_ID_register_pc_out;
     decode_stage_instruction_in <= IF_ID_register_instruction_out;
-    decode_stage_write_back_data <= write_back_stage_writeData;
+    decode_stage_write_back_data <= x"00000000" & write_back_stage_writeData; -- TODO: Length problem: write_back stage should have write_data be 64 bits, not 32.
     decode_stage_write_back_instruction <= write_back_stage_instructionOut;
 
     ID_EX_register_a_in <= decode_stage_val_a;
     ID_EX_register_b_in <= decode_stage_val_b;
     ID_EX_register_instruction_in <= decode_stage_instruction_out;
     ID_EX_register_pc_in <= decode_stage_PC_out;
-    ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended;
+    ID_EX_register_sign_extend_imm_in <= to_integer(unsigned(decode_stage_i_sign_extended));
 
     execute_stage_PC <= ID_EX_register_pc_out;
     execute_stage_instruction_in <= ID_EX_register_instruction_out;
     execute_stage_val_a <= ID_EX_register_a_out;
     execute_stage_val_b <= ID_EX_register_b_out;
-    execute_stage_imm_sign_extended <= ID_EX_register_sign_extend_imm_out;
+    execute_stage_imm_sign_extended <= std_logic_vector(to_unsigned(ID_EX_register_sign_extend_imm_out,32));
     
     EX_MEM_register_alu_result_in <= execute_stage_ALU_Result;
     EX_MEM_register_b_in <= execute_stage_ALU_Result; -- TODO: is this right ?
     EX_MEM_register_does_branch_in <= execute_stage_branch;
-    EX_MEM_register_pc_in <= execute_stage_PC_out; -- TODO: missing port in execute stage!
+    -- EX_MEM_register_pc_in <= execute_stage_PC_out; -- TODO: missing port in execute stage!
     EX_MEM_register_instruction_in <= execute_stage_instruction_out;
 
     memory_stage_ALU_result_in <= EX_MEM_register_alu_result_out;
@@ -479,7 +479,7 @@ begin
     MEM_WB_register_alu_result_in <= memory_stage_ALU_result_out;
     MEM_WB_register_data_mem_in <= memory_stage_mem_data;
     MEM_WB_register_instruction_in <= memory_stage_instruction_out;
-    MEM_WB_register_pc_in <= memory_stage_PC; -- TODO: Port issue: MEM_WB has PC_in, but memory stage doesn't have that output. (I think MEM_WB doesn't need PC.);
+    -- MEM_WB_register_pc_in <= memory_stage_PC; -- TODO: Port issue: MEM_WB has PC_in, but memory stage doesn't have that output. (I think MEM_WB doesn't need PC.);
     
     write_back_stage_ALU_ResultIn <= MEM_WB_register_alu_result_out;
     write_back_stage_instructionIn <= MEM_WB_register_instruction_out;
