@@ -13,7 +13,8 @@ entity executeStage is
     PC : in integer; 
     instruction_out : out Instruction;
     branch : out std_logic;
-    ALU_Result : out std_logic_vector(31 downto 0)
+    ALU_Result : out std_logic_vector(63 downto 0);
+    PC_out : out integer
   ) ;
 end executeStage ;
 
@@ -23,7 +24,7 @@ architecture executeStage_arch of executeStage is
     instruction : in INSTRUCTION;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
-    ALU_out : out std_logic_vector(31 downto 0) -- RD
+    ALU_out : out std_logic_vector(63 downto 0) -- RD
   );
   END COMPONENT;
   
@@ -40,7 +41,7 @@ begin
   branch <= internal_branch; --from first process below
   --ALU_Result <= ALU_Result; --from alu --not needed since done in port map
   instruction_out <= instruction_in; --pass through
-
+  PC_out <= PC;
   -- Process 1: calculate branch boolean (whether we branch or not)
   branch_condition : process(instruction_in)
   begin
