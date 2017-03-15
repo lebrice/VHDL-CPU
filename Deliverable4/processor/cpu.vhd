@@ -111,7 +111,9 @@ architecture CPU_arch of CPU is
             PC : in integer; 
             instruction_out : out Instruction;
             branch : out std_logic;
-            ALU_Result : out std_logic_vector(31 downto 0)
+            ALU_Result : out std_logic_vector(63 downto 0);
+            branch_target_out : out std_logic_vector(31 downto 0);
+            PC_out : out integer
     );
     END COMPONENT;
     COMPONENT EX_MEM_ENTITY IS
@@ -123,10 +125,12 @@ architecture CPU_arch of CPU is
             instruction_out: OUT INSTRUCTION;
             does_branch_in: IN STD_LOGIC;
             does_branch_out: OUT STD_LOGIC;
-            alu_result_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            alu_result_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-            b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+            alu_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
+            alu_result_out: OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
+            branch_target_in : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            branch_target_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            b_value_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            b_value_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         ); 
     END COMPONENT;
     COMPONENT memoryStage IS
