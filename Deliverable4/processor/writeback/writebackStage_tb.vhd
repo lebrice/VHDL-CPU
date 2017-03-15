@@ -3,7 +3,7 @@ library ieee;
     use ieee.numeric_std.all;
     use ieee.numeric_std_unsigned.all ;   
 
-    use work.instruction_tools.all
+    use work.instruction_tools.all;
 
 entity writebackStage_tb is
 end writebackStage_tb; 

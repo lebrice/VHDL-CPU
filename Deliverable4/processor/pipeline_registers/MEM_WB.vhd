@@ -33,14 +33,11 @@ BEGIN
             instruction_intermediate <= instruction_in;
             instruction_out <= instruction_intermediate;
 
-            data_mem_in <= data_mem_intermediate;
-            data_mem_intermediate <= data_mem_out;
+            data_mem_out <= data_mem_intermediate;
+            data_mem_intermediate <= data_mem_in;
 
             alu_result_intermediate <= alu_result_in;
             alu_result_out <= alu_result_intermediate;
-
-            b_intermediate <= b_in;
-            b_out <= b_intermediate;
         END IF;
     END PROCESS;
 

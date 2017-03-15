@@ -21,7 +21,7 @@ BEGIN
     if_id_process: PROCESS (clock)
     BEGIN
         IF(clock'EVENT AND clock = '1') THEN
-            IF(stall == '0') THEN -- Only update intermediate and output values if we are not stalled.
+            IF(stall = '0') THEN -- Only update intermediate and output values if we are not stalled.
                 pc_intermediate <= pc_in; 
                 pc_out <= pc_intermediate;
 
