@@ -6,7 +6,7 @@ USE work.instruction_tools.all;
 ENTITY ex_mem_entity IS
 	PORT (
         clock: IN STD_LOGIC;
-        
+
         pc_in: IN INTEGER;
         pc_out: OUT INTEGER;
 
@@ -32,8 +32,8 @@ ARCHITECTURE ex_mem_architecture OF ex_mem_entity IS
     SIGNAL instruction_intermediate: INSTRUCTION;
     SIGNAL does_branch_intermediate: STD_LOGIC;
     SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(63 DOWNTO 0);
-    SIGNAL b_value_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL branch_target_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL b_value_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
     pc_out <= pc_intermediate;
