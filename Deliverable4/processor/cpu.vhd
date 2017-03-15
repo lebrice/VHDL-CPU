@@ -90,6 +90,83 @@ architecture CPU_arch of ALU is
             b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
     END COMPONENT;
+    COMPONENT executeStage IS
+        port(instruction_in : in Instruction;
+            val_a : in std_logic_vector(31 downto 0);
+            val_b : in std_logic_vector(31 downto 0);
+            imm_sign_extended : in std_logic_vector(31 downto 0);
+            PC : in integer; 
+            instruction_out : out Instruction;
+            branch : out std_logic;
+            ALU_Result : out std_logic_vector(31 downto 0)
+    );
+    END COMPONENT;
+    COMPONENT executeMemoryReg IS
+        PORT (
+            clock: IN STD_LOGIC;
+            pc_in: IN INTEGER;
+            pc_out: OUT INTEGER;
+            instruction_in: IN INSTRUCTION;
+            instruction_out: OUT INSTRUCTION;
+            does_branch_in: IN STD_LOGIC;
+            does_branch_out: OUT STD_LOGIC;
+            alu_result_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            alu_result_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            b_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+        ); 
+    END COMPONENT;
+    COMPONENT memoryStage IS
+        PORT (
+            clock : in std_logic;
+            ALU_result_in : in std_logic_vector(31 downto 0);
+            ALU_result_out : out std_logic_vector(31 downto 0);
+            instruction_in : in INSTRUCTION;
+            instruction_out : out INSTRUCTION;
+            branch_taken_in : in  std_logic;
+            branch_taken_out : out  std_logic;
+            val_b : in std_logic_vector(31 downto 0);
+            mem_data : out std_logic_vector(31 downto 0);
+
+            m_addr : out integer range 0 to ram_size-1;
+            m_read : out std_logic;
+            m_readdata : in std_logic_vector (bit_width-1 downto 0);        
+            m_writedata : out std_logic_vector (bit_width-1 downto 0);
+            m_write : out std_logic;
+            m_waitrequest : in std_logic -- Unused until the Avalon Interface is added.
+        );
+    END COMPONENT;
+    COMPONENT memoryWritebackReg IS
+        PORT (
+            clock: IN STD_LOGIC;
+            pc_in: IN INTEGER;
+            pc_out: OUT INTEGER;
+            instruction_in: IN INSTRUCTION;
+            instruction_out: OUT INSTRUCTION;
+            alu_result_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            alu_result_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            data_mem_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            data_mem_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+        );
+    END COMPONENT;
+
+    COMPONENT memory IS
+        GENERIC(
+          ram_size : INTEGER := ram_size;
+		      bit_width : INTEGER := bit_width;
+		      mem_delay : time := 0.1 ns;
+		      clock_period : time := clock_period
+        );
+        PORT (
+            clock: IN STD_LOGIC;
+            writedata: IN STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
+            address: IN INTEGER RANGE 0 TO ram_size-1;
+            memwrite: IN STD_LOGIC := '0';
+            memread: IN STD_LOGIC := '0';
+            readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
+            waitrequest: OUT STD_LOGIC
+        );
+    END COMPONENT;
 begin
 
 end architecture;
