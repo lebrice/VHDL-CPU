@@ -522,7 +522,6 @@ begin
     MEM_WB_register_ALU_result_in <= memory_stage_ALU_result_out;
     MEM_WB_register_data_mem_in <= memory_stage_mem_data;
     MEM_WB_register_instruction_in <= memory_stage_instruction_out;
-    -- MEM_WB_register_pc_in <= memory_stage_PC; -- TODO: Port issue: MEM_WB has PC_in, but memory stage doesn't have that output. (I think MEM_WB doesn't need PC.);
     
     write_back_stage_ALU_result_in <= MEM_WB_register_ALU_result_out;
     write_back_stage_instruction_in <= MEM_WB_register_instruction_out;
