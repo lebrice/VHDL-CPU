@@ -47,8 +47,7 @@ BEGIN
                 m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0)));
                 m_writedata <= val_b;
             WHEN others =>
-              -- do nothing.
-                
+              -- do nothing.  
         END CASE;
 
     END PROCESS;
