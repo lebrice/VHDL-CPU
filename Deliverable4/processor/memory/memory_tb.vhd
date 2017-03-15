@@ -24,12 +24,12 @@ ARCHITECTURE behaviour OF memory_tb IS
             clock: IN STD_LOGIC;
             writedata: IN STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
             address: IN INTEGER RANGE 0 TO ram_size-1;
-            memwrite: IN STD_LOGIC := '0';
-            memread: IN STD_LOGIC := '0';
-            memdump: IN STD_LOGIC := '0';
-            memload: IN STD_LOGIC := '0';
-            readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);  -- doesnt compile
-            waitrequest: OUT STD_LOGIC                              -- doesnt compile
+            memwrite: IN STD_LOGIC;
+            memread: IN STD_LOGIC;
+            readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);  
+            waitrequest: OUT STD_LOGIC;                        
+            memdump: IN STD_LOGIC;
+            memload: IN STD_LOGIC
         ); 
     END COMPONENT;
     
@@ -41,10 +41,10 @@ ARCHITECTURE behaviour OF memory_tb IS
     signal address: INTEGER RANGE 0 TO ram_size-1;
     signal memwrite: STD_LOGIC := '0';
     signal memread: STD_LOGIC := '0';
-    signal memdump: STD_LOGIC := '0';
-    signal memload: STD_LOGIC := '0';
     signal readdata: STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
     signal waitrequest: STD_LOGIC;
+    signal memdump: STD_LOGIC := '0';
+    signal memload: STD_LOGIC := '0';
 
 
 BEGIN
@@ -58,10 +58,10 @@ BEGIN
                     address,
                     memwrite,
                     memread,
-                    memdump,
-                    memload,
                     readdata,
-                    waitrequest
+                    waitrequest,
+                    memdump,
+                    memload
                 );
 
     clk_process : process

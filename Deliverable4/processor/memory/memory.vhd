@@ -20,10 +20,10 @@ ENTITY memory IS
 		address: IN INTEGER RANGE 0 TO ram_size-1;
 		memwrite: IN STD_LOGIC;
 		memread: IN STD_LOGIC;
-		memdump: IN STD_LOGIC;
-		memload: IN STD_LOGIC;
 		readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
-		waitrequest: OUT STD_LOGIC
+		waitrequest: OUT STD_LOGIC;
+		memdump: IN STD_LOGIC;
+		memload: IN STD_LOGIC
 	);
 END memory;
 

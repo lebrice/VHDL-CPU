@@ -184,10 +184,12 @@ architecture CPU_arch of CPU is
             clock: IN STD_LOGIC;
             writedata: IN STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
             address: IN INTEGER RANGE 0 TO ram_size-1;
-            memwrite: IN STD_LOGIC := '0';
-            memread: IN STD_LOGIC := '0';
+            memwrite: IN STD_LOGIC;
+            memread: IN STD_LOGIC;
             readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
-            waitrequest: OUT STD_LOGIC
+            waitrequest: OUT STD_LOGIC;
+            memdump: IN STD_LOGIC;
+            memload: IN STD_LOGIC
         );
     END COMPONENT;
     
@@ -292,6 +294,11 @@ architecture CPU_arch of CPU is
     signal write_back_stage_writeData :  std_logic_vector(31 downto 0);
     signal write_back_stage_instructionOut :  instruction;
 
+    signal instruction_memory_dump : std_logic := '0';
+    signal instruction_memory_load : std_logic := '0';
+    signal data_memory_dump : std_logic := '0';
+    signal data_memory_load : std_logic := '0';
+
 begin
 
     fetch : fetchStage PORT MAP(
@@ -319,7 +326,9 @@ begin
         fetch_stage_m_write, -- unused in this case.
         fetch_stage_m_read,
         fetch_stage_m_readdata,
-        fetch_stage_m_waitrequest
+        fetch_stage_m_waitrequest,
+        instruction_memory_dump,
+        instruction_memory_load
     );
 
     IF_ID_register : IF_ID_ENTITY PORT MAP (
@@ -417,7 +426,9 @@ begin
         memory_stage_m_write, -- unused in this case.
         memory_stage_m_read,
         memory_stage_m_readdata,
-        memory_stage_m_waitrequest
+        memory_stage_m_waitrequest,
+        data_memory_dump,
+        data_memory_load
     );
 
     MEM_WB_register : MEM_WB_ENTITY PORT MAP (
