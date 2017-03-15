@@ -52,7 +52,7 @@ begin
   branch_target_out <= internal_ALU_Result(31 downto 0); --this won't always be a branch.
   ALU_Result <= internal_ALU_Result;
   -- Process 2: Pass in values to ALU and get result
-  compute_inputs : process(input_a, input_b) --TODO: ask about this. 
+  compute_inputs : process(instruction_in) --TODO: ask about this. 
   begin
  
     -- The instruction changes what is passed to the ALU
