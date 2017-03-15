@@ -113,7 +113,7 @@ architecture CPU_arch of CPU is
             ALU_Result : out std_logic_vector(31 downto 0)
     );
     END COMPONENT;
-    COMPONENT executeMemoryReg IS
+    COMPONENT EX_MEM_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
             pc_in: IN INTEGER;
@@ -373,5 +373,19 @@ begin
         execute_stage_branch,
         execute_stage_ALU_Result
     );
+
+    EX_MEM_register : EX_MEM_ENTITY PORT MAP (
+            clock,
+            EX_MEM_register_pc_in,
+            EX_MEM_register_pc_out,
+            EX_MEM_register_instruction_in,
+            EX_MEM_register_instruction_out,
+            EX_MEM_register_does_branch_in,
+            EX_MEM_register_does_branch_out,
+            EX_MEM_register_alu_result_in,
+            EX_MEM_register_alu_result_out,
+            EX_MEM_register_b_in,
+            EX_MEM_register_b_out
+        );
     
 end architecture;
