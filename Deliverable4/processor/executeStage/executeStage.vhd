@@ -41,7 +41,7 @@ begin
   branch <=
     '1' when instruction_in.INSTRUCTION_TYPE is BRANCH_IF_EQUAL and val_a = val_b else
     '1' when instrcution_in.INSTRUCTION_TYPE IS BRANCH_IF_NOT_EQUAL and val_a /= val_b else
-    '1' when instruction_in.INSTRUCTION_TYPE IS JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER
+    '1' when instruction_in.INSTRUCTION_TYPE IS JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER else
     '0' when others;
 
   --ALU_Result <= ALU_Result; --from alu --not needed since done in port map
