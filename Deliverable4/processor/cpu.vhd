@@ -41,12 +41,14 @@ architecture CPU_arch of CPU is
         );
     END COMPONENT;
 
-    COMPONENT fetchDecodeReg IS
+    COMPONENT IF_ID_ENTITY IS
         PORT (
-            instruction_in : in Instruction;
-            PC_in : in integer;            
-            instruction_out : out Instruction;
-            PC_out : out integer
+            clock: IN STD_LOGIC;
+            pc_in: IN INTEGER;
+            pc_out: OUT INTEGER;
+            instruction_in: IN INSTRUCTION;
+            instruction_out: OUT INSTRUCTION;
+            stall: IN STD_LOGIC
         );
     END COMPONENT;
     COMPONENT decodeStage IS
@@ -204,12 +206,13 @@ architecture CPU_arch of CPU is
     signal fetch_stage_m_waitrequest : std_logic; -- unused until the Avalon Interface is added.
     signal fetch_stage_m_writedata : std_logic_vector(bit_width-1 downto 0); -- unused;
     signal fetch_stage_m_write : std_logic; -- unused;
-  
-    signal IF_ID_register_instruction_in : Instruction;
-    signal IF_ID_register_PC_in : integer;            
-    signal IF_ID_register_instruction_out : Instruction;
-    signal IF_ID_register_PC_out : integer;
+    
 
+    signal IF_ID_register_pc_in: INTEGER;
+    signal IF_ID_register_pc_out:  INTEGER;
+    signal IF_ID_register_instruction_in: INSTRUCTION;
+    signal IF_ID_register_instruction_out:  INSTRUCTION;
+    signal IF_ID_register_stall: STD_LOGIC;
 
     signal decode_stage_PC : integer;
     signal decode_stage_instruction_in : INSTRUCTION;
@@ -291,19 +294,7 @@ architecture CPU_arch of CPU is
 
 begin
 
--- signal fetch_stage_reset : std_logic;
--- signal fetch_stage_branch_target : integer;
--- signal fetch_stage_branch_condition : std_logic;
--- signal fetch_stage_stall : std_logic;
--- signal fetch_stage_instruction_out : Instruction;
--- signal fetch_stage_PC : integer;
--- signal fetch_stage_m_addr : integer;
--- signal fetch_stage_m_read : std_logic;
--- signal fetch_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);
--- signal fetch_stage_m_waitrequest : std_logic; -- unused until the Avalon Interface is added.
-  
-
-    fet: fetchStage PORT MAP(
+    fetch : fetchStage PORT MAP(
         clock,
         fetch_stage_reset,
         fetch_stage_branch_target,
@@ -330,5 +321,15 @@ begin
         fetch_stage_m_readdata,
         fetch_stage_m_waitrequest
     );
+
+    IF_ID_register : IF_ID_ENTITY PORT MAP (
+        clock,
+        IF_ID_register_pc_in,
+        IF_ID_register_pc_out,
+        IF_ID_register_instruction_in,
+        IF_ID_register_instruction_out,
+        IF_ID_register_stall
+	);
+
     
 end architecture;
