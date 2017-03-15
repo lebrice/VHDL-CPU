@@ -9,7 +9,6 @@ ENTITY mem is
       bit_width  : integer := 32
     );
     port (
-        clock : in std_logic;
         ALU_result_in : in std_logic_vector(63 downto 0);
         ALU_result_out : out std_logic_vector(63 downto 0);
         instruction_in : in INSTRUCTION;
@@ -33,7 +32,7 @@ BEGIN
     instruction_out <= instruction_in;
     ALU_result_out <= ALU_result_in;
 
-    mem_process : process(clock, m_waitrequest)
+    mem_process : process(m_waitrequest)
     BEGIN
         CASE instruction_in.INSTRUCTION_TYPE IS
             WHEN load_word =>
