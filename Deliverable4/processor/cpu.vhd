@@ -192,7 +192,6 @@ architecture CPU_arch of CPU is
     
     -- SIGNALS
     
-    signal fetch_stage_clock : std_logic;
     signal fetch_stage_reset : std_logic;
     signal fetch_stage_branch_target : integer;
     signal fetch_stage_branch_condition : std_logic;
@@ -203,6 +202,8 @@ architecture CPU_arch of CPU is
     signal fetch_stage_m_read : std_logic;
     signal fetch_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);
     signal fetch_stage_m_waitrequest : std_logic; -- unused until the Avalon Interface is added.
+    signal fetch_stage_m_writedata : std_logic_vector(bit_width-1 downto 0); -- unused;
+    signal fetch_stage_m_write : std_logic; -- unused;
   
     signal IF_ID_register_instruction_in : Instruction;
     signal IF_ID_register_PC_in : integer;            
@@ -210,7 +211,6 @@ architecture CPU_arch of CPU is
     signal IF_ID_register_PC_out : integer;
 
 
-    signal decode_stage_clock : std_logic;
     signal decode_stage_PC : integer;
     signal decode_stage_instruction_in : INSTRUCTION;
     signal decode_stage_write_back_instruction : INSTRUCTION;
@@ -226,7 +226,6 @@ architecture CPU_arch of CPU is
     signal decode_stage_stall_in : std_logic;
     signal decode_stage_stall_out :  std_logic;
         
-    signal ID_EX_register_clock : STD_LOGIC;
     signal ID_EX_register_pc_in: INTEGER;
     signal ID_EX_register_pc_out:  INTEGER;
     signal ID_EX_register_instruction_in: INSTRUCTION;
@@ -249,7 +248,6 @@ architecture CPU_arch of CPU is
     signal execute_stage_ALU_Result :  std_logic_vector(31 downto 0);
 
 
-    signal EX_MEM_register_clock: STD_LOGIC;
     signal EX_MEM_register_pc_in: INTEGER;
     signal EX_MEM_register_pc_out:  INTEGER;
     signal EX_MEM_register_instruction_in: INSTRUCTION;
@@ -261,7 +259,6 @@ architecture CPU_arch of CPU is
     signal EX_MEM_register_b_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal EX_MEM_register_b_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-    signal memory_stage_clock : std_logic;
     signal memory_stage_ALU_result_in : std_logic_vector(31 downto 0);
     signal memory_stage_ALU_result_out :  std_logic_vector(31 downto 0);
     signal memory_stage_instruction_in : INSTRUCTION;
@@ -277,7 +274,6 @@ architecture CPU_arch of CPU is
     signal memory_stage_m_write :  std_logic;
     signal memory_stage_m_waitrequest : std_logic;-- Unused until the Avalon Interface is added.
 
-    signal MEM_WB_register_clock: STD_LOGIC;
     signal MEM_WB_register_pc_in: INTEGER;
     signal MEM_WB_register_pc_out:  INTEGER;
     signal MEM_WB_register_instruction_in: INSTRUCTION;
@@ -294,6 +290,45 @@ architecture CPU_arch of CPU is
     signal write_back_stage_instructionOut :  instruction;
 
 begin
+
+-- signal fetch_stage_reset : std_logic;
+-- signal fetch_stage_branch_target : integer;
+-- signal fetch_stage_branch_condition : std_logic;
+-- signal fetch_stage_stall : std_logic;
+-- signal fetch_stage_instruction_out : Instruction;
+-- signal fetch_stage_PC : integer;
+-- signal fetch_stage_m_addr : integer;
+-- signal fetch_stage_m_read : std_logic;
+-- signal fetch_stage_m_readdata : std_logic_vector (bit_width-1 downto 0);
+-- signal fetch_stage_m_waitrequest : std_logic; -- unused until the Avalon Interface is added.
   
+
+    fet: fetchStage PORT MAP(
+        clock,
+        fetch_stage_reset,
+        fetch_stage_branch_target,
+        fetch_stage_branch_condition,
+        fetch_stage_stall,
+        fetch_stage_instruction_out,
+        fetch_stage_PC,
+        fetch_stage_m_addr,
+        fetch_stage_m_read,
+        fetch_stage_m_readdata,
+        fetch_stage_m_waitrequest -- unused until the Avalon Interface is added.
+    );
+
+    fetch_stage_memory : memory GENERIC MAP(
+        ram_size => ram_size,
+        bit_width => bit_width
+    )
+    PORT MAP(
+        clock,
+        fetch_stage_m_writedata, -- unused in this case;
+        fetch_stage_m_addr,
+        fetch_stage_m_write, -- unused in this case.
+        fetch_stage_m_read,
+        fetch_stage_m_readdata,
+        fetch_stage_m_waitrequest
+    );
     
 end architecture;
