@@ -255,8 +255,8 @@ architecture CPU_arch of CPU is
     signal ID_EX_register_pc_out:  INTEGER;
     signal ID_EX_register_instruction_in: INSTRUCTION;
     signal ID_EX_register_instruction_out:  INSTRUCTION;
-    signal ID_EX_register_sign_extend_imm_in: INTEGER;
-    signal ID_EX_register_sign_extend_imm_out:  INTEGER;
+    signal ID_EX_register_sign_extend_imm_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal ID_EX_register_sign_extend_imm_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal ID_EX_register_a_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal ID_EX_register_a_out:  STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal ID_EX_register_b_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -500,13 +500,13 @@ begin
     ID_EX_register_b_in <= decode_stage_val_b;
     ID_EX_register_instruction_in <= decode_stage_instruction_out;
     ID_EX_register_pc_in <= decode_stage_PC_out;
-    ID_EX_register_sign_extend_imm_in <= to_integer(unsigned(decode_stage_i_sign_extended));
+    ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended);
 
     execute_stage_PC <= ID_EX_register_pc_out;
     execute_stage_instruction_in <= ID_EX_register_instruction_out;
     execute_stage_val_a <= ID_EX_register_a_out;
     execute_stage_val_b <= ID_EX_register_b_out;
-    execute_stage_imm_sign_extended <= std_logic_vector(to_unsigned(ID_EX_register_sign_extend_imm_out,32));
+    execute_stage_imm_sign_extended <= ID_EX_register_sign_extend_imm_out;
     
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
     EX_MEM_register_b_in <= execute_stage_ALU_result; -- TODO: is this right ?
