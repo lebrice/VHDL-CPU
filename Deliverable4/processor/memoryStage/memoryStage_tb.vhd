@@ -41,12 +41,14 @@ ARCHITECTURE behaviour OF memStage_tb IS
         PORT (
             clock: IN STD_LOGIC;
             writedata: IN STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
-            address: IN INTEGER;
+            address: IN INTEGER RANGE 0 TO ram_size-1;
             memwrite: IN STD_LOGIC;
             memread: IN STD_LOGIC;
-            readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
-            waitrequest: OUT STD_LOGIC
-        );
+            readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);  
+            waitrequest: OUT STD_LOGIC;                        
+            memdump: IN STD_LOGIC;
+            memload: IN STD_LOGIC
+        ); 
     END COMPONENT;
 
     -- All the input signals with initial values.
@@ -78,6 +80,8 @@ ARCHITECTURE behaviour OF memStage_tb IS
     signal mem_component_addr : integer range 0 to ram_size-1;
     signal mem_component_read : std_logic;
     signal mem_component_write : std_logic;
+    signal mem_dump : std_logic;
+    signal mem_load : std_logic;
 
 BEGIN
 
@@ -109,7 +113,9 @@ BEGIN
         mem_readdata,
         mem_writedata,
         mem_component_write,
-        mem_waitrequest
+        mem_waitrequest,
+        mem_dump,
+        mem_load
     );
 
     -- Clock.
