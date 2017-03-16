@@ -10,15 +10,19 @@ END executeStage_tb;
 ARCHITECTURE behaviour OF executeStage_tb IS
 --components go here
 COMPONENT EXECUTE IS
-    port(instruction_in : in Instruction;
+    port (
+    instruction_in : in Instruction;
     val_a : in std_logic_vector(31 downto 0);
     val_b : in std_logic_vector(31 downto 0);
     imm_sign_extended : in std_logic_vector(31 downto 0);
     PC : in integer; 
     instruction_out : out Instruction;
     branch : out std_logic;
-    ALU_Result : out std_logic_vector(31 downto 0)
-  );
+    ALU_result : out std_logic_vector(63 downto 0);
+    branch_target_out : out std_logic_vector(31 downto 0);
+    val_b_out : out std_logic_vector(31 downto 0);
+    PC_out : out integer
+  ) ;
 END COMPONENT;
 
 --these are our input signals 
@@ -29,7 +33,12 @@ signal imm_sign_extended : std_logic_vector(31 downto 0);
 signal PC : integer;
 signal INSTRUCTION_OUT : Instruction;
 signal branch : std_logic;
-signal ALU_Result : std_logic_vector(31 downto 0);
+signal ALU_Result : std_logic_vector(63 downto 0);
+signal branch_target_out : std_logic_vector(31 downto 0);
+signal val_b_out : std_logic_vector(31 downto 0);
+signal PC_out : integer;
+
+
 
 CONSTANT clk_period : time := 1 ns; --TODO: figure out how long we wait here for...
 signal val_a_int, val_b_int, immediate_int : integer;
@@ -37,7 +46,19 @@ begin
     -- val_a <= std_logic_vector(to_unsigned(val_a_int,32));
 
     --TODO: think carefully about signed vs unsigned and the format of values
-    exAlu: EXECUTE port map (instruction_in, val_a, val_b, imm_sign_extended, PC, instruction_out, branch, ALU_Result);
+    exAlu: EXECUTE port map (
+        instruction_in,
+        val_a,
+        val_b,
+        imm_sign_extended,
+        PC,
+        instruction_out,
+        branch,
+        ALU_result,
+        branch_target_out,
+        val_b_out,
+        PC_out
+    );
     test_process : PROCESS
     variable temp : std_logic_vector(31 downto 0) ;
     BEGIN
