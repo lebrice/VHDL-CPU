@@ -113,7 +113,7 @@ BEGIN
         mem_component_addr,
         mem_component_read,
         mem_readdata,
-        mem_writedata,
+        mem_write_data,
         mem_component_write,
         mem_waitrequest
     );
