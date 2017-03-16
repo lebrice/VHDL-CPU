@@ -18,11 +18,11 @@ architecture processor_test of cpu_tb is
             clock : in std_logic;
             initialize : in std_logic; -- signals to load Instruciton and Data Memories. Should be held at '1' for at least a few clock cycles.
             dump : in std_logic; -- similar to above but for dump instead of load.
-            IF_ID_instruction : INSTRUCTION; 
-            ID_EX_instruction : INSTRUCTION; 
-            EX_MEM_instruction : INSTRUCTION;
-            MEM_WB_instruction : INSTRUCTION;
-            WB_instruction : INSTRUCTION
+            IF_ID_instruction : out INSTRUCTION; 
+            ID_EX_instruction : out INSTRUCTION; 
+            EX_MEM_instruction : out INSTRUCTION;
+            MEM_WB_instruction : out INSTRUCTION;
+            WB_instruction : out INSTRUCTION
         );
     end COMPONENT;
     signal dump : std_logic := '0';
@@ -70,7 +70,7 @@ begin
     report "stopped at first clock cycle." severity failure;
     wait for clock_period;
     report "stopped at second clock cycle." severity failure;
-    
+
 
     wait for 9000 ns;
     dump <= '1'; --dump data

@@ -16,11 +16,11 @@ entity CPU is
     clock : in std_logic;
     initialize : in std_logic; -- signals to load Instruciton and Data Memories. Should be held at '1' for at least a few clock cycles.
     dump : in std_logic; -- similar to above but for dump instead of load.
-    IF_ID_instruction : INSTRUCTION; 
-    ID_EX_instruction : INSTRUCTION; 
-    EX_MEM_instruction : INSTRUCTION;
-    MEM_WB_instruction : INSTRUCTION;
-    WB_instruction : INSTRUCTION
+    IF_ID_instruction : out INSTRUCTION; 
+    ID_EX_instruction : out INSTRUCTION; 
+    EX_MEM_instruction : out INSTRUCTION;
+    MEM_WB_instruction : out INSTRUCTION;
+    WB_instruction : out INSTRUCTION
   
   );
 end CPU ;
