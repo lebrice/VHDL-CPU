@@ -92,12 +92,14 @@ BEGIN
     dut: memory 
     PORT MAP(
         clock,
-        mem_writedata,
+        mem_write_data,
         mem_addr,
         mem_write,
         mem_read,
         mem_readdata,
-        mem_waitrequest
+        mem_waitrequest,
+        mem_dump,
+        mem_load
     );
     -- Stage under test.
     mem_stage: memoryStage 
@@ -113,9 +115,7 @@ BEGIN
         mem_readdata,
         mem_writedata,
         mem_component_write,
-        mem_waitrequest,
-        mem_dump,
-        mem_load
+        mem_waitrequest
     );
 
     -- Clock.
@@ -149,12 +149,7 @@ BEGIN
         instruction_in <= makeInstruction(LW_OP, 1, 1, 0);
         wait for clock_period;
         assert mem_data = x"FEFEFEFE" report "mem_data should be FEFEFEFE; Did not correctly load or store!" severity failure;
-
-        -- Branch
-        instruction_in <= makeInstruction(BEQ_OP, 1, 1, 8);
-        wait for clock_period;
-        assert branch_taken_out = '1' report "branch_taken_out should be 1" severity failure;
-
+        wait;
     end process;
 
 END behaviour ; -- behaviour
