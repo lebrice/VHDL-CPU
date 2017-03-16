@@ -72,7 +72,7 @@ BEGIN
 	-- load memory from file "memory_load.text" when a rising edge is see on memload
 	-- load memory is used for testing only, file IO is not synthesizeable	
 	if(rising_edge(memload)) THEN
-			report "Trying to do a mem_load for" & data_or_instruction_specifier;
+			report "Trying to do a mem_load";
 			-- TODO: add generics for the paths
 			file_open(infile, "program.txt", read_mode);
 			for i in ram_block' reverse_range loop

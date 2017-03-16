@@ -357,8 +357,7 @@ begin
         fetch_stage_m_readdata,
         fetch_stage_m_waitrequest,
         instruction_memory_dump,
-        instruction_memory_load,
-        '0'
+        instruction_memory_load
     );
 
     IF_ID_reg : IF_ID_REGISTER PORT MAP (
@@ -459,8 +458,7 @@ begin
         memory_stage_m_readdata,
         memory_stage_m_waitrequest,
         data_memory_dump,
-        data_memory_load,
-        '1'
+        data_memory_load
     );
 
     MEM_WB_reg : MEM_WB_REGISTER PORT MAP (
@@ -527,7 +525,7 @@ begin
 
     -- TODO: Later, Take a look at page 684 (C-40) of the textbook "Computer Architecture : a quantitative approach"
     -- for some neat pseudo-code about forwarding.
-    
+
     init : process( clock, initialize )
     begin
         if initialize = '1' AND initialized = '0' then

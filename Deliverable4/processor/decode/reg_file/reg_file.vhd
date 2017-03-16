@@ -26,8 +26,8 @@ package registers is
         return register_block;
     function set_register(reg_number: integer; reg_data : std_logic_vector(31 downto 0); reg_block : register_block)
         return register_block;
-    impure function load_registers
-        return register_block;
+    -- impure function load_registers
+    --     return register_block;
     procedure dump_registers(reg_block  : register_block);
 
 end registers;
