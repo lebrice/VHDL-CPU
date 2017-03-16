@@ -70,7 +70,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period; 
-        ASSERT (to_integer(signed(ALU_Result)) = 181) REPORT "ADD: ALU_Result should be 181, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 181) REPORT "ADD: ALU_Result should be 181, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- Addi
         instruction_in <= makeInstruction(ADDI_OP, 1, 2, 12); --addi t1 t2 10
@@ -79,7 +79,7 @@ begin
         imm_sign_extended <= std_logic_vector(to_signed(12,32));
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 22) REPORT "ADDI: ALU_Result should be 22, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 22) REPORT "ADDI: ALU_Result should be 22, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- LOAD_WORD
         instruction_in <= makeInstruction(LW_OP, 1, 2, 50); --lw 
@@ -88,7 +88,7 @@ begin
         imm_sign_extended <= std_logic_vector(to_signed(50,32));
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "LW: ALU_Result should be 60, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "LW: ALU_Result should be 60, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- STORE_WORD
         instruction_in <= makeInstruction(SW_OP, 1, 2, 50); --sw
@@ -97,7 +97,7 @@ begin
         imm_sign_extended <= std_logic_vector(to_signed(50,32));
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "SW: ALU_Result should be 60, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "SW: ALU_Result should be 60, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- BRANCH_IF_EQUAL
         instruction_in <= makeInstruction(BEQ_OP, 1, 2, 40); --beq t1,t2,0x0000
@@ -106,7 +106,7 @@ begin
         imm_sign_extended <= std_logic_vector(to_signed(40,32)); --full
         PC <= 20;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "BEQ: ALU_Result should be 50, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "BEQ: ALU_Result should be 50, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- BRANCH_IF_NOT_EQUAL
         instruction_in <= makeInstruction(BNE_OP, 1, 2, 40); --beq t1,t2,0x0000
@@ -115,7 +115,7 @@ begin
         imm_sign_extended <= std_logic_vector(to_signed(40,32)); --full
         PC <= 20;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "BNE: ALU_Result should be 60, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 60) REPORT "BNE: ALU_Result should be 60, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
    
         -- SUBTRACT
@@ -125,7 +125,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 200) REPORT "SUB: ALU_Result should be 200, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 200) REPORT "SUB: ALU_Result should be 200, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- MULTIPLY
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, MULT_FN); 
@@ -134,7 +134,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 600) REPORT "MULT: ALU_Result should be 600, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 600) REPORT "MULT: ALU_Result should be 600, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- DIVIDE 
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, DIV_FN);
@@ -143,7 +143,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 2) REPORT "DIV: ALU_Result should be 2, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 2) REPORT "DIV: ALU_Result should be 2, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- SET_LESS_THAN
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, SLT_FN); --x"014B482A"; --slt t1 t2 t3
@@ -152,7 +152,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 1) REPORT "SLT: ALU_Result should be 1, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 1) REPORT "SLT: ALU_Result should be 1, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- SET_LESS_THAN_IMMEDIATE
         instruction_in <= makeInstruction(SLTI_OP, 1, 2, 10); --slti t1 t2 0xFFFF
@@ -161,7 +161,7 @@ begin
         imm_sign_extended <= std_logic_vector(to_signed(10,32)); --10 (as per instruction)
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 0) REPORT "SLTI: ALU_Result should be 0, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 0) REPORT "SLTI: ALU_Result should be 0, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- BITWISE_AND
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, AND_FN); --and t1 t2 t3
@@ -170,7 +170,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"0000000A") REPORT "AND: ALU_Result should be 0x0000000A, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"0000000A") REPORT "AND: ALU_Result should be 0x0000000A, but wasn't" SEVERITY FAILURE;
 
         -- BITWISE_AND_IMMEDIATE 
         temp := x"0000000B";
@@ -180,7 +180,7 @@ begin
         imm_sign_extended <= x"0000000B"; --0xB
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"0000000A") REPORT "ANDI: ALU_Result should be 0x0000000A, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"0000000A") REPORT "ANDI: ALU_Result should be 0x0000000A, but wasn't" SEVERITY FAILURE;
 
         -- BITWISE_OR
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, OR_FN); --or t1, t2, t3
@@ -189,7 +189,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"0000000B") REPORT "OR: ALU_Result should be 0x0000000B, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"0000000B") REPORT "OR: ALU_Result should be 0x0000000B, but wasn't" SEVERITY FAILURE;
 
         -- BITWISE_OR_IMMEDIATE
         instruction_in <= makeInstruction(ORI_OP, 1, 2, 11); --ori t1 t2 0xB
@@ -198,7 +198,7 @@ begin
         imm_sign_extended <= x"0000000B"; --0xB
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"FFFFFFFF") REPORT "ORI: ALU_Result should be 0x0000000B, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"FFFFFFFF") REPORT "ORI: ALU_Result should be 0x0000000B, but wasn't" SEVERITY FAILURE;
 
         -- BITWISE_NOR
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, NOR_FN); --nor t1 t2 t3
@@ -207,7 +207,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"FFFFFFF0") REPORT "NOR: ALU_Result should be 0xFFFFFFF0, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"FFFFFFF0") REPORT "NOR: ALU_Result should be 0xFFFFFFF0, but wasn't" SEVERITY FAILURE;
 
         -- BITWISE_XOR
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, XOR_FN); --xor t1 t2 t3
@@ -216,7 +216,7 @@ begin
         imm_sign_extended <= x"00000000"; --full
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"00000006") REPORT "XOR: ALU_Result should be 0x00000006, but wasn't" SEVERITY ERROR;   
+        ASSERT (ALU_Result = x"00000006") REPORT "XOR: ALU_Result should be 0x00000006, but wasn't" SEVERITY FAILURE;   
 
         -- BITWISE_XOR_IMMEDIATE
         instruction_in <= makeInstruction(XORI_OP, 1, 2, 11); --xori t1 t2 0xB
@@ -225,7 +225,7 @@ begin
         imm_sign_extended <= x"0000000B"; --0xB
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"00000006") REPORT "XORI: ALU_Result should be 0x00000006, but wasn't" SEVERITY ERROR;   
+        ASSERT (ALU_Result = x"00000006") REPORT "XORI: ALU_Result should be 0x00000006, but wasn't" SEVERITY FAILURE;   
 
         -- MOVE_FROM_HI
         -- The execute stage will never reach MOVE_FROM_HI (handled in decode)
@@ -240,7 +240,7 @@ begin
         imm_sign_extended <= x"FFFFFFFF"; --full
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"FFFF0000") REPORT "SLL: ALU_Result should be 0xFFFF0000, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"FFFF0000") REPORT "SLL: ALU_Result should be 0xFFFF0000, but wasn't" SEVERITY FAILURE;
 
         -- SHIFT_LEFT_LOGICAL
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 1, SLL_FN); --SLL t1 t2 t3 
@@ -249,7 +249,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"00000100") REPORT "SLL: ALU_Result should be 0x00000100, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"00000100") REPORT "SLL: ALU_Result should be 0x00000100, but wasn't" SEVERITY FAILURE;
 
         -- SHIFT_RIGHT_LOGICAL
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 1, SRL_FN); --SRL t1 t2 t3
@@ -258,7 +258,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"40000F00") REPORT "SRL: ALU_Result should be 0x00000F00, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"40000F00") REPORT "SRL: ALU_Result should be 0x00000F00, but wasn't" SEVERITY FAILURE;
 
         -- SHIFT_RIGHT_ARITHMETIC
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 1, SRA_FN); --SRA t1 t2 t3
@@ -267,7 +267,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"90000F00") REPORT "SRA: ALU_Result should be 0x00000F00, but wasn't" SEVERITY ERROR;
+        ASSERT (ALU_Result = x"90000F00") REPORT "SRA: ALU_Result should be 0x00000F00, but wasn't" SEVERITY FAILURE;
 
         -- JUMP
         instruction_in <= makeInstruction(J_OP, 500); --j 
@@ -276,7 +276,7 @@ begin
         imm_sign_extended <= x"00000000"; --0: doesn't matter
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "J: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "J: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- JUMP_AND_LINK
         instruction_in <= makeInstruction(JAL_OP, 500); --jal
@@ -285,7 +285,7 @@ begin
         imm_sign_extended <= x"00000000"; --0: doesn't matter
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "JAL: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "JAL: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
         -- JUMP_TO_REGISTER
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, JR_FN); --jr
@@ -294,7 +294,7 @@ begin
         imm_sign_extended <= x"00000000"; --0: doesn't matter
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "JR: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY ERROR;
+        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "JR: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
         wait;
     END PROCESS;
 END;
