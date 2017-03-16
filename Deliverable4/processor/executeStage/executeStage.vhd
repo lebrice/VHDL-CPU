@@ -23,7 +23,7 @@ end executeStage ;
 architecture executeStage_arch of executeStage is
   COMPONENT ALU
   port (
-    instruction : in INSTRUCTION;
+    instruction_type : in INSTRUCTION_TYPE;
     op_a : in std_logic_vector(31 downto 0); -- RS
     op_b : in std_logic_vector(31 downto 0); -- RT
     ALU_out : out std_logic_vector(63 downto 0) -- RD
@@ -38,7 +38,7 @@ architecture executeStage_arch of executeStage is
   --SIGNAL ALU_result : std_logic_vector(31 downto 0);
 begin
   --define alu component
-  exAlu: ALU port map (instruction_in, input_a, input_b, internal_ALU_result);
+  exAlu: ALU port map (instruction_in.instruction_type, input_a, input_b, internal_ALU_result);
 
   --calculate the branch target
   branch <=
