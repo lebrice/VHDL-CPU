@@ -479,7 +479,7 @@ begin
         write_back_stage_instruction_out
     );
 
-    -- TODO: SIGNAL CONNECTIONS BETWEEN COMPONENTS
+    -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
     fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_ALU_result_out));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
 

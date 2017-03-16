@@ -46,22 +46,24 @@ end process ; -- clock_process
 test_process : process
 begin
     report "starting test process";
-    wait for clock_period;
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
-    wait for clock_period;
-    wait for clock_period;
-    wait for clock_period;
-    wait for clock_period;
-    wait for clock_period;
+    
 
+
+    wait for 9000 ns;
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
     wait for clock_period;
+
+    report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
+
     wait;
 
+
+   
 
 
 end process test_process;
