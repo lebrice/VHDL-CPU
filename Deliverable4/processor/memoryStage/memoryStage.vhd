@@ -3,7 +3,7 @@ USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 USE work.instruction_tools.all;
 
-ENTITY mem is
+ENTITY memoryStage is
     generic (
       ram_size : integer := 8196;
       bit_width  : integer := 32
@@ -19,14 +19,13 @@ ENTITY mem is
         m_addr : out integer range 0 to ram_size-1;
         m_read : out std_logic;
         m_readdata : in std_logic_vector (bit_width-1 downto 0);        
-        m_writedata : out std_logic_vector (bit_width-1 downto 0);
+        m_write_data : out std_logic_vector (bit_width-1 downto 0);
         m_write : out std_logic;
         m_waitrequest : in std_logic -- Unused until the Avalon Interface is added.
-
     );
-END mem;
+END memoryStage;
 
-ARCHITECTURE memArch OF mem IS
+ARCHITECTURE memArch OF memoryStage IS
 BEGIN
     --set outputs
     instruction_out <= instruction_in;
@@ -44,7 +43,7 @@ BEGIN
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_write <= '1';
                 m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0)));
-                m_writedata <= val_b;
+                m_write_data <= val_b;
             WHEN others =>
               -- do nothing.  
         END CASE;
