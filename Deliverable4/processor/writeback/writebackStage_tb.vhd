@@ -14,6 +14,7 @@ begin
         -- vars
     begin
         -- test process body
+        wait;
     end process;
 
 end;
