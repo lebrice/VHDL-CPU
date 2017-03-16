@@ -358,7 +358,7 @@ begin
         instruction_memory_load
     );
 
-    IF_ID_register : IF_ID_REGISTER PORT MAP (
+    IF_ID_reg : IF_ID_REGISTER PORT MAP (
         clock,
         IF_ID_register_pc_in,
         IF_ID_register_pc_out,
@@ -385,7 +385,7 @@ begin
         decode_stage_stall_out
     );
 
-    ID_EX_register : ID_EX_Register PORT MAP (
+    ID_EX_reg : ID_EX_Register PORT MAP (
         clock,
         ID_EX_register_pc_in,
         ID_EX_register_pc_out,
@@ -412,7 +412,7 @@ begin
         execute_stage_PC_out
     );
 
-    EX_MEM_register : EX_MEM_REGISTER PORT MAP (
+    EX_MEM_reg : EX_MEM_REGISTER PORT MAP (
         clock,
         EX_MEM_register_pc_in,
         EX_MEM_register_pc_out,
@@ -459,7 +459,7 @@ begin
         data_memory_load
     );
 
-    MEM_WB_register : MEM_WB_REGISTER PORT MAP (
+    MEM_WB_reg : MEM_WB_REGISTER PORT MAP (
         clock,
         MEM_WB_register_instruction_in,
         MEM_WB_register_instruction_out,
