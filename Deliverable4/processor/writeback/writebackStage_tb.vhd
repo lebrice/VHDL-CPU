@@ -15,8 +15,8 @@ begin
     begin
         report "Start of Write Back Stage.";
         -- test process body
-        wait;
         report "End of Write Back Stage.";
+        wait;
     end process;
 
 end;
