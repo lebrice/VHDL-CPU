@@ -73,7 +73,7 @@ BEGIN
 
 	-- load memory from file "memory_load.text" when a rising edge is see on memload
 	-- load memory is used for testing only, file IO is not synthesizeable	
-	if(rising_edge(memload) && data_init_complete = false) THEN
+	if(rising_edge(memload) AND data_init_complete = false) THEN
 			data_init_complete := true;
 			-- TODO: add generics for the paths
 			file_open(infile, "processor\memory\mem_in" & data_or_instruction_specifier & ".txt", read_mode);
