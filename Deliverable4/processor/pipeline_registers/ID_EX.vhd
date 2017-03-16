@@ -30,7 +30,7 @@ BEGIN
     id_ex_process: PROCESS (clock)
     BEGIN
         IF(clock'EVENT AND clock = '1') THEN
-            report "ID_EX Register";
+            -- report "ID_EX Register";
             pc_intermediate <= pc_in;
             pc_out <= pc_intermediate;
 
