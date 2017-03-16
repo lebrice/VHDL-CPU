@@ -100,8 +100,8 @@ architecture CPU_arch of CPU is
             pc_out: OUT INTEGER;
             instruction_in: IN INSTRUCTION;
             instruction_out: OUT INSTRUCTION;
-            sign_extend_imm_in: IN INTEGER;
-            sign_extend_imm_out: OUT INTEGER;
+            sign_extend_imm_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            sign_extend_imm_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
             a_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             a_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
             b_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -276,18 +276,18 @@ architecture CPU_arch of CPU is
     signal execute_stage_PC_out : integer;
 
     --Execute Memory register
-    signal EX_MEM_pc_in: INTEGER;
-    signal EX_MEM_pc_out: INTEGER;
-    signal EX_MEM_instruction_in: INSTRUCTION;
-    signal EX_MEM_instruction_out: INSTRUCTION;
-    signal EX_MEM_does_branch_in: STD_LOGIC;
-    signal EX_MEM_does_branch_out: STD_LOGIC;
-    signal EX_MEM_ALU_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
-    signal EX_MEM_ALU_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
-    signal EX_MEM_branch_target_in : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal EX_MEM_branch_target_out : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal EX_MEM_b_value_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal EX_MEM_b_value_out: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal EX_MEM_register_pc_in: INTEGER;
+    signal EX_MEM_register_pc_out: INTEGER;
+    signal EX_MEM_register_instruction_in: INSTRUCTION;
+    signal EX_MEM_register_instruction_out: INSTRUCTION;
+    signal EX_MEM_register_does_branch_in: STD_LOGIC;
+    signal EX_MEM_register_does_branch_out: STD_LOGIC;
+    signal EX_MEM_register_ALU_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
+    signal EX_MEM_register_ALU_result_out: STD_LOGIC_VECTOR(63 DOWNTO 0);
+    signal EX_MEM_register_branch_target_in : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal EX_MEM_register_branch_target_out : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal EX_MEM_register_b_value_in: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal EX_MEM_register_b_value_out: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     --Memory Stage
     signal memory_stage_ALU_result_in : std_logic_vector(63 downto 0);
