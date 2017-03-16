@@ -18,39 +18,11 @@ end writebackStage ;
 
 architecture writebackStage_arch of writebackStage is
 begin
-  -- process to act as mux
-  mux : process
-    -- vars
-  begin
-      instruction_out <= instruction_in;
-      case instruction_in.format is
-        -- register-register ALU instruction
-        when r_type => 
-          write_data <= ALU_result_in;
 
--- uncomment if you wish to implement register choice here
-          -- if (instruction_in.rt != 0) then
-          --   writeRegister <= instruction_in.rd;
-          -- end if;
+  instruction_out <= instruction_in;
 
-        -- register-immediate ALU instruction
-        when i_type  => 
-          if (instruction_in.instruction_type = LOAD_WORD) then
-            write_data <= mem_data_in;
-          else
-            write_data <= ALU_result_in; --TODO: currently this is wrong (32 to 64 bits)
-          end if;
-
--- uncomment if you wish to implement register choice here     
-          -- if (instruction_in.rt != 0) then
-          --   writeRegister <= instruction_in.rt;
-          -- end if;
-          
-        when others => 
-          -- do nothing
-
-      end case;
-   
-  end process mux;
+  write_data <= 
+    mem_data_in when instruction_in.instruction_type = LOAD_WORD else
+    ALU_result_in;
 
 end architecture ; 
