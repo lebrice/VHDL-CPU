@@ -22,7 +22,7 @@ begin
   instruction_out <= instruction_in;
 
   write_data <= 
-    mem_data_in when instruction_in.instruction_type = LOAD_WORD else
+    X"00000000" & mem_data_in when instruction_in.instruction_type = LOAD_WORD else --TODO: Confirm this is right.
     ALU_result_in;
 
 end architecture ; 
