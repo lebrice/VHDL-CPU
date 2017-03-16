@@ -61,7 +61,6 @@ BEGIN
 		file 	 infile: text;
 		variable inline: line;
 		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
-		variable data_init_complete: boolean := false;
 	BEGIN
 		--This is a cheap trick to initialize the SRAM in simulation
 		-- IF(now < 1 ps)THEN
@@ -73,8 +72,7 @@ BEGIN
 
 	-- load memory from file "memory_load.text" when a rising edge is see on memload
 	-- load memory is used for testing only, file IO is not synthesizeable	
-	if(rising_edge(memload) AND data_init_complete = false) THEN
-			data_init_complete := true;
+	if(rising_edge(memload)) THEN
 			-- TODO: add generics for the paths
 			file_open(infile, "processor\memory\mem_in" & data_or_instruction_specifier & ".txt", read_mode);
 			for i in ram_block' reverse_range loop
