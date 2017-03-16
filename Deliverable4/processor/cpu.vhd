@@ -493,7 +493,7 @@ begin
 
     decode_stage_PC <= IF_ID_register_pc_out;
     decode_stage_instruction_in <= IF_ID_register_instruction_out;
-    decode_stage_write_back_data <= write_back_stage_write_data --TODO: I removed x"0000000", is that ok?
+    decode_stage_write_back_data <= write_back_stage_write_data 
     decode_stage_write_back_instruction <= write_back_stage_instruction_out;
 
     ID_EX_register_a_in <= decode_stage_val_a;
