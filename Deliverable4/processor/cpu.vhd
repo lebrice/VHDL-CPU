@@ -493,14 +493,14 @@ begin
 
     decode_stage_PC <= IF_ID_register_pc_out;
     decode_stage_instruction_in <= IF_ID_register_instruction_out;
-    decode_stage_write_back_data <= write_back_stage_write_data 
+    decode_stage_write_back_data <= write_back_stage_write_data;
     decode_stage_write_back_instruction <= write_back_stage_instruction_out;
 
     ID_EX_register_a_in <= decode_stage_val_a;
     ID_EX_register_b_in <= decode_stage_val_b;
     ID_EX_register_instruction_in <= decode_stage_instruction_out;
     ID_EX_register_pc_in <= decode_stage_PC_out;
-    ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended);
+    ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended;
 
     execute_stage_PC <= ID_EX_register_pc_out;
     execute_stage_instruction_in <= ID_EX_register_instruction_out;
@@ -509,15 +509,15 @@ begin
     execute_stage_imm_sign_extended <= ID_EX_register_sign_extend_imm_out;
     
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
-    EX_MEM_register_b_in <= execute_stage_val_b_out; 
+    EX_MEM_register_b_value_in <= execute_stage_val_b_out; 
     EX_MEM_register_does_branch_in <= execute_stage_branch;
     EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
     EX_MEM_register_instruction_in <= execute_stage_instruction_out;
 
-    memory_stage_ALU_result_in <= EX_MEM_register_ALU_result_ou;
+    memory_stage_ALU_result_in <= EX_MEM_register_ALU_result_out;
     memory_stage_instruction_in <= EX_MEM_register_instruction_out;
-    memory_stage_val_b <= EX_MEM_register_b_out;
+    memory_stage_val_b <= EX_MEM_register_b_value_out;
 
     MEM_WB_register_ALU_result_in <= memory_stage_ALU_result_out;
     MEM_WB_register_data_mem_in <= memory_stage_mem_data;
