@@ -542,7 +542,7 @@ begin
         end if;
     end process ; -- init
 
-    dump : process( clock, dump )
+    dump_process : process( clock, dump )
     begin
         if dump = '1' AND dumped = '0' then
             report "Dumping...";
