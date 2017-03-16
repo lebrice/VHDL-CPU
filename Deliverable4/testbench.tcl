@@ -3,11 +3,11 @@ vlib work
 ;# Compile the needed components
 vcom processor/instruction/instruction.vhd
 vcom processor/memory/memory.vhd
-vcom processor/writeback/writebackStage.vhd
-vcom processor/alu.vhd
+vcom processor/writebackStage/writebackStage.vhd
+vcom processor/executeStage/alu.vhd
 vcom processor/executeStage/executeStage.vhd
-vcom processor/decode/reg_file/reg_file.vhd
-vcom processor/decode/decodeStage.vhd
+vcom processor/decodeStage/reg_file/reg_file.vhd
+vcom processor/decodeStage/decodeStage.vhd
 vcom processor/fetchStage/fetchStage.vhd
 vcom processor/pipeline_registers/EX_MEM.vhd
 vcom processor/pipeline_registers/ID_EX.vhd
