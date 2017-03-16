@@ -14,7 +14,8 @@ entity CPU is
     );
   port (
     clock : in std_logic;
-    initialize : in std_logic -- signals to load Instruciton and Data Memories. Should be held at '1' for at least a few clock cycles.
+    initialize : in std_logic; -- signals to load Instruciton and Data Memories. Should be held at '1' for at least a few clock cycles.
+    dump : in std_logic -- similar to above but for dump instead of load.
   );
 end CPU ;
 
@@ -326,6 +327,7 @@ architecture CPU_arch of CPU is
 
     --misc
     signal initialized : std_logic := '0';
+    signal dumped : std_logic := '0';
 
 begin
 
@@ -539,6 +541,19 @@ begin
             instruction_memory_load <= '0';         
         end if;
     end process ; -- init
+
+    dump : process( clock, dump )
+    begin
+        if dump = '1' AND dumped = '0' then
+            report "Dumping...";
+            data_memory_dump <= '1';
+            instruction_memory_dump <= '1';
+            dumped <= '1';  
+        else 
+            data_memory_dump <= '0';
+            instruction_memory_dump <= '0';         
+        end if;
+    end process ; -- dump
 
 
 
