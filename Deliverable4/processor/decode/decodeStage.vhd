@@ -380,8 +380,8 @@ current_state <=
 
   write_registers_to_file : process( write_register_file )
   begin
-    if write_register_file = '1' then
-      -- TODO: call the procedure to write out the register_file to a file.
+    if rising_edge(write_register_file) then
+      dump_registers(register_file);
     end if;    
   end process ; -- write_registers_to_file
 

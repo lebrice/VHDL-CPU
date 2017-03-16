@@ -23,8 +23,7 @@ ENTITY memory IS
 		readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
 		waitrequest: OUT STD_LOGIC;
 		memdump: IN STD_LOGIC;
-		memload: IN STD_LOGIC;
-		data_or_instruction_specifier: IN character
+		memload: IN STD_LOGIC
 	);
 END memory;
 
@@ -46,7 +45,7 @@ BEGIN
 	BEGIN
 		IF(rising_edge(memdump)) THEN
 			--TODO: Add generics for the paths
-			file_open(outfile, "processor\memory\mem_out" & data_or_instruction_specifier & ".txt", write_mode);
+			file_open(outfile, "memory.txt", write_mode);
         	for i in ram_block' reverse_range loop
 				write(outline, ram_block(i));
 				writeline(outfile, outline);
@@ -75,7 +74,7 @@ BEGIN
 	if(rising_edge(memload)) THEN
 			report "Trying to do a mem_load for" & data_or_instruction_specifier;
 			-- TODO: add generics for the paths
-			file_open(infile, "processor\memory\mem_in" & data_or_instruction_specifier & ".txt", read_mode);
+			file_open(infile, "program.txt", read_mode);
 			for i in ram_block' reverse_range loop
 				readline(infile, inline);
 				read(inline, data);

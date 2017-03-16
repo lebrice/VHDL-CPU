@@ -206,8 +206,7 @@ architecture CPU_arch of CPU is
             readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
             waitrequest: OUT STD_LOGIC;
             memdump: IN STD_LOGIC;
-            memload: IN STD_LOGIC;
-            data_or_instruction_specifier: IN character            
+            memload: IN STD_LOGIC          
         );
     END COMPONENT;
     
@@ -359,7 +358,7 @@ begin
         fetch_stage_m_waitrequest,
         instruction_memory_dump,
         instruction_memory_load,
-        'a'
+        '0'
     );
 
     IF_ID_reg : IF_ID_REGISTER PORT MAP (
@@ -461,7 +460,7 @@ begin
         memory_stage_m_waitrequest,
         data_memory_dump,
         data_memory_load,
-        'b'
+        '1'
     );
 
     MEM_WB_reg : MEM_WB_REGISTER PORT MAP (
@@ -528,16 +527,16 @@ begin
 
     -- TODO: Later, Take a look at page 684 (C-40) of the textbook "Computer Architecture : a quantitative approach"
     -- for some neat pseudo-code about forwarding.
-
+    
     init : process( clock, initialize )
     begin
         if initialize = '1' AND initialized = '0' then
             report "Initializing...";
-            data_memory_load <= '1';
+            -- data_memory_load <= '1';
             instruction_memory_load <= '1';
             initialized <= '1';  
         else 
-            data_memory_load <= '0';
+            -- data_memory_load <= '0';
             instruction_memory_load <= '0';         
         end if;
     end process ; -- init
@@ -547,11 +546,13 @@ begin
         if dump = '1' AND dumped = '0' then
             report "Dumping...";
             data_memory_dump <= '1';
-            instruction_memory_dump <= '1';
+            -- instruction_memory_dump <= '1';
+            decode_stage_write_register_file <= '1';
             dumped <= '1';  
         else 
             data_memory_dump <= '0';
-            instruction_memory_dump <= '0';         
+            decode_stage_write_register_file <= '0';
+            -- instruction_memory_dump <= '0';         
         end if;
     end process ; -- dump
 
