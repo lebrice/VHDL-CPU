@@ -17,7 +17,12 @@ architecture processor_test of cpu_tb is
         port (
             clock : in std_logic;
             initialize : in std_logic; -- signals to load Instruciton and Data Memories. Should be held at '1' for at least a few clock cycles.
-            dump : in std_logic
+            dump : in std_logic; -- similar to above but for dump instead of load.
+            IF_ID_instruction : INSTRUCTION; 
+            ID_EX_instruction : INSTRUCTION; 
+            EX_MEM_instruction : INSTRUCTION;
+            MEM_WB_instruction : INSTRUCTION;
+            WB_instruction : INSTRUCTION
         );
     end COMPONENT;
     signal dump : std_logic := '0';
@@ -25,12 +30,25 @@ architecture processor_test of cpu_tb is
     signal initialize : std_logic := '0';
 
     constant clock_period : time := 1 ns;
+
+
+    signal IF_ID_instruction : INSTRUCTION; 
+    signal ID_EX_instruction : INSTRUCTION; 
+    signal EX_MEM_instruction : INSTRUCTION;
+    signal MEM_WB_instruction : INSTRUCTION;
+    signal WB_instruction : INSTRUCTION;
+
 begin
 
 c1 : CPU PORT MAP (
     clock,
     initialize,
-    dump
+    dump,
+    IF_ID_instruction,
+    ID_EX_instruction, 
+    EX_MEM_instruction,
+    MEM_WB_instruction,
+    WB_instruction
 );
 
 
@@ -49,8 +67,10 @@ begin
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
+    report "stopped at first clock cycle." severity failure;
+    wait for clock_period;
+    report "stopped at second clock cycle." severity failure;
     
-
 
     wait for 9000 ns;
     dump <= '1'; --dump data

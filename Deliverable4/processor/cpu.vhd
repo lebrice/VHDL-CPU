@@ -15,7 +15,13 @@ entity CPU is
   port (
     clock : in std_logic;
     initialize : in std_logic; -- signals to load Instruciton and Data Memories. Should be held at '1' for at least a few clock cycles.
-    dump : in std_logic -- similar to above but for dump instead of load.
+    dump : in std_logic; -- similar to above but for dump instead of load.
+    IF_ID_instruction : INSTRUCTION; 
+    ID_EX_instruction : INSTRUCTION; 
+    EX_MEM_instruction : INSTRUCTION;
+    MEM_WB_instruction : INSTRUCTION;
+    WB_instruction : INSTRUCTION
+  
   );
 end CPU ;
 
@@ -525,6 +531,14 @@ begin
 
     -- TODO: Later, Take a look at page 684 (C-40) of the textbook "Computer Architecture : a quantitative approach"
     -- for some neat pseudo-code about forwarding.
+
+
+    IF_ID_instruction <= IF_ID_register_instruction_out;
+    ID_EX_instruction <= ID_EX_register_instruction_out;
+    EX_MEM_instruction <= EX_MEM_register_instruction_out;
+    MEM_WB_instruction <= MEM_WB_register_instruction_out;
+    WB_instruction <= write_back_stage_instruction_out;
+
 
     init : process( clock, initialize )
     begin
