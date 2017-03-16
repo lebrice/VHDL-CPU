@@ -185,7 +185,7 @@ architecture CPU_arch of CPU is
             mem_data_in : in std_logic_vector(31 downto 0);
             ALU_result_in : in std_logic_vector(63 downto 0);
             instruction_in : in instruction;
-            write_data : out std_logic_vector(31 downto 0);
+            write_data : out std_logic_vector(63 downto 0);
             -- writeRegister : out integer range 0 to 31; -- uncomment if you wish to implement register choice here
             instruction_out : out instruction
         );
@@ -318,7 +318,7 @@ architecture CPU_arch of CPU is
     signal write_back_stage_mem_data_in : std_logic_vector(31 downto 0);
     signal write_back_stage_ALU_result_in : std_logic_vector(63 downto 0);
     signal write_back_stage_instruction_in : instruction;
-    signal write_back_stage_write_data : std_logic_vector(31 downto 0);
+    signal write_back_stage_write_data : std_logic_vector(63 downto 0);
     signal write_back_stage_instruction_out : instruction;
 
     --memory
@@ -493,7 +493,7 @@ begin
 
     decode_stage_PC <= IF_ID_register_pc_out;
     decode_stage_instruction_in <= IF_ID_register_instruction_out;
-    decode_stage_write_back_data <= x"00000000" & write_back_stage_write_data; -- TODO: Length problem: write_back stage should have write_data be 64 bits, not 32.
+    decode_stage_write_back_data <= write_back_stage_write_data --TODO: I removed x"0000000", is that ok?
     decode_stage_write_back_instruction <= write_back_stage_instruction_out;
 
     ID_EX_register_a_in <= decode_stage_val_a;
