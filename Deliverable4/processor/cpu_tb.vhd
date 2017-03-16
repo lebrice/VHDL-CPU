@@ -22,7 +22,8 @@ architecture processor_test of cpu_tb is
             ID_EX_instruction : out INSTRUCTION; 
             EX_MEM_instruction : out INSTRUCTION;
             MEM_WB_instruction : out INSTRUCTION;
-            WB_instruction : out INSTRUCTION
+            WB_instruction : out INSTRUCTION;
+            fetch_PC : out integer
         );
     end COMPONENT;
     signal dump : std_logic := '0';
@@ -38,6 +39,8 @@ architecture processor_test of cpu_tb is
     signal MEM_WB_instruction : INSTRUCTION;
     signal WB_instruction : INSTRUCTION;
 
+    signal PC : integer;
+
 begin
 
 c1 : CPU PORT MAP (
@@ -48,7 +51,8 @@ c1 : CPU PORT MAP (
     ID_EX_instruction, 
     EX_MEM_instruction,
     MEM_WB_instruction,
-    WB_instruction
+    WB_instruction,
+    PC
 );
 
 
@@ -67,9 +71,13 @@ begin
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
-    report "stopped at first clock cycle." severity failure;
-    wait for clock_period;
-    report "stopped at second clock cycle." severity failure;
+    
+
+    for i in 0 to 10 loop
+        wait for clock_period;
+        report "stopped at clock cycle " & integer'image(i) & ", PC is " & integer'image(PC) severity failure;
+    end loop;
+
 
 
     wait for 9000 ns;

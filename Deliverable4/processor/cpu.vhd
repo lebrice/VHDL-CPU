@@ -20,7 +20,8 @@ entity CPU is
     ID_EX_instruction : out INSTRUCTION; 
     EX_MEM_instruction : out INSTRUCTION;
     MEM_WB_instruction : out INSTRUCTION;
-    WB_instruction : out INSTRUCTION
+    WB_instruction : out INSTRUCTION;
+    fetch_PC : out integer
   
   );
 end CPU ;
@@ -538,6 +539,9 @@ begin
     EX_MEM_instruction <= EX_MEM_register_instruction_out;
     MEM_WB_instruction <= MEM_WB_register_instruction_out;
     WB_instruction <= write_back_stage_instruction_out;
+
+    fetch_PC <= fetch_stage_PC;
+
 
 
     init : process( clock, initialize )
