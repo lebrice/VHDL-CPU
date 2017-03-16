@@ -41,8 +41,15 @@ begin
 end process ; -- clock_process
 
 
-test_process : process ( clock )
+test_process : process
 begin
+    initialize <= '1';
+    wait for clock_period;
+    initialize <= '0';
+
+    wait;
+
+
 
 end process test_process;
 

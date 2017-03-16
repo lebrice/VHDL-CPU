@@ -509,7 +509,7 @@ begin
     execute_stage_imm_sign_extended <= ID_EX_register_sign_extend_imm_out;
     
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
-    EX_MEM_register_b_value_in <= execute_stage_val_b_out; 
+    EX_MEM_register_b_value_in <= execute_stage_val_b; 
     EX_MEM_register_does_branch_in <= execute_stage_branch;
     EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
