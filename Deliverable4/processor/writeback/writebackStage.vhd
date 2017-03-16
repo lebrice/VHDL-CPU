@@ -18,11 +18,12 @@ end writebackStage ;
 
 architecture writebackStage_arch of writebackStage is
 begin
-
+  report "Start of Write Back Stage.";
   instruction_out <= instruction_in;
 
   write_data <= 
     X"00000000" & mem_data_in when instruction_in.instruction_type = LOAD_WORD else --TODO: Confirm this is right.
     ALU_result_in;
+  report "End of Write Back Stage.";
 
 end architecture ; 

@@ -13,8 +13,10 @@ begin
     test_process : process
         -- vars
     begin
+        report "Start of Write Back Stage.";
         -- test process body
         wait;
+        report "End of Write Back Stage.";
     end process;
 
 end;
