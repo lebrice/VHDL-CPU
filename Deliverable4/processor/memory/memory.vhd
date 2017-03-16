@@ -44,7 +44,8 @@ BEGIN
 		variable outline : line;
 	BEGIN
 		IF(rising_edge(memdump)) THEN
-			file_open(outfile, "memory_dump.txt", write_mode);
+			--TODO: Add generics for the paths
+			file_open(outfile, "processor\memory\memory_load.txt", write_mode);
         	for i in ram_block' reverse_range loop
 				write(outline, ram_block(i));
 				writeline(outfile, outline);
@@ -70,8 +71,9 @@ BEGIN
 
 	-- load memory from file "memory_load.text" when a rising edge is see on memload
 	-- load memory is used for testing only, file IO is not synthesizeable	
-	if(rising_edge(memload)) then
-			file_open(infile, "memory_load.txt", read_mode);
+	if(rising_edge(memload)) THEN
+			-- TODO: add generics for the paths
+			file_open(infile, "processor\memory\memory_load.txt", read_mode);
 			for i in ram_block' reverse_range loop
 				readline(infile, inline);
 				read(inline, data);
