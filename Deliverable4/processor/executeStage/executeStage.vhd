@@ -34,7 +34,7 @@ architecture executeStage_arch of executeStage is
   SIGNAL input_a: std_logic_vector(31 downto 0);
   SIGNAL input_b: std_logic_vector(31 downto 0);
   SIGNAL internal_branch : std_logic;
-  SIGNAL internal_ALU_result : std_logic(63 downto 0);
+  SIGNAL internal_ALU_result : std_logic_vector(63 downto 0);
   --SIGNAL ALU_result : std_logic_vector(31 downto 0);
 begin
   --define alu component
@@ -42,10 +42,12 @@ begin
 
   --calculate the branch target
   branch <=
-    '1' when instruction_in.INSTRUCTION_TYPE is BRANCH_IF_EQUAL and val_a = val_b else
-    '1' when instrcution_in.INSTRUCTION_TYPE IS BRANCH_IF_NOT_EQUAL and val_a /= val_b else
-    '1' when instruction_in.INSTRUCTION_TYPE IS JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER else
-    '0' when others;
+    '1' when instruction_in.INSTRUCTION_TYPE = BRANCH_IF_EQUAL AND val_a = val_b else
+    '1' when instruction_in.INSTRUCTION_TYPE = BRANCH_IF_NOT_EQUAL AND val_a /= val_b else
+    '1' when instruction_in.INSTRUCTION_TYPE = JUMP else
+    '1' when instruction_in.INSTRUCTION_TYPE = JUMP_AND_LINK else
+    '1' when instruction_in.INSTRUCTION_TYPE = JUMP_TO_REGISTER else
+    '0';
 
   --ALU_result <= ALU_result; --from alu --not needed since done in port map
   instruction_out <= instruction_in; --pass through
