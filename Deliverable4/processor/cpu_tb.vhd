@@ -43,12 +43,11 @@ end process ; -- clock_process
 
 test_process : process
 begin
-    -- wait for clock_period;
-    -- initialize <= '1';
-    -- wait for clock_period;
-    -- initialize <= '0';
-    -- wait for clock_period;
     report "starting test process";
+    wait for clock_period;
+    initialize <= '1';
+    wait for clock_period;
+    initialize <= '0';
     wait for clock_period;
 
     wait;
