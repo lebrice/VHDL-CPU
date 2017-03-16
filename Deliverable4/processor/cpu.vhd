@@ -206,7 +206,7 @@ architecture CPU_arch of CPU is
             waitrequest: OUT STD_LOGIC;
             memdump: IN STD_LOGIC;
             memload: IN STD_LOGIC;
-            data_or_instruction_specifier: IN STD_LOGIC            
+            data_or_instruction_specifier: IN character            
         );
     END COMPONENT;
     
