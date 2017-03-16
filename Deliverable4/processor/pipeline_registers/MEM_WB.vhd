@@ -24,7 +24,7 @@ BEGIN
     mem_wb_process: PROCESS (clock)
     BEGIN
         IF(clock'EVENT AND clock = '1') THEN
-
+            report "MEM_WB register";
             instruction_intermediate <= instruction_in;
             instruction_out <= instruction_intermediate;
 

@@ -47,6 +47,7 @@ BEGIN
     ex_mem_process: PROCESS (clock)
     BEGIN
         IF(rising_edge(clock)) THEN
+            report "EX_MEM register";
             --set internal signals to incoming signals
             pc_intermediate <= pc_in;
             instruction_intermediate <= instruction_in;
