@@ -130,6 +130,7 @@ BEGIN
     -- Testing process.
     test_process : process
     BEGIN
+        report "Starting to test Memory";
         -- Store instruction
         ALU_result_in <= std_logic_vector(to_unsigned(1, 64));
         instruction_in <= makeInstruction(SW_OP, 1, 1, 0);
@@ -149,6 +150,8 @@ BEGIN
         instruction_in <= makeInstruction(LW_OP, 1, 1, 0);
         wait for clock_period;
         assert mem_data = x"FEFEFEFE" report "mem_data should be FEFEFEFE; Did not correctly load or store!" severity failure;
+        
+        report "Done testing memoryStage";
         wait;
     end process;
 
