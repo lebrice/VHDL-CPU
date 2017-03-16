@@ -3,7 +3,7 @@ USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 USE work.instruction_tools.all;
 
-ENTITY mem_wb_entity IS
+ENTITY MEM_WB_REGISTER IS
 	PORT (
         clock: IN STD_LOGIC;
         instruction_in: IN INSTRUCTION;
@@ -13,9 +13,9 @@ ENTITY mem_wb_entity IS
         data_mem_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         data_mem_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
-END mem_wb_entity;
+END MEM_WB_REGISTER;
 
-ARCHITECTURE mem_wb_architecture OF mem_wb_entity IS
+ARCHITECTURE mem_wb_architecture OF MEM_WB_REGISTER IS
     SIGNAL instruction_intermediate: INSTRUCTION;
     SIGNAL alu_result_intermediate: STD_LOGIC_VECTOR(63 DOWNTO 0);
     SIGNAL data_mem_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);

@@ -3,7 +3,7 @@ USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 USE work.instruction_tools.all;
 
-ENTITY ex_mem_entity IS
+ENTITY EX_MEM_REGISTER IS
 	PORT (
         clock: IN STD_LOGIC;
 
@@ -25,9 +25,9 @@ ENTITY ex_mem_entity IS
         b_value_in: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         b_value_out: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
-END ex_mem_entity;
+END EX_MEM_REGISTER;
 
-ARCHITECTURE ex_mem_architecture OF ex_mem_entity IS
+ARCHITECTURE ex_mem_architecture OF EX_MEM_REGISTER IS
     SIGNAL pc_intermediate: INTEGER;
     SIGNAL instruction_intermediate: INSTRUCTION;
     SIGNAL does_branch_intermediate: STD_LOGIC;

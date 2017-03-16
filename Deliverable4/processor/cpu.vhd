@@ -168,8 +168,6 @@ architecture CPU_arch of CPU is
     COMPONENT MEM_WB_ENTITY IS
         PORT (
             clock: IN STD_LOGIC;
-            pc_in: IN INTEGER;
-            pc_out: OUT INTEGER;
             instruction_in: IN INSTRUCTION;
             instruction_out: OUT INSTRUCTION;
             ALU_result_in: IN STD_LOGIC_VECTOR(63 DOWNTO 0);
@@ -305,8 +303,6 @@ architecture CPU_arch of CPU is
 
 
     --Memory Writeback register
-    signal MEM_WB_register_pc_in: INTEGER;
-    signal MEM_WB_register_pc_out: INTEGER;
     signal MEM_WB_register_instruction_in: INSTRUCTION;
     signal MEM_WB_register_instruction_out: INSTRUCTION;
     signal MEM_WB_register_ALU_result_in: STD_LOGIC_VECTOR(63 DOWNTO 0);
@@ -465,8 +461,6 @@ begin
 
     MEM_WB_register : MEM_WB_ENTITY PORT MAP (
         clock,
-        MEM_WB_register_pc_in,
-        MEM_WB_register_pc_out,
         MEM_WB_register_instruction_in,
         MEM_WB_register_instruction_out,
         MEM_WB_register_ALU_result_in,

@@ -3,7 +3,7 @@ USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 USE work.instruction_tools.all;
 
-ENTITY if_id_entity IS
+ENTITY IF_ID_REGISTER IS
 	PORT (
         clock: IN STD_LOGIC;
         pc_in: IN INTEGER;
@@ -12,9 +12,9 @@ ENTITY if_id_entity IS
         instruction_out: OUT INSTRUCTION;
         stall: IN STD_LOGIC
 	);
-END if_id_entity;
+END IF_ID_REGISTER;
 
-ARCHITECTURE if_id_architecture OF if_id_entity IS
+ARCHITECTURE if_id_architecture OF IF_ID_REGISTER IS
     SIGNAL pc_intermediate: INTEGER;
     SIGNAL instruction_intermediate: INSTRUCTION;
 BEGIN
