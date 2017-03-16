@@ -357,7 +357,7 @@ begin
         fetch_stage_m_waitrequest,
         instruction_memory_dump,
         instruction_memory_load,
-        '0'
+        'a'
     );
 
     IF_ID_reg : IF_ID_REGISTER PORT MAP (
@@ -459,7 +459,7 @@ begin
         memory_stage_m_waitrequest,
         data_memory_dump,
         data_memory_load,
-        '1'
+        'b'
     );
 
     MEM_WB_reg : MEM_WB_REGISTER PORT MAP (
