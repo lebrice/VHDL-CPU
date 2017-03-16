@@ -44,7 +44,7 @@ architecture CPU_arch of CPU is
     END COMPONENT;
 
     --Fetch decode Register
-    COMPONENT IF_ID_ENTITY IS
+    COMPONENT IF_ID_REGISTER IS
         PORT (
             clock: IN STD_LOGIC;
             pc_in: IN INTEGER;
@@ -93,7 +93,7 @@ architecture CPU_arch of CPU is
     END COMPONENT;
 
     --Decode Execute Register
-    COMPONENT ID_EX_ENTITY IS
+    COMPONENT ID_EX_Register IS
         PORT (
             clock: IN STD_LOGIC;
             pc_in: IN INTEGER;
@@ -126,7 +126,7 @@ architecture CPU_arch of CPU is
     END COMPONENT;
 
     --Execute Memory Register
-    COMPONENT EX_MEM_ENTITY IS
+    COMPONENT EX_MEM_REGISTER IS
         PORT (
             clock: IN STD_LOGIC;
             pc_in: IN INTEGER;
@@ -165,7 +165,7 @@ architecture CPU_arch of CPU is
     END COMPONENT;
 
     --Memory writeback register
-    COMPONENT MEM_WB_ENTITY IS
+    COMPONENT MEM_WB_REGISTER IS
         PORT (
             clock: IN STD_LOGIC;
             instruction_in: IN INSTRUCTION;
@@ -358,7 +358,7 @@ begin
         instruction_memory_load
     );
 
-    IF_ID_register : IF_ID_ENTITY PORT MAP (
+    IF_ID_register : IF_ID_REGISTER PORT MAP (
         clock,
         IF_ID_register_pc_in,
         IF_ID_register_pc_out,
@@ -385,7 +385,7 @@ begin
         decode_stage_stall_out
     );
 
-    ID_EX_register : ID_EX_ENTITY PORT MAP (
+    ID_EX_register : ID_EX_Register PORT MAP (
         clock,
         ID_EX_register_pc_in,
         ID_EX_register_pc_out,
@@ -412,7 +412,7 @@ begin
         execute_stage_PC_out
     );
 
-    EX_MEM_register : EX_MEM_ENTITY PORT MAP (
+    EX_MEM_register : EX_MEM_REGISTER PORT MAP (
         clock,
         EX_MEM_register_pc_in,
         EX_MEM_register_pc_out,
@@ -459,7 +459,7 @@ begin
         data_memory_load
     );
 
-    MEM_WB_register : MEM_WB_ENTITY PORT MAP (
+    MEM_WB_register : MEM_WB_REGISTER PORT MAP (
         clock,
         MEM_WB_register_instruction_in,
         MEM_WB_register_instruction_out,
