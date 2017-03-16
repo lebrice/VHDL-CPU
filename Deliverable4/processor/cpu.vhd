@@ -205,7 +205,8 @@ architecture CPU_arch of CPU is
             readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
             waitrequest: OUT STD_LOGIC;
             memdump: IN STD_LOGIC;
-            memload: IN STD_LOGIC
+            memload: IN STD_LOGIC;
+            data_or_instruction_specifier: IN STD_LOGIC            
         );
     END COMPONENT;
     
@@ -355,7 +356,8 @@ begin
         fetch_stage_m_readdata,
         fetch_stage_m_waitrequest,
         instruction_memory_dump,
-        instruction_memory_load
+        instruction_memory_load,
+        '0'
     );
 
     IF_ID_reg : IF_ID_REGISTER PORT MAP (
@@ -456,7 +458,8 @@ begin
         memory_stage_m_readdata,
         memory_stage_m_waitrequest,
         data_memory_dump,
-        data_memory_load
+        data_memory_load,
+        '1'
     );
 
     MEM_WB_reg : MEM_WB_REGISTER PORT MAP (

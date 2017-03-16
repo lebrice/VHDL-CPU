@@ -23,7 +23,8 @@ ENTITY memory IS
 		readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
 		waitrequest: OUT STD_LOGIC;
 		memdump: IN STD_LOGIC;
-		memload: IN STD_LOGIC
+		memload: IN STD_LOGIC;
+		data_or_instruction_specifier: IN STD_LOGIC
 	);
 END memory;
 
@@ -45,7 +46,7 @@ BEGIN
 	BEGIN
 		IF(rising_edge(memdump)) THEN
 			--TODO: Add generics for the paths
-			file_open(outfile, "processor\memory\memory_load.txt", write_mode);
+			file_open(outfile, "processor\memory\mem_out" & data_or_instruction_specifier & ".txt", write_mode);
         	for i in ram_block' reverse_range loop
 				write(outline, ram_block(i));
 				writeline(outfile, outline);
@@ -73,7 +74,7 @@ BEGIN
 	-- load memory is used for testing only, file IO is not synthesizeable	
 	if(rising_edge(memload)) THEN
 			-- TODO: add generics for the paths
-			file_open(infile, "processor\memory\memory_load.txt", read_mode);
+			file_open(infile, "processor\memory\mem_in" & data_or_instruction_specifier & ".txt", read_mode);
 			for i in ram_block' reverse_range loop
 				readline(infile, inline);
 				read(inline, data);
