@@ -50,7 +50,7 @@ begin
         --a is the signed representation of our movement amount
         --we will add a and b as integers, and store it in an std_logic_vector (as unsigned)
         --then we extend by 64 since we want a 64 bit output...
-        ALU_out <= extend64(std_logic_vector(to_unsigned(to_integer(a) + to_integer(unsigned(b))))); 
+        ALU_out <= extend64(std_logic_vector(to_unsigned(to_integer(a) + to_integer(unsigned(op_b)),32))); 
       when SUBTRACT =>
         ALU_out <= extend64(std_logic_vector(a - b)); -- rs - rt
       when MULTIPLY =>
@@ -87,8 +87,8 @@ begin
         report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
 
       when LOAD_UPPER_IMMEDIATE =>
-        -- loads the upper 16 bits of RT with the 16 bit immediate, and all the lower bits to '0'.
-        ALU_out <= extend64(op_b(31 downto 16) & X"0000");
+        -- This is never reached (handled in decode)
+        report "ERROR: LOAD_UPPER_IMMEDIATE should not be given to ALU!" severity WARNING;
       
       when SHIFT_LEFT_LOGICAL =>
         ALU_out <= extend64(std_logic_vector(b SLL shift_amount)); 

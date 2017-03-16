@@ -86,6 +86,7 @@ begin
           report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
         when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
+          input_b <= val_b;
         when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
           --with branches, we want "a" to have the PC, b the immediate
           input_a <= std_logic_vector(to_unsigned(PC, 32)); 

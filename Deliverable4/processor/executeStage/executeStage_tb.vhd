@@ -62,6 +62,7 @@ begin
     test_process : PROCESS
     variable temp : std_logic_vector(31 downto 0) ;
     BEGIN
+        report "starting testing of EX stage";
 
         -- Add
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, ADD_FN); -- add t1 t2 t3
@@ -69,7 +70,6 @@ begin
         val_b <= std_logic_vector(to_signed(171,32)); -- x"000000AB"; --171
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
-        wait for 1 ps;
         WAIT FOR clk_period; 
         ASSERT (to_integer(signed(ALU_Result)) = 181) REPORT "ADD: ALU_Result should be 181, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
 
@@ -208,7 +208,7 @@ begin
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"FFFFFFFFFFFFFFF0") REPORT "NOR: ALU_Result should be 0xFFFFFFF0, but wasn't" SEVERITY FAILURE;
+        ASSERT (ALU_Result = x"00000000FFFFFFF0") REPORT "NOR: ALU_Result should be 0xFFFFFFF0, but wasn't" SEVERITY FAILURE;
 
         -- BITWISE_XOR
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, XOR_FN); --xor t1 t2 t3
@@ -217,7 +217,7 @@ begin
         imm_sign_extended <= x"00000000"; --full
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"0000000000000006") REPORT "XOR: ALU_Result should be 0x00000006, but wasn't" SEVERITY FAILURE;   
+        ASSERT (ALU_Result = x"0000000000000001") REPORT "XOR: ALU_Result should be 0x00000001, but wasn't" SEVERITY FAILURE;   
 
         -- BITWISE_XOR_IMMEDIATE
         instruction_in <= makeInstruction(XORI_OP, 1, 2, 11); --xori t1 t2 0xB
@@ -226,7 +226,7 @@ begin
         imm_sign_extended <= x"0000000B"; --0xB
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"0000000000000006") REPORT "XORI: ALU_Result should be 0x00000006, but wasn't" SEVERITY FAILURE;   
+        ASSERT (ALU_Result = x"0000000000000001") REPORT "XORI: ALU_Result should be 0x00000001, but wasn't" SEVERITY FAILURE;   
 
         -- MOVE_FROM_HI
         -- The execute stage will never reach MOVE_FROM_HI (handled in decode)
@@ -236,17 +236,17 @@ begin
 
         -- SHIFT_LEFT_LOGICAL
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 1, SLL_FN); --SLL t1 t2 t3 
-        val_a <= x"000000F0"; --
-        val_b <= x"00000000"; --0
+        val_a <= x"00000000"; --
+        val_b <= x"000000F0"; --0
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (ALU_Result = x"0000000000000100") REPORT "SLL: ALU_Result should be 0x00000100, but wasn't" SEVERITY FAILURE;
+        ASSERT (ALU_Result = x"00000000000001E0") REPORT "SLL: ALU_Result should be 0x000001E0, but wasn't" SEVERITY FAILURE;
 
         -- SHIFT_RIGHT_LOGICAL
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 1, SRL_FN); --SRL t1 t2 t3
-        val_a <= x"80001000"; --
-        val_b <= x"00000000"; --0
+        val_a <= x"00000000"; --
+        val_b <= x"80001000"; --0
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
@@ -254,8 +254,8 @@ begin
 
         -- SHIFT_RIGHT_ARITHMETIC
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 1, SRA_FN); --SRA t1 t2 t3
-        val_a <= x"80001000"; --
-        val_b <= x"00000000"; --0
+        val_a <= x"00000000"; --
+        val_b <= x"80001000"; --0
         imm_sign_extended <= x"00000000"; --0
         PC <= 50;
         WAIT FOR clk_period;
@@ -266,11 +266,12 @@ begin
         val_a <= x"00000000"; --0: doesn't matter
         val_b <= x"00000000"; --0: doesn't matter
         imm_sign_extended <= x"00000000"; --0: doesn't matter
-        PC <= 50;
+        PC <= 536870912;
+        -- 536870912
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "J: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
+        -- ASSERT (to_integer(signed(ALU_Result)) = 500) REPORT "J: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
         ASSERT branch = '1' report "J: Branch should always be 1 in the case of JUmp instructions." SEVERITY FAILURE;
-        ASSERT branch_target_out = std_logic_vector(to_unsigned(550, 32)) report "J: Branch target isn't right!" SEVERITY FAILURE;
+        ASSERT branch_target_out = std_logic_vector(to_unsigned(536871412, 32)) REPORT "J: Branch target should be 550, but was " & integer'image(to_integer(signed(branch_target_out))) SEVERITY FAILURE;
         
         -- JUMP_AND_LINK
         instruction_in <= makeInstruction(JAL_OP, 500); --jal
@@ -279,9 +280,9 @@ begin
         imm_sign_extended <= x"00000000"; --0: doesn't matter
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "JAL: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
+        -- ASSERT (to_integer(signed(ALU_Result)) = 500) REPORT "JAL: ALU_Result should be 500, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
         ASSERT branch = '1' report "JAL: Branch should always be 1 in the case of JUmp instructions." SEVERITY FAILURE;
-        ASSERT branch_target_out = std_logic_vector(to_unsigned(550, 32)) report "JAL: Branch target isn't right!" SEVERITY FAILURE;
+        ASSERT branch_target_out = std_logic_vector(to_unsigned(500, 32)) REPORT "JAL: Branch targer should be 500, but was " & integer'image(to_integer(signed(branch_target_out))) SEVERITY FAILURE;
 
         -- JUMP_TO_REGISTER
         instruction_in <= makeInstruction(ALU_OP, 1, 2, 3, 0, JR_FN); --jr
@@ -290,10 +291,11 @@ begin
         imm_sign_extended <= x"00000000"; --0: doesn't matter
         PC <= 50;
         WAIT FOR clk_period;
-        ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "JR: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
+        -- ASSERT (to_integer(signed(ALU_Result)) = 550) REPORT "JR: ALU_Result should be 550, but was " & integer'image(to_integer(signed(ALU_Result))) SEVERITY FAILURE;
         ASSERT branch = '1' report "JR: Branch should always be 1 in the case of JUmp instructions." SEVERITY FAILURE;
-        ASSERT branch_target_out = std_logic_vector(to_unsigned(550, 32)) report "JR: Branch target isn't right!" SEVERITY FAILURE;
+        ASSERT branch_target_out = std_logic_vector(to_unsigned(500, 32)) REPORT "JR: Branch targer should be 500, but was " & integer'image(to_integer(signed(branch_target_out))) SEVERITY FAILURE;
 
+        report "DONE testing the EX stage.";
         wait;
     END PROCESS;
 END;
