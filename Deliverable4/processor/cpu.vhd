@@ -21,6 +21,7 @@ entity CPU is
     EX_MEM_instruction : out INSTRUCTION;
     MEM_WB_instruction : out INSTRUCTION;
     WB_instruction : out INSTRUCTION;
+    WB_data : out std_logic_vector(63 downto 0);
     fetch_PC : out integer;
     decode_register_file : out REGISTER_BLOCK
   );
@@ -547,6 +548,7 @@ begin
     EX_MEM_instruction <= EX_MEM_register_instruction_out;
     MEM_WB_instruction <= MEM_WB_register_instruction_out;
     WB_instruction <= write_back_stage_instruction_out;
+    WB_data <= write_back_stage_write_data;
 
     fetch_PC <= IF_ID_register_pc_out;
     fetch_stage_reset <= '1' when initialize = '1' else '0';

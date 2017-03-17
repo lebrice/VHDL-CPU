@@ -23,6 +23,7 @@ architecture processor_test of cpu_tb is
             EX_MEM_instruction : out INSTRUCTION;
             MEM_WB_instruction : out INSTRUCTION;
             WB_instruction : out INSTRUCTION;
+            WB_data : out std_logic_vector(63 downto 0);
             fetch_PC : out integer;
             decode_register_file : out REGISTER_BLOCK
         );
@@ -39,6 +40,7 @@ architecture processor_test of cpu_tb is
     signal EX_MEM_instruction : INSTRUCTION;
     signal MEM_WB_instruction : INSTRUCTION;
     signal WB_instruction : INSTRUCTION;
+    signal WB_data : std_logic_vector(63 downto 0);
 
     signal PC : integer;
 
@@ -55,6 +57,7 @@ c1 : CPU PORT MAP (
     EX_MEM_instruction,
     MEM_WB_instruction,
     WB_instruction,
+    WB_data,
     PC,
     decode_register_file
 );
