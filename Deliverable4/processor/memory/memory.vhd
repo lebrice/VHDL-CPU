@@ -50,6 +50,20 @@ ARCHITECTURE rtl OF memory IS
 	end dump_memory_to_file;
 
 
+	procedure load_memory_from_file (signal mem : out MEM) is
+		file 	 infile: text;
+		variable inline: line;
+		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
+	begin
+		file_open(infile, "program.txt", read_mode);
+		for i in 0 to RAM_SIZE-1 loop
+			readline(infile, inline);
+			read(inline, data);
+			mem(i) <= data;
+		end loop;
+		file_close(infile);
+	end load_memory_from_file;
+
 
 
 BEGIN
@@ -69,27 +83,12 @@ BEGIN
 		variable inline: line;
 		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
 	BEGIN
-		--This is a cheap trick to initialize the SRAM in simulation
-		-- IF(now < 1 ps)THEN
-		-- 	For i in 0 to ram_size-1 LOOP
-		-- 		ram_block(i) <= std_logic_vector(to_unsigned(i,bit_width));
-		-- 	END LOOP;
-		-- end if;
-	
 
 	-- load memory from file "memory_load.text" when a rising edge is see on memload
 	-- load memory is used for testing only, file IO is not synthesizeable	
 	if(rising_edge(memload)) THEN
 		report "Trying to do a mem_load";
-		-- TODO: add generics for the paths
-		file_open(infile, "program.txt", read_mode);
-		for i in 0 to RAM_SIZE-1 loop
-			readline(infile, inline);
-			read(inline, data);
-			-- writedata <= data;
-			ram_block(i) <= data;
-		end loop;
-		file_close(infile);
+		load_memory_from_file(ram_block);
 	-- This is the actual synthesizable SRAM block 
 	else
 		IF (memwrite = '1') THEN
@@ -100,7 +99,23 @@ BEGIN
 	END PROCESS;
 	readdata <= ram_block(address);
 
+	--The waitrequest signal is used to vary response time in simulation
+	--Read and write should never happen at the same time.
+	waitreq_w_proc: PROCESS (memwrite)
+	BEGIN
+		IF(rising_edge(memwrite))THEN
+			write_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
 
+		END IF;
+	END PROCESS;
+
+	waitreq_r_proc: PROCESS (memread)
+	BEGIN
+		IF(rising_edge(memread))THEN
+			read_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
+		END IF;
+	END PROCESS;
+	waitrequest <= write_waitreq_reg and read_waitreq_reg;
 
 
 END rtl;
