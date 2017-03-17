@@ -12,31 +12,23 @@ entity decodeStage is
     -- Inputs coming from the IF/ID Register
     PC : in integer;
     instruction_in : in INSTRUCTION;
-
-
     -- Instruction and data coming from the Write-Back stage.
     write_back_instruction : in INSTRUCTION;
     write_back_data : in std_logic_vector(63 downto 0);
-
-
     -- Outputs to the ID/EX Register
     val_a : out std_logic_vector(31 downto 0);
     val_b : out std_logic_vector(31 downto 0);
     i_sign_extended : out std_logic_vector(31 downto 0);
     PC_out : out integer;
     instruction_out : out INSTRUCTION;
-
     -- Register file
     register_file_out : out REGISTER_BLOCK;
     write_register_file : in std_logic;
     reset_register_file : in std_logic;
-
     -- might have to add this in at some point:
     stall_in : in std_logic;
-
     -- Stall signal out.
-    stall_out : out std_logic
-    
+    stall_out : out std_logic    
   ) ;
 end decodeStage ;
 
@@ -120,6 +112,8 @@ begin
   -- JUMP_AND_LINK,
   -- UNKNOWN
 
+
+
 current_state <= 
   RESETTING when reset_register_file = '1' else
   READING when clock = '0' else
@@ -171,7 +165,7 @@ current_state <=
 
           when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
             val_a <= register_file(rs).data;
-            val_b <= signExtend(immediate);
+            i_sign_extended <= signExtend(instruction_in.immediate_vect);
             register_file(rt).busy <= '1'; 
 
           when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
