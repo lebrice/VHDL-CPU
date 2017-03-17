@@ -45,6 +45,14 @@ PC_next <=
 -- -- inst := getInstruction(m_readdata);
 --   instruction_out <= getInstruction(m_readdata);
 
+report_stall : process( clock, stall )
+begin
+  if stall = '1' then
+    report "FETCH IS STALLED";
+  end if;
+end process ; -- report_stall
+
+
 mem_process : process(clock, m_waitrequest)
 variable inst : INSTRUCTION;
 begin

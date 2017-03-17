@@ -122,8 +122,8 @@ begin
 current_state <= 
   STALLED when stall_in = '1' OR stall_reg = '1' else
   RESETTING when reset_register_file = '1' else
-  READING when clock = '0' AND stall_in = '0' else
-  WRITING when clock = '1' AND stall_in = '0' else
+  READING when clock = '0' else
+  WRITING when clock = '1' else
   IDLE;
 
   computation : process(clock, instruction_in, write_back_instruction, write_back_data, register_file)
@@ -138,10 +138,11 @@ current_state <=
     wb_rt := write_back_instruction.rt;
     wb_rd := write_back_instruction.rd;
     immediate := instruction_in.immediate_vect; 
-
+    
     case current_state is
 
-    when READING =>    
+    when READING =>  
+        report " current state is READING ";  
         -- second half of clock cycle: read data from registers, and output the correct instruction.
         -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
         -- since they only move data from the HI or LOW special registers to another register.
@@ -231,6 +232,7 @@ current_state <=
         val_b <= (others => '0');  
 
     when RESETTING =>
+      report " current state is RESETTING "; 
       -- reset register file
       register_file <= reset_register_block(register_file);
       -- FOR i in 0 to NUM_REGISTERS-1 LOOP
@@ -240,6 +242,8 @@ current_state <=
 
     when WRITING =>
 
+      report " current state is WRITING ";  
+      
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
 
@@ -280,6 +284,7 @@ current_state <=
 
       end case;
       when IDLE =>
+        report " current state is IDLE... ";  
         -- do nothing.
    end case;
   end process;
@@ -293,6 +298,7 @@ current_state <=
     rd := register_file(instruction_in.rd);
 
     if clock = '0' OR rising_edge(clock) then
+      report "stall_reg is " & std_logic'image(stall_reg);
       -- we can only set stall_out to '1' during the second part of the cycle.
       
     case instruction_in.instruction_type is
@@ -372,7 +378,7 @@ current_state <=
 
 
   instruction_out <= 
-    NO_OP_INSTRUCTION when stall_reg = '1' 
+    NO_OP_INSTRUCTION when (stall_reg = '1') 
       OR instruction_in.instruction_type = MOVE_FROM_HI
       OR instruction_in.instruction_type = MOVE_FROM_LOW
       OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 

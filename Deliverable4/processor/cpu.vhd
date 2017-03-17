@@ -21,8 +21,8 @@ entity CPU is
     EX_MEM_instruction : out INSTRUCTION;
     MEM_WB_instruction : out INSTRUCTION;
     WB_instruction : out INSTRUCTION;
-    fetch_PC : out integer
-  
+    fetch_PC : out integer;
+    decode_register_file : out REGISTER_BLOCK
   );
 end CPU ;
 
@@ -334,8 +334,9 @@ architecture CPU_arch of CPU is
     --misc
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
-
 begin
+
+    decode_register_file <= decode_stage_register_file_out;
 
     fetch : fetchStage PORT MAP(
         clock,
@@ -489,6 +490,7 @@ begin
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
     fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_ALU_result_out));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+    fetch_stage_stall <= decode_stage_stall_out;
 
     IF_ID_register_instruction_in <= fetch_stage_instruction_out;
     IF_ID_register_pc_in <= fetch_stage_PC;
