@@ -35,23 +35,31 @@ ARCHITECTURE rtl OF memory IS
 	SIGNAL read_address_reg: INTEGER RANGE 0 to ram_size-1;
 	SIGNAL write_waitreq_reg: STD_LOGIC := '1';
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
+
+	procedure dump_memory_to_file (mem : MEM) is
+		file     outfile  : text;
+		variable outline : line;
+	begin
+		--TODO: Add generics for the paths
+		file_open(outfile, "memory.txt", write_mode);
+		for i in 0 to RAM_SIZE-1 loop
+			write(outline, mem(i));
+			writeline(outfile, outline);
+		end loop;
+		file_close(outfile);
+	end dump_memory_to_file;
+
+
+
+
 BEGIN
 	--This is the main section of the SRAM model
 
 	-- process to dump memory to file
 	dump_process: PROCESS(memdump)
-		file     outfile  : text;
-		variable outline : line;
 	BEGIN
 		IF(rising_edge(memdump)) THEN
-			--TODO: Add generics for the paths
-			file_open(outfile, "memory.txt", write_mode);
-        	for i in 0 to RAM_SIZE-1 loop
-				write(outline, ram_block(i));
-				writeline(outfile, outline);
-        	end loop;
-			file_close(outfile);
-
+			dump_memory_to_file(ram_block);
 		END IF;
 	END PROCESS;
 
