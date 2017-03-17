@@ -9,20 +9,20 @@ library std;
 
 ENTITY memory IS
 	GENERIC(
-		ram_size : INTEGER := 8192;
-		bit_width : INTEGER := 32;
-		mem_delay : time := 0.1 ns;
-		clock_period : time := 1 ns;
-		data_dump_filename : STRING := "memory.txt";
-		instruction_load_filename : STRING := "program.txt"
+		RAM_SIZE : INTEGER := 8192;
+		BIT_WIDTH : INTEGER := 32;
+		MEM_DELAY : time := 0.1 ns;
+		CLOCK_PERIOD : time := 1 ns;
+		MEMORY_LOAD_FILEPATH : STRING := "memory_out.txt";
+		MEMORY_DUMP_FILEPATH : STRING := "memory_in.txt"
 	);
 	PORT (
 		clock: IN STD_LOGIC;
-		writedata: IN STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
-		address: IN INTEGER RANGE 0 TO ram_size-1;
+		writedata: IN STD_LOGIC_VECTOR (BIT_WIDTH-1 DOWNTO 0);
+		address: IN INTEGER RANGE 0 TO RAM_SIZE-1;
 		memwrite: IN STD_LOGIC;
 		memread: IN STD_LOGIC;
-		readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
+		readdata: OUT STD_LOGIC_VECTOR (BIT_WIDTH-1 DOWNTO 0);
 		waitrequest: OUT STD_LOGIC;
 		memdump: IN STD_LOGIC;
 		memload: IN STD_LOGIC
@@ -30,11 +30,12 @@ ENTITY memory IS
 END memory;
 
 ARCHITECTURE rtl OF memory IS
-	TYPE MEM IS ARRAY(ram_size-1 downto 0) OF STD_LOGIC_VECTOR(bit_width-1 DOWNTO 0);
-	
-  	constant empty_ram_block : MEM := (others => (others => '0'));
+	TYPE MEM IS ARRAY(RAM_SIZE-1 downto 0) OF STD_LOGIC_VECTOR(BIT_WIDTH-1 DOWNTO 0);
+	constant empty_ram_block : MEM := (others => (others => '0'));
+
+	-- Initialize ram_block as empty (filled with zeroes).
 	SIGNAL ram_block: MEM := empty_ram_block;
-	SIGNAL read_address_reg: INTEGER RANGE 0 to ram_size-1;
+	
 	SIGNAL write_waitreq_reg: STD_LOGIC := '1';
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
 
@@ -43,7 +44,7 @@ ARCHITECTURE rtl OF memory IS
 		variable outline : line;
 	begin
 		--TODO: Add generics for the paths
-		file_open(outfile, data_dump_filename, write_mode);
+		file_open(outfile, MEMORY_LOAD_FILEPATH, write_mode);
 		for i in 0 to RAM_SIZE-1 loop
 			write(outline, mem(i));
 			writeline(outfile, outline);
@@ -56,9 +57,9 @@ ARCHITECTURE rtl OF memory IS
 	procedure load_memory_from_file (signal mem : out MEM) is
 		file 	 infile: text;
 		variable inline: line;
-		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
+		variable data: std_logic_vector(BIT_WIDTH-1 DOWNTO 0);
 	begin
-		file_open(infile, instruction_load_filename, read_mode);
+		file_open(infile, MEMORY_DUMP_FILEPATH, read_mode);
 		for i in 0 to RAM_SIZE-1 loop
 			readline(infile, inline);
 			read(inline, data);
@@ -95,14 +96,14 @@ BEGIN
 	waitreq_w_proc: PROCESS (memwrite)
 	BEGIN
 		IF(rising_edge(memwrite))THEN
-			write_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
+			write_waitreq_reg <= '0' after MEM_DELAY, '1' after MEM_DELAY + CLOCK_PERIOD;
 		END IF;
 	END PROCESS;
 
 	waitreq_r_proc: PROCESS (memread)
 	BEGIN
 		IF(rising_edge(memread))THEN
-			read_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
+			read_waitreq_reg <= '0' after MEM_DELAY, '1' after MEM_DELAY + CLOCK_PERIOD;
 		END IF;
 	END PROCESS;
 

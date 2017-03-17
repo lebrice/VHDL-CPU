@@ -199,10 +199,13 @@ architecture CPU_arch of CPU is
     
     --memory component
     COMPONENT memory IS
-        GENERIC(
-          ram_size : INTEGER := ram_size;
-		      bit_width : INTEGER := bit_width;
-		      mem_delay : time := 0.1 ns
+        GENERIC(            
+            RAM_SIZE : INTEGER := ram_size;
+            BIT_WIDTH : INTEGER := bit_width;
+            MEM_DELAY : time := 0.1 ns;
+            CLOCK_PERIOD : time := 1 ns;
+            MEMORY_LOAD_FILEPATH : STRING := "memory.txt";
+            MEMORY_DUMP_FILEPATH : STRING := "program.txt"
         );
         PORT (
             clock: IN STD_LOGIC;
@@ -454,8 +457,8 @@ begin
     );
 
     memory_stage_memory : memory GENERIC MAP(
-        ram_size => ram_size,
-        bit_width => bit_width
+        RAM_SIZE => ram_size,
+        BIT_WIDTH => bit_width
     )
     PORT MAP(
         clock,
