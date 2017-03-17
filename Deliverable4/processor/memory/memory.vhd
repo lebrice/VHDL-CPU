@@ -12,7 +12,9 @@ ENTITY memory IS
 		ram_size : INTEGER := 8192;
 		bit_width : INTEGER := 32;
 		mem_delay : time := 0.1 ns;
-		clock_period : time := 1 ns
+		clock_period : time := 1 ns;
+		data_dump_filename : STRING := "memory.txt";
+		instruction_load_filename : STRING := "program.txt"
 	);
 	PORT (
 		clock: IN STD_LOGIC;
@@ -41,7 +43,7 @@ ARCHITECTURE rtl OF memory IS
 		variable outline : line;
 	begin
 		--TODO: Add generics for the paths
-		file_open(outfile, "memory.txt", write_mode);
+		file_open(outfile, data_dump_filename, write_mode);
 		for i in 0 to RAM_SIZE-1 loop
 			write(outline, mem(i));
 			writeline(outfile, outline);
@@ -56,7 +58,7 @@ ARCHITECTURE rtl OF memory IS
 		variable inline: line;
 		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
 	begin
-		file_open(infile, "program.txt", read_mode);
+		file_open(infile, instruction_load_filename, read_mode);
 		for i in 0 to RAM_SIZE-1 loop
 			readline(infile, inline);
 			read(inline, data);
