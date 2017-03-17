@@ -46,7 +46,7 @@ BEGIN
 		IF(rising_edge(memdump)) THEN
 			--TODO: Add generics for the paths
 			file_open(outfile, "memory.txt", write_mode);
-        	for i in ram_block' reverse_range loop
+        	for i in 0 to RAM_SIZE-1 loop
 				write(outline, ram_block(i));
 				writeline(outfile, outline);
         	end loop;
@@ -56,7 +56,7 @@ BEGIN
 	END PROCESS;
 
 
-	mem_process: PROCESS (clock, memload)
+	mem_process: PROCESS (clock, memload, address)
 		file 	 infile: text;
 		variable inline: line;
 		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
@@ -72,44 +72,27 @@ BEGIN
 	-- load memory from file "memory_load.text" when a rising edge is see on memload
 	-- load memory is used for testing only, file IO is not synthesizeable	
 	if(rising_edge(memload)) THEN
-			report "Trying to do a mem_load";
-			-- TODO: add generics for the paths
-			file_open(infile, "program.txt", read_mode);
-			for i in ram_block' reverse_range loop
-				readline(infile, inline);
-				read(inline, data);
-				-- writedata <= data;
-				ram_block(i) <= data;
-			end loop;
-			file_close(infile);
+		report "Trying to do a mem_load";
+		-- TODO: add generics for the paths
+		file_open(infile, "program.txt", read_mode);
+		for i in 0 to RAM_SIZE-1 loop
+			readline(infile, inline);
+			read(inline, data);
+			-- writedata <= data;
+			ram_block(i) <= data;
+		end loop;
+		file_close(infile);
 	-- This is the actual synthesizable SRAM block 
-	elsif (rising_edge(clock)) THEN
-			IF (memwrite = '1') THEN
-				ram_block(address) <= writedata;
-			END IF;
-		read_address_reg <= address;
+	else
+		IF (memwrite = '1') THEN
+			ram_block(address) <= writedata;
 		END IF;
+		-- read_address_reg <= address;
+	END IF;
 	END PROCESS;
-	readdata <= ram_block(read_address_reg);
+	readdata <= ram_block(address);
 
 
-	--The waitrequest signal is used to vary response time in simulation
-	--Read and write should never happen at the same time.
-	waitreq_w_proc: PROCESS (memwrite)
-	BEGIN
-		IF(memwrite'event AND memwrite = '1')THEN
-			write_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
-
-		END IF;
-	END PROCESS;
-
-	waitreq_r_proc: PROCESS (memread)
-	BEGIN
-		IF(memread'event AND memread = '1')THEN
-			read_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
-		END IF;
-	END PROCESS;
-	waitrequest <= write_waitreq_reg and read_waitreq_reg;
 
 
 END rtl;
