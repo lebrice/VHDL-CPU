@@ -57,7 +57,7 @@ begin
   else
     report " reading instruction from PC address of " & integer'image(PC_register);
     m_read <= '1';
-    m_addr <= PC_register;
+    m_addr <= PC_register / 4;
     inst := getInstruction(m_readdata);
     instruction_out <= inst;
   end if;

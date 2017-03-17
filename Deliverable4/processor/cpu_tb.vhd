@@ -71,7 +71,6 @@ begin
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
-    
 
     for i in 1 to 10 loop
         wait for clock_period;
