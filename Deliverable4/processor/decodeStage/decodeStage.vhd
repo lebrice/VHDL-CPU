@@ -68,8 +68,9 @@ architecture decodeStage_arch of decodeStage is
   signal LOW, HI : REGISTER_ENTRY := empty_register;
   signal register_file : REGISTER_BLOCK := empty_register_file;
 
-  type state is (READING, WRITING, RESETTING, STALLED, IDLE);
+  type state is (READING, WRITING, RESETTING, IDLE);
   signal current_state : state;
+  signal reading_stalled : std_logic;
 
 begin
   stall_out <= stall_reg;
@@ -120,13 +121,15 @@ begin
   -- UNKNOWN
 
 current_state <= 
-  STALLED when stall_in = '1' OR stall_reg = '1' else
   RESETTING when reset_register_file = '1' else
   READING when clock = '0' else
   WRITING when clock = '1' else
   IDLE;
 
-  computation : process(clock, instruction_in, write_back_instruction, write_back_data)
+  reading_stalled <= '1' when stall_in = '1' OR stall_reg = '1' else '0';
+
+
+  computation : process(clock, instruction_in, write_back_instruction, write_back_data, stall_reg)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
@@ -142,6 +145,12 @@ current_state <=
     case current_state is
 
     when READING =>  
+        if ( reading_stalled = '1' ) then
+          report "Reading is stalled in Decode stage.";
+          val_a <= (others => '0');
+          val_b <= (others => '0'); 
+        else
+          
         report " current state is READING ";  
         -- second half of clock cycle: read data from registers, and output the correct instruction.
         -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
@@ -226,10 +235,8 @@ current_state <=
             report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
         
         end case;
+        end if;
 
-    when STALLED =>
-        val_a <= (others => '0');
-        val_b <= (others => '0');  
 
     when RESETTING =>
       report " current state is RESETTING "; 
@@ -291,7 +298,7 @@ current_state <=
   end process;
 
 
-  stall_detection : process(clock, instruction_in, register_file)
+  stall_detection : process(clock, instruction_in, write_back_instruction, write_back_data, stall_in)
     variable rs, rt, rd : REGISTER_ENTRY;
   begin
     rs := register_file(instruction_in.rs);
@@ -379,7 +386,7 @@ current_state <=
 
 
   instruction_out <= 
-    NO_OP_INSTRUCTION when current_state = STALLED 
+    NO_OP_INSTRUCTION when (reading_stalled = '1')
       OR instruction_in.instruction_type = MOVE_FROM_HI
       OR instruction_in.instruction_type = MOVE_FROM_LOW
       OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
