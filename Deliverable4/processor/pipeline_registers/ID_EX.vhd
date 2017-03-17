@@ -27,24 +27,21 @@ ARCHITECTURE id_ex_architecture OF ID_EX_REGISTER IS
     SIGNAL b_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
+    pc_out <= pc_intermediate;
+    instruction_out <= instruction_intermediate;
+    sign_extend_imm_out <= sign_extend_imm_intermediate;
+    a_out <= a_intermediate;
+    b_out <= b_intermediate;
+
     id_ex_process: PROCESS (clock)
     BEGIN
-        IF(clock'EVENT AND clock = '1') THEN
+        IF(rising_edge(clock)) THEN
             -- report "ID_EX Register";
             pc_intermediate <= pc_in;
-            pc_out <= pc_intermediate;
-
             instruction_intermediate <= instruction_in;
-            instruction_out <= instruction_intermediate;
-
             sign_extend_imm_intermediate <= sign_extend_imm_in;
-            sign_extend_imm_out <= sign_extend_imm_intermediate;
-
             a_intermediate <= a_in;
-            a_out <= a_intermediate;
-
             b_intermediate <= b_in;
-            b_out <= b_intermediate;
         END IF;
     END PROCESS;
 
