@@ -40,14 +40,27 @@ PC_next <=
   PC_register   when stall = '1' else 
   PC_register + 4;
 
-mem_process : process(m_waitrequest)
+--   m_read <= '1';
+--   m_addr <= PC_register;
+-- -- inst := getInstruction(m_readdata);
+--   instruction_out <= getInstruction(m_readdata);
+
+mem_process : process(clock, m_waitrequest)
 variable inst : INSTRUCTION;
 begin
   -- TODO: add the proper timing and avalon interface stuff later.
-  m_read <= '1';
-  m_addr <= PC_register;
-  inst := getInstruction(m_readdata);
-  instruction_out <= inst;
+  
+  
+  if reset = '1' then
+    report "reset is '1', we are outputting a no-op.";
+    instruction_out <= NO_OP_INSTRUCTION;
+  else
+    report " reading instruction from PC address of " & integer'image(PC_register);
+    m_read <= '1';
+    m_addr <= PC_register;
+    inst := getInstruction(m_readdata);
+    instruction_out <= inst;
+  end if;
 end process;
 
 pc_process : process( clock, reset )

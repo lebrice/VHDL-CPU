@@ -18,18 +18,19 @@ ARCHITECTURE if_id_architecture OF IF_ID_REGISTER IS
     SIGNAL pc_intermediate: INTEGER;
     SIGNAL instruction_intermediate: INSTRUCTION;
 BEGIN
+    pc_out <= pc_intermediate;
+    instruction_out <= instruction_intermediate;
+
     if_id_process: PROCESS (clock)
     BEGIN
-        IF(clock'EVENT AND clock = '1') THEN
+        IF(rising_edge(clock)) THEN
             -- report "IF_ID Register";
             IF(stall = '0') THEN -- Only update intermediate and output values if we are not stalled.
                 pc_intermediate <= pc_in; 
-                pc_out <= pc_intermediate;
-
                 instruction_intermediate <= instruction_in;
-                instruction_out <= instruction_intermediate;
             END IF;
         END IF;
     END PROCESS;
+
 
 END if_id_architecture;

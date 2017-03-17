@@ -540,7 +540,8 @@ begin
     MEM_WB_instruction <= MEM_WB_register_instruction_out;
     WB_instruction <= write_back_stage_instruction_out;
 
-    fetch_PC <= fetch_stage_PC;
+    fetch_PC <= IF_ID_register_pc_out;
+    fetch_stage_reset <= '1' when initialize = '1' else '0';
 
 
 
@@ -548,12 +549,12 @@ begin
     begin
         if initialize = '1' AND initialized = '0' then
             report "Initializing...";
-            -- data_memory_load <= '1';
+            -- fetch_stage_reset <= '1';
             instruction_memory_load <= '1';
             initialized <= '1';  
         else 
-            -- data_memory_load <= '0';
-            instruction_memory_load <= '0';         
+            instruction_memory_load <= '0';
+            -- fetch_stage_reset <= '0';     
         end if;
     end process ; -- init
 
