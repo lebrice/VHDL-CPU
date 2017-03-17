@@ -49,7 +49,8 @@ ARCHITECTURE rtl OF memory IS
 		file_close(outfile);
 	end dump_memory_to_file;
 
-
+	-- load memory from file "program.txt" when a rising edge is seen on memload
+	-- load memory is used for testing only, file IO is not synthesizeable
 	procedure load_memory_from_file (signal mem : out MEM) is
 		file 	 infile: text;
 		variable inline: line;
@@ -67,9 +68,6 @@ ARCHITECTURE rtl OF memory IS
 
 
 BEGIN
-	--This is the main section of the SRAM model
-
-	-- process to dump memory to file
 	dump_process: PROCESS(memdump)
 	BEGIN
 		IF(rising_edge(memdump)) THEN
@@ -77,25 +75,16 @@ BEGIN
 		END IF;
 	END PROCESS;
 
-
 	mem_process: PROCESS (clock, memload, address)
-		file 	 infile: text;
-		variable inline: line;
-		variable data: std_logic_vector(bit_width-1 DOWNTO 0);
-	BEGIN
-
-	-- load memory from file "memory_load.text" when a rising edge is see on memload
-	-- load memory is used for testing only, file IO is not synthesizeable	
-	if(rising_edge(memload)) THEN
-		report "Trying to do a mem_load";
-		load_memory_from_file(ram_block);
-	-- This is the actual synthesizable SRAM block 
-	else
-		IF (memwrite = '1') THEN
-			ram_block(address) <= writedata;
+	BEGIN	
+		if(rising_edge(memload)) THEN
+			report "Loading data memory from file 'program.txt'.";
+			load_memory_from_file(ram_block);
+		else
+			IF (memwrite = '1') THEN
+				ram_block(address) <= writedata;
+			END IF;
 		END IF;
-		-- read_address_reg <= address;
-	END IF;
 	END PROCESS;
 	readdata <= ram_block(address);
 
@@ -105,7 +94,6 @@ BEGIN
 	BEGIN
 		IF(rising_edge(memwrite))THEN
 			write_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
-
 		END IF;
 	END PROCESS;
 
@@ -115,6 +103,7 @@ BEGIN
 			read_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
 		END IF;
 	END PROCESS;
+
 	waitrequest <= write_waitreq_reg and read_waitreq_reg;
 
 
