@@ -21,18 +21,17 @@ ARCHITECTURE mem_wb_architecture OF MEM_WB_REGISTER IS
     SIGNAL data_mem_intermediate: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
+    instruction_out <= instruction_intermediate;
+    data_mem_out <= data_mem_intermediate;
+    alu_result_out <= alu_result_intermediate;
+
     mem_wb_process: PROCESS (clock)
     BEGIN
-        IF(clock'EVENT AND clock = '1') THEN
+        IF(rising_edge(clock)) THEN
             -- report "MEM_WB register";
             instruction_intermediate <= instruction_in;
-            instruction_out <= instruction_intermediate;
-
-            data_mem_out <= data_mem_intermediate;
             data_mem_intermediate <= data_mem_in;
-
             alu_result_intermediate <= alu_result_in;
-            alu_result_out <= alu_result_intermediate;
         END IF;
     END PROCESS;
 
