@@ -129,6 +129,7 @@ architecture CPU_arch of CPU is
             branch : out std_logic;
             ALU_result : out std_logic_vector(63 downto 0);
             branch_target_out : out std_logic_vector(31 downto 0);
+            val_b_out : out std_logic_vector(31 downto 0);
             PC_out : out integer
     );
     END COMPONENT;
@@ -282,6 +283,7 @@ architecture CPU_arch of CPU is
     signal execute_stage_branch : std_logic;
     signal execute_stage_ALU_result : std_logic_vector(63 downto 0);
     signal execute_stage_branch_target_out : std_logic_vector(31 downto 0);
+    signal execute_stage_val_b_out : std_logic_vector(31 downto 0);
     signal execute_stage_PC_out : integer;
 
     --Execute Memory register
@@ -422,6 +424,7 @@ begin
         execute_stage_branch,
         execute_stage_ALU_result,
         execute_stage_branch_target_out,
+        execute_stage_val_b_out,
         execute_stage_PC_out
     );
 
