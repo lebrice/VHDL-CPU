@@ -126,7 +126,7 @@ current_state <=
   WRITING when clock = '1' else
   IDLE;
 
-  computation : process(clock, instruction_in, write_back_instruction, write_back_data, register_file)
+  computation : process(clock, instruction_in, write_back_instruction, write_back_data)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
@@ -254,6 +254,7 @@ current_state <=
             
           if (wb_rd = 0) then
             -- Instructions can't write into register 0! it's always zero!
+            report "No-Op coming brack from WB.";
           else
             register_file(wb_rd).data <= write_back_data(31 downto 0);
           end if;
@@ -378,7 +379,7 @@ current_state <=
 
 
   instruction_out <= 
-    NO_OP_INSTRUCTION when (stall_reg = '1') 
+    NO_OP_INSTRUCTION when current_state = STALLED 
       OR instruction_in.instruction_type = MOVE_FROM_HI
       OR instruction_in.instruction_type = MOVE_FROM_LOW
       OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
