@@ -35,6 +35,19 @@ architecture executeStage_arch of executeStage is
   SIGNAL input_b: std_logic_vector(31 downto 0);
   SIGNAL internal_branch : std_logic;
   SIGNAL internal_ALU_result : std_logic_vector(63 downto 0);
+
+  function signExtend(immediate : std_logic_vector(15 downto 0))
+    return std_logic_vector is
+  begin
+    if(immediate(15) = '1') then
+      return X"FFFF" & immediate;
+    else
+      return X"0000" & immediate;
+    end if;
+  end signExtend;
+
+
+
   --SIGNAL ALU_result : std_logic_vector(31 downto 0);
 begin
   --define alu component
@@ -57,7 +70,7 @@ begin
   val_b_out <= val_b; --used to send val b to the next stage
  
   -- Process 2: Pass in values to ALU and get result
-  compute_inputs : process(instruction_in)
+  compute_inputs : process(instruction_in, val_a, val_b, imm_sign_extended)
   begin
  
     -- The instruction changes what is passed to the ALU
@@ -77,7 +90,9 @@ begin
           input_b <= val_b; -- rt
         when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | LOAD_UPPER_IMMEDIATE | LOAD_WORD | STORE_WORD =>
           input_a <= val_a; -- rs
-          input_b <= imm_sign_extended;
+          -- FIXME: temp fix:
+          input_b <= signExtend(instruction_in.immediate_vect);
+          -- input_b <= imm_sign_extended;
         when MOVE_FROM_HI =>
           -- This case is never reached (handled in decode)
           report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
