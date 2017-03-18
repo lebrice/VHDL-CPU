@@ -25,7 +25,8 @@ architecture processor_test of cpu_tb is
             WB_instruction : out INSTRUCTION;
             WB_data : out std_logic_vector(63 downto 0);
             fetch_PC : out integer;
-            decode_register_file : out REGISTER_BLOCK
+            decode_register_file : out REGISTER_BLOCK;
+            ALU_out : out std_logic_vector(63 downto 0)
         );
     end COMPONENT;
     signal dump : std_logic := '0';
@@ -46,6 +47,8 @@ architecture processor_test of cpu_tb is
 
     signal decode_register_file : REGISTER_BLOCK;
 
+    signal ALU_out_copy : std_logic_vector(63 downto 0);
+
 begin
 
 c1 : CPU PORT MAP (
@@ -59,7 +62,8 @@ c1 : CPU PORT MAP (
     WB_instruction,
     WB_data,
     PC,
-    decode_register_file
+    decode_register_file,
+    ALU_out_copy
 );
 
 

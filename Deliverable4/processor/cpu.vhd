@@ -23,7 +23,8 @@ entity CPU is
     WB_instruction : out INSTRUCTION;
     WB_data : out std_logic_vector(63 downto 0);
     fetch_PC : out integer;
-    decode_register_file : out REGISTER_BLOCK
+    decode_register_file : out REGISTER_BLOCK;
+    ALU_out : out std_logic_vector(63 downto 0)
   );
 end CPU ;
 
@@ -341,6 +342,7 @@ architecture CPU_arch of CPU is
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
 begin
+    ALU_out <= execute_stage_ALU_result;
 
     decode_register_file <= decode_stage_register_file_out;
 
