@@ -85,7 +85,7 @@ begin
 
     for i in 1 to 10 loop
         wait for clock_period;
-        report "stopped at clock cycle " & integer'image(i) & ", PC is " & integer'image(PC) severity failure;
+        -- report "stopped at clock cycle " & integer'image(i) & ", PC is " & integer'image(PC) severity failure;
     end loop;
 
 
