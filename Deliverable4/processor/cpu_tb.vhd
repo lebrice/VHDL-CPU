@@ -90,7 +90,7 @@ begin
 
 
 
-    wait for 9000 ns;
+    wait for 10 ns;
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
