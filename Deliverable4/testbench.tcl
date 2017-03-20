@@ -6,7 +6,7 @@ vcom memory.vhd
 vcom writebackStage.vhd
 vcom alu.vhd
 vcom executeStage.vhd
-vcom reg_file/reg_file.vhd
+vcom reg_file.vhd
 vcom decodeStage.vhd
 vcom fetchStage.vhd
 vcom EX_MEM.vhd
