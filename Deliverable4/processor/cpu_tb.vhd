@@ -33,7 +33,7 @@ architecture processor_test of cpu_tb is
     signal clock : std_logic := '0';
     signal initialize : std_logic := '0';
 
-    constant clock_period : time := 1 ns;
+    constant clock_period : time := 10 ns;
 
 
     signal IF_ID_instruction : INSTRUCTION; 
@@ -90,13 +90,13 @@ begin
 
 
 
-    wait for 1000 ns;
-    dump <= '1'; --dump data
-    wait for clock_period;
-    dump <= '0';
-    wait for clock_period;
+    -- wait for 1000 ns;
+    -- dump <= '1'; --dump data
+    -- wait for clock_period;
+    -- dump <= '0';
+    -- wait for clock_period;
 
-    report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
+
   
     wait for 9900 ns;
     dump <= '1'; --dump data
@@ -104,7 +104,7 @@ begin
     dump <= '0';
     wait for clock_period;
     wait;
-
+    report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
 
    
 
