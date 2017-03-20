@@ -90,14 +90,19 @@ begin
 
 
 
-    wait for 9900 ns;
+    wait for 1000 ns;
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
     wait for clock_period;
 
     report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
-
+  
+    wait for 9900 ns;
+    dump <= '1'; --dump data
+    wait for clock_period;
+    dump <= '0';
+    wait for clock_period;
     wait;
 
 
