@@ -20,5 +20,5 @@ vcom processor/cpu_tb.vhd
 ;# Start simulation
 vsim cpu_tb
 
-;# Run for 50 ns
-run 50ns
+;# Run for 10000 ns
+run 10000ns
