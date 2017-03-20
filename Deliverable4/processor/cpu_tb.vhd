@@ -83,14 +83,14 @@ begin
     wait for clock_period;
     initialize <= '0';
 
-    for i in 1 to 10 loop
-        wait for clock_period;
-        -- report "stopped at clock cycle " & integer'image(i) & ", PC is " & integer'image(PC) severity failure;
-    end loop;
+    -- for i in 1 to 10 loop
+    --     wait for clock_period;
+    --     -- report "stopped at clock cycle " & integer'image(i) & ", PC is " & integer'image(PC) severity failure;
+    -- end loop;
 
 
 
-    wait for 10 ns;
+    wait for 9900 ns;
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
