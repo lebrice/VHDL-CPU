@@ -11,7 +11,7 @@ entity CPU is
     generic(
         ram_size : integer := 8196;
         mem_delay : time := 0.1 ns;
-		data_memory_dump_filepath : STRING := "memory.txt";
+        data_memory_dump_filepath : STRING := "memory.txt";
         instruction_memory_load_filepath : STRING := "program.txt";
         clock_period : time := 1 ns
     );
