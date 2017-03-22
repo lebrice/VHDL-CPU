@@ -11,8 +11,7 @@ end cpu_tb ;
 architecture processor_test of cpu_tb is
     COMPONENT CPU is
         generic(
-            ram_size : integer := 8196;
-            bit_width : integer := 32
+            ram_size : integer := 8196
         );
         port (
             clock : in std_logic;
