@@ -206,6 +206,7 @@ current_state <=
             -- register_file(rt).busy <= '1';
 
           when STORE_WORD =>
+            report "breakpoint" severity failure;
           -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
             val_a <= register_file(rs).data; -- the base address
             var_val_b := register_file(rt).data; -- the word to store
