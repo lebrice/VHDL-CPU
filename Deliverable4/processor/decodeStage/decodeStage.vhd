@@ -12,31 +12,23 @@ entity decodeStage is
     -- Inputs coming from the IF/ID Register
     PC : in integer;
     instruction_in : in INSTRUCTION;
-
-
     -- Instruction and data coming from the Write-Back stage.
     write_back_instruction : in INSTRUCTION;
     write_back_data : in std_logic_vector(63 downto 0);
-
-
     -- Outputs to the ID/EX Register
     val_a : out std_logic_vector(31 downto 0);
     val_b : out std_logic_vector(31 downto 0);
     i_sign_extended : out std_logic_vector(31 downto 0);
     PC_out : out integer;
     instruction_out : out INSTRUCTION;
-
     -- Register file
     register_file_out : out REGISTER_BLOCK;
     write_register_file : in std_logic;
     reset_register_file : in std_logic;
-
     -- might have to add this in at some point:
     stall_in : in std_logic;
-
     -- Stall signal out.
-    stall_out : out std_logic
-    
+    stall_out : out std_logic    
   ) ;
 end decodeStage ;
 
@@ -68,8 +60,9 @@ architecture decodeStage_arch of decodeStage is
   signal LOW, HI : REGISTER_ENTRY := empty_register;
   signal register_file : REGISTER_BLOCK := empty_register_file;
 
-  type state is (READING, WRITING, RESETTING, STALLED, IDLE);
+  type state is (READING, WRITING, RESETTING, IDLE);
   signal current_state : state;
+  signal reading_stalled : std_logic;
 
 begin
   stall_out <= stall_reg;
@@ -119,14 +112,18 @@ begin
   -- JUMP_AND_LINK,
   -- UNKNOWN
 
+
+
 current_state <= 
-  STALLED when stall_in = '1' OR stall_reg = '1' else
   RESETTING when reset_register_file = '1' else
-  READING when clock = '0' AND stall_in = '0' else
-  WRITING when clock = '1' AND stall_in = '0' else
+  READING when clock = '0' else
+  WRITING when clock = '1' else
   IDLE;
 
-  computation : process(clock, instruction_in, write_back_instruction, write_back_data, register_file)
+  reading_stalled <= '1' when stall_in = '1' OR stall_reg = '1' else '0';
+
+
+  computation : process(clock, instruction_in, write_back_instruction, write_back_data, stall_reg)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
@@ -138,10 +135,17 @@ current_state <=
     wb_rt := write_back_instruction.rt;
     wb_rd := write_back_instruction.rd;
     immediate := instruction_in.immediate_vect; 
-
+    
     case current_state is
 
-    when READING =>    
+    when READING =>  
+        if ( reading_stalled = '1' ) then
+          report "Reading is stalled in Decode stage.";
+          val_a <= (others => '0');
+          val_b <= (others => '0'); 
+        else
+          
+        report " current state is READING ";  
         -- second half of clock cycle: read data from registers, and output the correct instruction.
         -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
         -- since they only move data from the HI or LOW special registers to another register.
@@ -161,7 +165,7 @@ current_state <=
 
           when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
             val_a <= register_file(rs).data;
-            val_b <= signExtend(immediate);
+            i_sign_extended <= signExtend(instruction_in.immediate_vect);
             register_file(rt).busy <= '1'; 
 
           when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
@@ -225,12 +229,11 @@ current_state <=
             report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
         
         end case;
+        end if;
 
-    when STALLED =>
-        val_a <= (others => '0');
-        val_b <= (others => '0');  
 
     when RESETTING =>
+      report " current state is RESETTING "; 
       -- reset register file
       register_file <= reset_register_block(register_file);
       -- FOR i in 0 to NUM_REGISTERS-1 LOOP
@@ -240,6 +243,8 @@ current_state <=
 
     when WRITING =>
 
+      report " current state is WRITING ";  
+      
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
 
@@ -250,6 +255,7 @@ current_state <=
             
           if (wb_rd = 0) then
             -- Instructions can't write into register 0! it's always zero!
+            report "No-Op coming brack from WB.";
           else
             register_file(wb_rd).data <= write_back_data(31 downto 0);
           end if;
@@ -280,12 +286,13 @@ current_state <=
 
       end case;
       when IDLE =>
+        report " current state is IDLE... ";  
         -- do nothing.
    end case;
   end process;
 
 
-  stall_detection : process(clock, instruction_in, register_file)
+  stall_detection : process(clock, instruction_in, write_back_instruction, write_back_data, stall_in)
     variable rs, rt, rd : REGISTER_ENTRY;
   begin
     rs := register_file(instruction_in.rs);
@@ -293,6 +300,7 @@ current_state <=
     rd := register_file(instruction_in.rd);
 
     if clock = '0' OR rising_edge(clock) then
+      report "stall_reg is " & std_logic'image(stall_reg);
       -- we can only set stall_out to '1' during the second part of the cycle.
       
     case instruction_in.instruction_type is
@@ -372,7 +380,7 @@ current_state <=
 
 
   instruction_out <= 
-    NO_OP_INSTRUCTION when stall_reg = '1' 
+    NO_OP_INSTRUCTION when (reading_stalled = '1')
       OR instruction_in.instruction_type = MOVE_FROM_HI
       OR instruction_in.instruction_type = MOVE_FROM_LOW
       OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
@@ -380,8 +388,8 @@ current_state <=
 
   write_registers_to_file : process( write_register_file )
   begin
-    if write_register_file = '1' then
-      -- TODO: call the procedure to write out the register_file to a file.
+    if rising_edge(write_register_file) then
+      dump_registers(register_file);
     end if;    
   end process ; -- write_registers_to_file
 

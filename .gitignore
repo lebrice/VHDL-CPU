@@ -2,3 +2,7 @@
 Deliverable4/work
 Deliverable4/processor.mpf
 *.mti
+
+Deliverable4/__MACOSX/**
+Deliverable4/Assembler/**
+.metadata

@@ -46,7 +46,9 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
             memwrite: IN STD_LOGIC;
             memread: IN STD_LOGIC;
             readdata: OUT STD_LOGIC_VECTOR (bit_width-1 DOWNTO 0);
-            waitrequest: OUT STD_LOGIC
+            waitrequest: OUT STD_LOGIC;
+            memdump : IN std_logic;
+            memload : IN std_logic
         );
     END COMPONENT;
 
@@ -70,7 +72,8 @@ ARCHITECTURE behaviour OF fetchStage_tb IS
     signal fetch_addr : integer;
     signal test_addr : integer range 0 to ram_size-1;
 
-
+    signal memdump : std_logic := '0';
+    signal memload : std_logic := '0';
     signal accessing_memory : std_logic;
 BEGIN
 
@@ -85,7 +88,9 @@ BEGIN
         mem_write,
         mem_read,
         mem_readdata,
-        mem_waitrequest
+        mem_waitrequest,
+        memdump,
+        memload
     );
     -- device under test.
     fet: fetchStage PORT MAP(

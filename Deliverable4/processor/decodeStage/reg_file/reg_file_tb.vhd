@@ -33,7 +33,7 @@ begin
         end loop;
 
         -- test register dump
-        reg_block := load_registers;
+        -- reg_block := load_registers;
         dump_registers(reg_block);
         report "test completed";
 

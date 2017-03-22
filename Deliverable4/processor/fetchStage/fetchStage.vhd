@@ -29,34 +29,61 @@ entity fetchStage is
 end fetchStage;
 
 architecture fetchStage_arch of fetchStage is
-signal PC_next : integer := 4;
 signal PC_register : integer := 0;
+signal PC_next : integer := 0;
 begin 
 
 PC <= PC_register;
-
 PC_next <= 
+  0 when reset = '1' else
   branch_target when branch_condition = '1' else
-  PC_register   when stall = '1' else 
   PC_register + 4;
-
-mem_process : process(m_waitrequest)
-variable inst : INSTRUCTION;
-begin
-  -- TODO: add the proper timing and avalon interface stuff later.
-  m_read <= '1';
-  m_addr <= PC_register;
-  inst := getInstruction(m_readdata);
-  instruction_out <= inst;
-end process;
 
 pc_process : process( clock, reset )
 begin
   if( reset = '1' ) then
     PC_register <= 0;
   elsif( rising_edge(clock) ) then
-    PC_register <= PC_next;
+    if(stall = '1') then
+      -- dont change its value.
+      report "fetch stage is STALLED.";
+    else
+      PC_register <= PC_next;
+    end if;
   end if ;
 end process ; -- pc_process
+
+
+
+
+
+mem_process : process(clock, reset, m_waitrequest, PC_register)
+variable inst : INSTRUCTION;
+begin
+  -- TODO: add the proper timing and avalon interface stuff later.
+  
+  
+  if reset = '1' then
+    report "reset is '1', we are outputting a no-op.";
+    instruction_out <= NO_OP_INSTRUCTION;
+  else
+    report " reading instruction from PC address of " & integer'image(PC_register);
+    m_read <= '1';
+    m_addr <= PC_register / 4;
+    inst := getInstruction(m_readdata);
+    instruction_out <= inst;
+  end if;
+end process;
+
+
+
+
+
+report_stall : process( clock, stall )
+begin
+  if stall = '1' then
+    report "FETCH IS STALLED";
+  end if;
+end process ; -- report_stall
 
 end architecture ; -- arch
