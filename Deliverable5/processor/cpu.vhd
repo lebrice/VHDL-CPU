@@ -10,7 +10,10 @@ use work.REGISTERS.all;
 entity CPU is
     generic(
         ram_size : integer := 8196;
-        bit_width : integer := 32
+        mem_delay : time := 0.1 ns;
+		data_memory_dump_filepath : STRING := "memory.txt";
+        instruction_memory_load_filepath : STRING := "program.txt";
+        clock_period : time := 1 ns
     );
   port (
     clock : in std_logic;
@@ -26,6 +29,7 @@ entity CPU is
     decode_register_file : out REGISTER_BLOCK;
     ALU_out : out std_logic_vector(63 downto 0)
   );
+  constant bit_width : integer := 32;
 end CPU ;
 
 
@@ -205,10 +209,10 @@ architecture CPU_arch of CPU is
         GENERIC(            
             RAM_SIZE : INTEGER := ram_size;
             BIT_WIDTH : INTEGER := bit_width;
-            MEM_DELAY : time := 0.1 ns;
-            CLOCK_PERIOD : time := 1 ns;
-            MEMORY_LOAD_FILEPATH : STRING := "memory.txt";
-            MEMORY_DUMP_FILEPATH : STRING := "program.txt"
+            MEM_DELAY : time := mem_delay;
+            CLOCK_PERIOD : time := clock_period;
+            MEMORY_LOAD_FILEPATH : STRING := instruction_memory_load_filepath;
+            MEMORY_DUMP_FILEPATH : STRING := data_memory_dump_filepath
         );
         PORT (
             clock: IN STD_LOGIC;
