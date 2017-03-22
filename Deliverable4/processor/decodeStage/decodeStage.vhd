@@ -127,6 +127,7 @@ current_state <=
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
+    variable var_val_b : std_logic_vector(31 downto 0);
   begin
     rs := instruction_in.rs;
     rt := instruction_in.rt;
@@ -142,7 +143,7 @@ current_state <=
         if ( reading_stalled = '1' ) then
           report "Reading is stalled in Decode stage.";
           val_a <= (others => '0');
-          val_b <= (others => '0'); 
+          var_val_b := (others => '0'); 
         else
           
         report " current state is READING ";  
@@ -156,7 +157,7 @@ current_state <=
 
           when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
             val_a <= register_file(rs).data;
-            val_b <= register_file(rt).data;
+            var_val_b := register_file(rt).data;
             if (rd = 0) then
               -- we don't ever set register zero as busy, since it's hard-wired to zero!
             else
@@ -175,27 +176,27 @@ current_state <=
 
           when MULTIPLY | DIVIDE =>
             val_a <= register_file(rs).data;
-            val_b <= register_file(rt).data;
+            var_val_b := register_file(rt).data;
             LOW.busy <= '1';
             HI.busy <= '1';
 
           when MOVE_FROM_HI =>
             register_file(rd).data <= HI.data;
             val_a <= (others => '0');
-            val_b <= (others => '0');
+            var_val_b := (others => '0');
 
           when MOVE_FROM_LOW =>
             register_file(rd).data <= LOW.data;
             val_a <= (others => '0');
-            val_b <= (others => '0');
+            var_val_b := (others => '0');
 
           when LOAD_UPPER_IMMEDIATE =>
             register_file(rt).data <= immediate & (15 downto 0 => '0');
             val_a <= (others => '0');
-            val_b <= (others => '0');
+            var_val_b := (others => '0');
 
           when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-            val_b <= register_file(rt).data;
+            var_val_b := register_file(rt).data;
             val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
             -- register_file(rd).busy <= '1';
 
@@ -207,12 +208,12 @@ current_state <=
           when STORE_WORD =>
           -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
             val_a <= register_file(rs).data; -- the base address
-            val_b <= register_file(rt).data; -- the word to store
+            var_val_b := register_file(rt).data; -- the word to store
             i_sign_extended <= signExtend(immediate); -- the offset
-
+            val_b <= var_val_b;
           when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
             val_a <= register_file(rs).data;
-            val_b <= register_file(rt).data;
+            var_val_b := register_file(rt).data;
             i_sign_extended <= signExtend(immediate);
 
           when JUMP =>
