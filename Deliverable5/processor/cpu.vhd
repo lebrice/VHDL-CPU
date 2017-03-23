@@ -27,7 +27,9 @@ entity CPU is
     WB_data : out std_logic_vector(63 downto 0);
     fetch_PC : out integer;
     decode_register_file : out REGISTER_BLOCK;
-    ALU_out : out std_logic_vector(63 downto 0)
+    ALU_out : out std_logic_vector(63 downto 0);
+    input_instruction : in INSTRUCTION;
+    override_input_instruction : in std_logic
   );
   constant bit_width : integer := 32;
 end CPU ;
@@ -505,7 +507,10 @@ begin
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
     fetch_stage_stall <= decode_stage_stall_out;
 
-    IF_ID_register_instruction_in <= NO_OP_INSTRUCTION when initialize = '1' else fetch_stage_instruction_out;
+    IF_ID_register_instruction_in <= 
+        NO_OP_INSTRUCTION when initialize = '1' else 
+        input_instruction when override_input_instruction = '1' else
+        fetch_stage_instruction_out;
     IF_ID_register_pc_in <= fetch_stage_PC;
     IF_ID_register_stall <= decode_stage_stall_out;
 
