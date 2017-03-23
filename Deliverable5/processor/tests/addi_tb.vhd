@@ -13,13 +13,15 @@ architecture processor_test of addi_tb is
     constant data_memory_dump_path : string := "tests/addi_memory.txt";
     -- not used in this case.
     constant instruction_memory_load_path : string := "tests/program.txt";
+    constant register_file_path : string := "tests/addi_register_file.txt";
     COMPONENT CPU is
         generic(
             ram_size : integer := 8196;
             mem_delay : time := 0.1 ns;
             data_memory_dump_filepath : STRING := "memory.txt";
             instruction_memory_load_filepath : STRING := "program.txt";
-            clock_period : time := clock_period
+            register_file_dump_filepath : STRING := "register_file.txt";
+            clock_period : time := 1 ns
         );
         port (
             clock : in std_logic;
@@ -63,7 +65,10 @@ begin
 
 c1 : CPU 
 GENERIC MAP (
-    data_memory_dump_filepath => data_memory_dump_path
+    data_memory_dump_filepath => data_memory_dump_path,
+    register_file_dump_filepath => register_file_path,
+    instruction_memory_load_filepath => instruction_memory_load_path,
+    clock_period => clock_period
 )
 PORT MAP (
     clock,
@@ -100,8 +105,7 @@ begin
     initialize <= '0';
     input_instruction <= makeInstruction(ADDI_OP, 0, 1, 15);
     wait for clock_period;
-
-    report "stopped for testing" severity failure;
+    input_instruction <= NO_OP_INSTRUCTION;
 
     wait for 10 * clock_period;
     dump <= '1'; --dump data
