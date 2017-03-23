@@ -64,13 +64,19 @@ architecture decodeStage_arch of decodeStage is
   signal current_state : state;
   signal reading_stalled : std_logic;
   signal sig_var_b : std_logic_vector(31 downto 0);
-
+  signal sig_PC : integer;
+  signal sig_instruction : INSTRUCTION;
 begin
   stall_out <= stall_reg;
-  PC_out <= PC;
+  PC_out <= sig_PC;
   register_file_out <= register_file;
   val_b <= sig_var_b;
-
+  instruction_out <= 
+    NO_OP_INSTRUCTION when (reading_stalled = '1')
+      OR sig_instruction.instruction_type = MOVE_FROM_HI
+      OR sig_instruction.instruction_type = MOVE_FROM_LOW
+      OR sig_instruction.instruction_type = LOAD_UPPER_IMMEDIATE 
+    else sig_instruction;
   -- Rough Pseudocode:
   -- Conditions that create a stall:
   -- A register is busy, and the incoming instruction from fetch is using it.
@@ -138,7 +144,8 @@ current_state <=
     wb_rt := write_back_instruction.rt;
     wb_rd := write_back_instruction.rd;
     immediate := instruction_in.immediate_vect; 
-    
+    PC <= sig_PC;
+    instruction_in <= sig_instruction;
     case current_state is
 
     when READING =>  
@@ -382,13 +389,6 @@ current_state <=
   --   end if;
   -- end process stall_detection;
 
-
-  instruction_out <= 
-    NO_OP_INSTRUCTION when (reading_stalled = '1')
-      OR instruction_in.instruction_type = MOVE_FROM_HI
-      OR instruction_in.instruction_type = MOVE_FROM_LOW
-      OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
-    else instruction_in;
 
   -- write_registers_to_file : process( write_register_file )
   -- begin
