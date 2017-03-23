@@ -125,11 +125,12 @@ current_state <=
   reading_stalled <= '1' when stall_in = '1' OR stall_reg = '1' else '0';
 
 
-  computation : process(clock, instruction_in, write_back_instruction, write_back_data, stall_reg)
+  computation : process(instruction_in, write_back_instruction, write_back_data, stall_reg)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
   begin
+    report "ENTERED PROCESS!!" failure;
     rs := instruction_in.rs;
     rt := instruction_in.rt;
     rd := instruction_in.rd;
