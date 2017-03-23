@@ -103,17 +103,40 @@ begin
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
-    input_instruction <= makeInstruction(ADDI_OP, 0, 1, 15);
+    
+    input_instruction <= makeInstruction(ADDI_OP, 0, 1, 15); -- ADDI R1, R0, 15
+    wait for clock_period;
+    input_instruction <= NO_OP_INSTRUCTION;
+    
+    wait for 5 * clock_period;
+    
+    assert decode_register_file(1).data = x"0000000F" report "ADDI didn't write the right results back into the register" severity error;
+    assert decode_register_file(1).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
+
+    input_instruction <= makeInstruction(ADDI_OP, 1, 2, 15); -- ADDI R2, R1, 15
     wait for clock_period;
     input_instruction <= NO_OP_INSTRUCTION;
 
+    wait for 5 * clock_period;
+    -- the result of R1 + 15 is 30 => x"1E"
+    assert decode_register_file(2).data = x"0000001E" report "ADDI didn't write the right results back into the register" severity error;
+    assert decode_register_file(2).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
+
+    input_instruction <= makeInstruction(SW_OP, 0, 1, 0); -- SW R1, 0(R0)
+    wait for clock_period;
+    input_instruction <= makeInstruction(SW_OP, 0, 2, 4); -- SW R2, 4(R0)
+    wait for clock_period;
+    input_instruction <= NO_OP_INSTRUCTION;
+    
     wait for 10 * clock_period;
+    
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
     wait for clock_period;
+
+    report "done testing ADDI";
     wait;
-    report "Dumped Contents into 'addi_memory.txt' and 'register_file.txt'";
     
 end process test_process;
 
