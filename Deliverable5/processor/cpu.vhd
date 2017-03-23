@@ -356,7 +356,12 @@ begin
 
     decode_register_file <= decode_stage_register_file_out;
 
-    fetch : fetchStage PORT MAP(
+    fetch : fetchStage
+    GENERIC MAP(
+        ram_size => ram_size,
+        bit_width => bit_width
+    ) 
+    PORT MAP(
         clock,
         fetch_stage_reset,
         fetch_stage_branch_target,
