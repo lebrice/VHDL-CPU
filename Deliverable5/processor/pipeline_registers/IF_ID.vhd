@@ -26,7 +26,7 @@ BEGIN
         IF(rising_edge(clock)) THEN
             -- report "IF_ID Register";
             IF(stall = '1') THEN -- Only update intermediate and output values if we are not stalled.
-                report "IF_ID is stalled";
+                -- report "IF_ID is stalled";
             ELSE
                 pc_intermediate <= pc_in; 
                 instruction_intermediate <= instruction_in;

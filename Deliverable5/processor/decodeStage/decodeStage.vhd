@@ -6,6 +6,9 @@ use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
 entity decodeStage is
+  generic (
+    write_register_filepath : string := "register_file.txt"
+  );
   port (
     clock : in std_logic;
 
@@ -140,12 +143,12 @@ current_state <=
 
     when READING =>  
         if ( reading_stalled = '1' ) then
-          report "Reading is stalled in Decode stage.";
+          -- report "Reading is stalled in Decode stage.";
           val_a <= (others => '0');
           val_b <= (others => '0'); 
         else
           
-        report " current state is READING ";  
+        -- report " current state is READING ";  
         -- second half of clock cycle: read data from registers, and output the correct instruction.
         -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
         -- since they only move data from the HI or LOW special registers to another register.
@@ -233,7 +236,7 @@ current_state <=
 
 
     when RESETTING =>
-      report " current state is RESETTING "; 
+      -- report " current state is RESETTING "; 
       -- reset register file
       register_file <= reset_register_block(register_file);
       -- FOR i in 0 to NUM_REGISTERS-1 LOOP
@@ -243,7 +246,7 @@ current_state <=
 
     when WRITING =>
 
-      report " current state is WRITING ";  
+      -- report " current state is WRITING ";  
       
       -- first half of clock cycle: write result of instruction to the registers.
       case write_back_instruction.instruction_type is
@@ -255,7 +258,7 @@ current_state <=
             
           if (wb_rd = 0) then
             -- Instructions can't write into register 0! it's always zero!
-            report "No-Op coming brack from WB.";
+            -- report "No-Op coming brack from WB.";
           else
             register_file(wb_rd).data <= write_back_data(31 downto 0);
           end if;
@@ -286,7 +289,7 @@ current_state <=
 
       end case;
       when IDLE =>
-        report " current state is IDLE... ";  
+        -- report " current state is IDLE... ";  
         -- do nothing.
    end case;
   end process;
@@ -300,7 +303,7 @@ current_state <=
     rd := register_file(instruction_in.rd);
 
     if clock = '0' OR rising_edge(clock) then
-      report "stall_reg is " & std_logic'image(stall_reg);
+      -- report "stall_reg is " & std_logic'image(stall_reg);
       -- we can only set stall_out to '1' during the second part of the cycle.
       
     case instruction_in.instruction_type is
