@@ -65,6 +65,7 @@ architecture decodeStage_arch of decodeStage is
   signal reading_stalled : std_logic;
   signal sig_var_b : std_logic_vector(31 downto 0);
 
+  signal good_to_read : std_logic := 0;
 begin
   stall_out <= stall_reg;
   PC_out <= PC;
@@ -125,12 +126,12 @@ current_state <=
   reading_stalled <= '1' when stall_in = '1' OR stall_reg = '1' else '0';
 
 
-  computation : process(instruction_in, write_back_instruction, write_back_data, stall_reg)
+  write_computation : process(instruction_in, write_back_instruction, write_back_data, stall_reg)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
   begin
-    report "ENTERED PROCESS!!" severity failure;
+    report "ENTERED write comp PROCESS!!" severity failure;
     rs := instruction_in.rs;
     rt := instruction_in.rt;
     rd := instruction_in.rd;
@@ -185,100 +186,8 @@ current_state <=
             report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
 
         end case;
-        
-        if ( reading_stalled = '1' ) then
-          report "Reading is stalled in Decode stage.";
-          val_a <= (others => '0');
-          sig_var_b <= (others => '0'); 
-        else
-          
-        report " current state is READING ";  
-        -- second half of clock cycle: read data from registers, and output the correct instruction.
-        -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
-        -- since they only move data from the HI or LOW special registers to another register.
-        -- (they move half of the result from a MULTIPLY instruction.)
-        
-        case instruction_in.instruction_type is 
-          -- TODO: Make sure that we're clear on what exactly EX or ID handles in each case.
-
-          when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
-            val_a <= register_file(rs).data;
-            sig_var_b <= register_file(rt).data;
-            if (rd = 0) then
-              -- we don't ever set register zero as busy, since it's hard-wired to zero!
-            else
-              register_file(rd).busy <= '1';
-            end if;
-
-          when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
-            val_a <= register_file(rs).data;
-            i_sign_extended <= signExtend(instruction_in.immediate_vect);
-            register_file(rt).busy <= '1'; 
-
-          when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
-            val_a <= register_file(rs).data;
-            i_sign_extended <= zeroExtend(immediate);
-            register_file(rt).busy <= '1';
-
-          when MULTIPLY | DIVIDE =>
-            val_a <= register_file(rs).data;
-            sig_var_b <= register_file(rt).data;
-            LOW.busy <= '1';
-            HI.busy <= '1';
-
-          when MOVE_FROM_HI =>
-            register_file(rd).data <= HI.data;
-            val_a <= (others => '0');
-            sig_var_b <= (others => '0');
-
-          when MOVE_FROM_LOW =>
-            register_file(rd).data <= LOW.data;
-            val_a <= (others => '0');
-            sig_var_b <= (others => '0');
-
-          when LOAD_UPPER_IMMEDIATE =>
-            register_file(rt).data <= immediate & (15 downto 0 => '0');
-            val_a <= (others => '0');
-            sig_var_b <= (others => '0');
-
-          when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-            sig_var_b <= register_file(rt).data;
-            val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
-            -- register_file(rd).busy <= '1';
-
-          when LOAD_WORD =>
-            val_a <= register_file(rs).data;
-            i_sign_extended <= signExtend(immediate);
-            -- register_file(rt).busy <= '1';
-
-          when STORE_WORD =>
-            report "breakpoint" severity failure;
-          -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
-            val_a <= register_file(rs).data; -- the base address
-            -- sig_var_b := register_file(rt).data; -- the word to store
-            sig_var_b <= register_file(rt).data; -- the word to store
-            i_sign_extended <= signExtend(immediate); -- the offset
-          when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-            val_a <= register_file(rs).data;
-            sig_var_b <= register_file(rt).data;
-            i_sign_extended <= signExtend(immediate);
-
-          when JUMP =>
-            -- do nothing
-
-          when JUMP_AND_LINK =>
-            register_file(link_register).data <= std_logic_vector(to_unsigned(PC + 8, 32));
-
-          when JUMP_TO_REGISTER =>
-            -- TODO: Clarify this with Asher
-            val_a <= register_file(rs).data;
-
-          when UNKNOWN =>
-            report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
-        
-        end case;
-        end if;
-
+        --this lets us do the read process.
+        good_to_read  <= 1; 
     when RESETTING =>
       report " current state is RESETTING "; 
       -- reset register file
@@ -292,8 +201,128 @@ current_state <=
       -- do nothing.
    end case;
   end process;
+  
+  
+  read_computation : process(good_to_read, instruction_in, write_back_instruction, write_back_data, stall_reg)
+    variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
+    variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
+    variable immediate : std_logic_vector(15 downto 0);
+  begin
+    case current_state is
 
+    when READING | WRITING =>  
+      report "ENTERED read comp PROCESS!!" severity failure;
+      if ( reading_stalled = '1' ) then
+        report "Reading is stalled in Decode stage.";
+        val_a <= (others => '0');
+        sig_var_b <= (others => '0'); 
+      else
+        if(good_to_read = '1') then
+          report " current state is READING ";  
+          -- second half of clock cycle: read data from registers, and output the correct instruction.
+          -- TODO: There is no need to go through the rest of the pipeline stages in the case of MFHI and MFLO,
+          -- since they only move data from the HI or LOW special registers to another register.
+          -- (they move half of the result from a MULTIPLY instruction.)
+          
+          case instruction_in.instruction_type is 
+            -- TODO: Make sure that we're clear on what exactly EX or ID handles in each case.
 
+            when ADD | SUBTRACT | BITWISE_AND | BITWISE_NOR | BITWISE_OR | BITWISE_XOR | SET_LESS_THAN =>
+              val_a <= register_file(rs).data;
+              sig_var_b <= register_file(rt).data;
+              if (rd = 0) then
+                -- we don't ever set register zero as busy, since it's hard-wired to zero!
+              else
+                register_file(rd).busy <= '1';
+              end if;
+
+            when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
+              val_a <= register_file(rs).data;
+              i_sign_extended <= signExtend(instruction_in.immediate_vect);
+              register_file(rt).busy <= '1'; 
+
+            when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
+              val_a <= register_file(rs).data;
+              i_sign_extended <= zeroExtend(immediate);
+              register_file(rt).busy <= '1';
+
+            when MULTIPLY | DIVIDE =>
+              val_a <= register_file(rs).data;
+              sig_var_b <= register_file(rt).data;
+              LOW.busy <= '1';
+              HI.busy <= '1';
+
+            when MOVE_FROM_HI =>
+              register_file(rd).data <= HI.data;
+              val_a <= (others => '0');
+              sig_var_b <= (others => '0');
+
+            when MOVE_FROM_LOW =>
+              register_file(rd).data <= LOW.data;
+              val_a <= (others => '0');
+              sig_var_b <= (others => '0');
+
+            when LOAD_UPPER_IMMEDIATE =>
+              register_file(rt).data <= immediate & (15 downto 0 => '0');
+              val_a <= (others => '0');
+              sig_var_b <= (others => '0');
+
+            when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+              sig_var_b <= register_file(rt).data;
+              val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
+              -- register_file(rd).busy <= '1';
+
+            when LOAD_WORD =>
+              val_a <= register_file(rs).data;
+              i_sign_extended <= signExtend(immediate);
+              -- register_file(rt).busy <= '1';
+
+            when STORE_WORD =>
+              report "breakpoint" severity failure;
+            -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
+              val_a <= register_file(rs).data; -- the base address
+              -- sig_var_b := register_file(rt).data; -- the word to store
+              sig_var_b <= register_file(rt).data; -- the word to store
+              i_sign_extended <= signExtend(immediate); -- the offset
+            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+              val_a <= register_file(rs).data;
+              sig_var_b <= register_file(rt).data;
+              i_sign_extended <= signExtend(immediate);
+
+            when JUMP =>
+              -- do nothing
+
+            when JUMP_AND_LINK =>
+              register_file(link_register).data <= std_logic_vector(to_unsigned(PC + 8, 32));
+
+            when JUMP_TO_REGISTER =>
+              -- TODO: Clarify this with Asher
+              val_a <= register_file(rs).data;
+
+            when UNKNOWN =>
+              report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
+          
+          end case;
+        end if;
+      end if;
+      when RESETTING =>
+        report " current state is RESETTING "; 
+        -- reset register file
+        register_file <= reset_register_block(register_file);
+        -- FOR i in 0 to NUM_REGISTERS-1 LOOP
+        --   register_file(i).data <= (others => '0');
+        --   register_file(i).busy <= '0';
+        -- end loop;
+      when IDLE =>
+        report " current state is IDLE... ";  
+        -- do nothing.
+    end case;
+  end process;
+
+  good_to_read_process : process(instruction_in)
+  begin
+    good_to_read <= 0;
+  end process;
   -- stall_detection : process(clock, instruction_in, write_back_instruction, write_back_data, stall_in)
   --   variable rs, rt, rd : REGISTER_ENTRY;
   -- begin
