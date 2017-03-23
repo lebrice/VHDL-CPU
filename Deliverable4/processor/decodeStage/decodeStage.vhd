@@ -144,7 +144,7 @@ current_state <=
         if ( reading_stalled = '1' ) then
           report "Reading is stalled in Decode stage.";
           val_a <= (others => '0');
-          sig_var_b := (others => '0'); 
+          sig_var_b <= (others => '0'); 
         else
           
         report " current state is READING ";  
