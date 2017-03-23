@@ -44,7 +44,7 @@ ARCHITECTURE rtl OF memory IS
 		variable outline : line;
 	begin
 		--TODO: Add generics for the paths
-		file_open(outfile, MEMORY_LOAD_FILEPATH, write_mode);
+		file_open(outfile, MEMORY_DUMP_FILEPATH, write_mode);
 		for i in 0 to RAM_SIZE-1 loop
 			write(outline, mem(i));
 			writeline(outfile, outline);
@@ -59,7 +59,7 @@ ARCHITECTURE rtl OF memory IS
 		variable inline: line;
 		variable data: std_logic_vector(BIT_WIDTH-1 DOWNTO 0);
 	begin
-		file_open(infile, MEMORY_DUMP_FILEPATH, read_mode);
+		file_open(infile, MEMORY_LOAD_FILEPATH, read_mode);
 		for i in 0 to RAM_SIZE-1 loop
 			readline(infile, inline);
 			read(inline, data);
