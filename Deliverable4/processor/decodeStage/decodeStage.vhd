@@ -141,7 +141,51 @@ current_state <=
     
     case current_state is
 
-    when READING =>  
+    when READING OR WRITING =>  
+      
+        report " current state is WRITING ";  
+        
+        -- first half of clock cycle: write result of instruction to the registers.
+        case write_back_instruction.instruction_type is
+
+          -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
+          -- behave in exactly the same way. (might be wrong though).
+          when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+            -- instructions where we simply write back the data to the "rd" register:
+              
+            if (wb_rd = 0) then
+              -- Instructions can't write into register 0! it's always zero!
+              report "No-Op coming brack from WB.";
+            else
+              register_file(wb_rd).data <= write_back_data(31 downto 0);
+            end if;
+            register_file(wb_rd).busy <= '0';
+
+          when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
+            -- instructions where we use "rt" as a destination
+            register_file(wb_rt).data <= write_back_data(31 downto 0);
+            register_file(wb_rt).busy <= '0';
+
+          when MULTIPLY | DIVIDE =>
+            LOW.data <= write_back_data(31 downto 0);
+            LOW.busy <= '0';
+            HI.data <= write_back_data(63 downto 32);
+            HI.busy <= '0';
+
+          when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
+            -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
+
+          when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
+            -- TODO: Not 100% sure if we're supposed to do anything here.
+
+          when STORE_WORD =>
+            -- Do Nothing.
+
+          when UNKNOWN =>
+            report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
+
+        end case;
+        
         if ( reading_stalled = '1' ) then
           report "Reading is stalled in Decode stage.";
           val_a <= (others => '0');
@@ -235,7 +279,6 @@ current_state <=
         end case;
         end if;
 
-
     when RESETTING =>
       report " current state is RESETTING "; 
       -- reset register file
@@ -244,54 +287,9 @@ current_state <=
       --   register_file(i).data <= (others => '0');
       --   register_file(i).busy <= '0';
       -- end loop;
-
-    when WRITING =>
-
-      report " current state is WRITING ";  
-      
-      -- first half of clock cycle: write result of instruction to the registers.
-      case write_back_instruction.instruction_type is
-
-        -- NOTE: using a case based on the instruction_type instead of the format, since I'm not sure that all instrucitons of the same format 
-        -- behave in exactly the same way. (might be wrong though).
-        when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-          -- instructions where we simply write back the data to the "rd" register:
-            
-          if (wb_rd = 0) then
-            -- Instructions can't write into register 0! it's always zero!
-            report "No-Op coming brack from WB.";
-          else
-            register_file(wb_rd).data <= write_back_data(31 downto 0);
-          end if;
-          register_file(wb_rd).busy <= '0';
-
-        when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
-          -- instructions where we use "rt" as a destination
-          register_file(wb_rt).data <= write_back_data(31 downto 0);
-          register_file(wb_rt).busy <= '0';
-
-        when MULTIPLY | DIVIDE =>
-          LOW.data <= write_back_data(31 downto 0);
-          LOW.busy <= '0';
-          HI.data <= write_back_data(63 downto 32);
-          HI.busy <= '0';
-
-        when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
-          -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
-
-        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
-          -- TODO: Not 100% sure if we're supposed to do anything here.
-
-        when STORE_WORD =>
-          -- Do Nothing.
-
-        when UNKNOWN =>
-          report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
-
-      end case;
-      when IDLE =>
-        report " current state is IDLE... ";  
-        -- do nothing.
+    when IDLE =>
+      report " current state is IDLE... ";  
+      -- do nothing.
    end case;
   end process;
 
