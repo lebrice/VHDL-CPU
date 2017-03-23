@@ -392,7 +392,7 @@ current_state <=
   write_registers_to_file : process( write_register_file )
   begin
     if rising_edge(write_register_file) then
-      dump_registers(register_file);
+      dump_registers(register_file, write_register_filepath);
     end if;    
   end process ; -- write_registers_to_file
 

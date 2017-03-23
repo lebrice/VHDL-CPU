@@ -16,7 +16,8 @@ architecture processor_test of cpu_tb is
             mem_delay : time := 0.1 ns;
             data_memory_dump_filepath : STRING := "memory.txt";
             instruction_memory_load_filepath : STRING := "program.txt";
-            clock_period : time := clock_period
+            register_file_dump_filepath : STRING := "register_file.txt";
+            clock_period : time := 1 ns
         );
         port (
             clock : in std_logic;
@@ -101,7 +102,7 @@ begin
     wait for clock_period;
     wait;
     report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
-    
+
 end process test_process;
 
 end architecture ;

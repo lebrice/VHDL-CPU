@@ -30,6 +30,8 @@ package registers is
     --     return register_block;
     procedure dump_registers(reg_block  : register_block);
 
+    procedure dump_registers(reg_block : register_block; path : string);
+
 end registers;
 
 package body registers is
@@ -61,11 +63,23 @@ package body registers is
         variable  outline  : line;
     begin
         file_open(outfile, "register_file.txt", write_mode);
-        for i in reg_block' reverse_range loop
+        for i in 0 to NUM_REGISTERS-1 loop
             -- write(outline, string'("R"));
             -- write(outline, i);
             -- write(outline, string'(":"));
             -- write(outline, HT);
+            write(outline, reg_block(i).data);
+            writeline(outfile, outline);
+        end loop;
+        file_close(outfile);
+    end procedure dump_registers;
+
+    procedure dump_registers(reg_block  : register_block; constant path : string) is
+        file      outfile  : text;
+        variable  outline  : line;
+    begin
+        file_open(outfile, path, write_mode);
+        for i in 0 to NUM_REGISTERS-1 loop
             write(outline, reg_block(i).data);
             writeline(outfile, outline);
         end loop;

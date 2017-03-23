@@ -13,6 +13,7 @@ entity CPU is
         mem_delay : time := 0.1 ns;
         data_memory_dump_filepath : STRING := "memory.txt";
         instruction_memory_load_filepath : STRING := "program.txt";
+        register_file_dump_filepath : STRING := "register_file.txt";
         clock_period : time := 1 ns
     );
   port (
@@ -73,6 +74,9 @@ architecture CPU_arch of CPU is
 
     --Decode
     COMPONENT decodeStage IS
+        generic (
+            write_register_filepath : string := "register_file.txt"
+        );
         port (
             clock : in std_logic;
 
@@ -391,7 +395,11 @@ begin
         IF_ID_register_stall
 	);
 
-    decode : decodeStage port map (
+    decode : decodeStage 
+    generic map (
+        write_register_filepath => register_file_dump_filepath
+    )
+    port map (
         clock,
         decode_stage_PC,
         decode_stage_instruction_in,
