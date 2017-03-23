@@ -65,7 +65,7 @@ architecture decodeStage_arch of decodeStage is
   signal reading_stalled : std_logic;
   signal sig_var_b : std_logic_vector(31 downto 0);
 
-  signal good_to_read : std_logic := 0;
+  signal good_to_read : std_logic := '0';
 begin
   stall_out <= stall_reg;
   PC_out <= PC;
@@ -187,7 +187,7 @@ current_state <=
 
         end case;
         --this lets us do the read process.
-        good_to_read  <= 1; 
+        good_to_read  <= '1'; 
     when RESETTING =>
       report " current state is RESETTING "; 
       -- reset register file
@@ -321,7 +321,7 @@ current_state <=
 
   good_to_read_process : process(instruction_in)
   begin
-    good_to_read <= 0;
+    good_to_read <= '0';
   end process;
   -- stall_detection : process(clock, instruction_in, write_back_instruction, write_back_data, stall_in)
   --   variable rs, rt, rd : REGISTER_ENTRY;
