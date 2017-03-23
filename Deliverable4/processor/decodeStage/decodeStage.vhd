@@ -131,7 +131,7 @@ current_state <=
   reading_stalled <= '1' when stall_in = '1' OR stall_reg = '1' else '0';
 
 
-  computation : process(instruction_in, write_back_instruction, write_back_data, stall_reg)
+  computation : process(clock, instruction_in, write_back_instruction, write_back_data, stall_reg)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
@@ -144,8 +144,8 @@ current_state <=
     wb_rt := write_back_instruction.rt;
     wb_rd := write_back_instruction.rd;
     immediate := instruction_in.immediate_vect; 
-    PC <= sig_PC;
-    instruction_in <= sig_instruction;
+    sig_PC <= PC;
+    sig_instruction <= instruction_in;
     case current_state is
 
     when READING =>  
