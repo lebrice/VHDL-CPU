@@ -141,7 +141,7 @@ current_state <=
     
     case current_state is
 
-    when READING OR WRITING =>  
+    when READING | WRITING =>  
       
         report " current state is WRITING ";  
         
