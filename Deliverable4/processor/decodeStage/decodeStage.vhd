@@ -295,91 +295,91 @@ current_state <=
   end process;
 
 
-  stall_detection : process(clock, instruction_in, write_back_instruction, write_back_data, stall_in)
-    variable rs, rt, rd : REGISTER_ENTRY;
-  begin
-    rs := register_file(instruction_in.rs);
-    rt := register_file(instruction_in.rt);
-    rd := register_file(instruction_in.rd);
+  -- stall_detection : process(clock, instruction_in, write_back_instruction, write_back_data, stall_in)
+  --   variable rs, rt, rd : REGISTER_ENTRY;
+  -- begin
+  --   rs := register_file(instruction_in.rs);
+  --   rt := register_file(instruction_in.rt);
+  --   rd := register_file(instruction_in.rd);
 
-    if clock = '0' OR rising_edge(clock) then
-      report "stall_reg is " & std_logic'image(stall_reg);
-      -- we can only set stall_out to '1' during the second part of the cycle.
+  --   if clock = '0' OR rising_edge(clock) then
+  --     report "stall_reg is " & std_logic'image(stall_reg);
+  --     -- we can only set stall_out to '1' during the second part of the cycle.
       
-    case instruction_in.instruction_type is
-      -- TODO: Maybe this has to only happen on the second half of the clock cycle ?
+  --   case instruction_in.instruction_type is
+  --     -- TODO: Maybe this has to only happen on the second half of the clock cycle ?
 
-      when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
-        -- if the instruction coming in from Fetch is one of these, then we wait until the same instruction 
-        -- comes back from Write-Back until releasing the pipeline.
-        -- (We assume here that whenever a BRANCH-like instruction comes into the DECODE stage, it will stay at the input of the Decode stage until
-        -- it comes back from Write-Back, since we freeze the fetch stage, but let the instruction through to EX-MEM-WB-Etc.)
+  --     when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
+  --       -- if the instruction coming in from Fetch is one of these, then we wait until the same instruction 
+  --       -- comes back from Write-Back until releasing the pipeline.
+  --       -- (We assume here that whenever a BRANCH-like instruction comes into the DECODE stage, it will stay at the input of the Decode stage until
+  --       -- it comes back from Write-Back, since we freeze the fetch stage, but let the instruction through to EX-MEM-WB-Etc.)
         
-        -- TODO: We HAVE to make sure that Fetch will work properly with this: 
-        --    - Even when stalled, it should latch the PC_NEXT value from a JUMP or BRANCH instruction.
-        --    - HOWEVER, the instruction coming into DECODE should stay the same until STALL is DE-ASSERTED! (This seems like a challenge right now.)
-        if (write_back_instruction.instruction_type = instruction_in.instruction_type) then
-          stall_reg <= '0';
-        else
-          stall_reg <= '1';
-        end if;
+  --       -- TODO: We HAVE to make sure that Fetch will work properly with this: 
+  --       --    - Even when stalled, it should latch the PC_NEXT value from a JUMP or BRANCH instruction.
+  --       --    - HOWEVER, the instruction coming into DECODE should stay the same until STALL is DE-ASSERTED! (This seems like a challenge right now.)
+  --       if (write_back_instruction.instruction_type = instruction_in.instruction_type) then
+  --         stall_reg <= '0';
+  --       else
+  --         stall_reg <= '1';
+  --       end if;
 
-      when ADD | SUBTRACT | SET_LESS_THAN | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR =>
-        if rs.busy = '1' OR rt.busy = '1' OR rd.busy = '1' then
-          stall_reg <= '1';
-        else
-          stall_reg <= '0';
-        end if;
+  --     when ADD | SUBTRACT | SET_LESS_THAN | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR =>
+  --       if rs.busy = '1' OR rt.busy = '1' OR rd.busy = '1' then
+  --         stall_reg <= '1';
+  --       else
+  --         stall_reg <= '0';
+  --       end if;
 
-      when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | LOAD_WORD | STORE_WORD =>
-        if rs.busy = '1' OR rt.busy = '1' then
-          stall_reg <= '1';
-        else
-          stall_reg <= '0';
-        end if;
+  --     when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | LOAD_WORD | STORE_WORD =>
+  --       if rs.busy = '1' OR rt.busy = '1' then
+  --         stall_reg <= '1';
+  --       else
+  --         stall_reg <= '0';
+  --       end if;
 
-      when MULTIPLY | DIVIDE =>
-        if rs.busy = '1' OR rt.busy = '1' OR HI.busy = '1' OR LOW.busy = '1' then
-          stall_reg <= '1';
-        else 
-          stall_reg <= '0';
-        end if;
+  --     when MULTIPLY | DIVIDE =>
+  --       if rs.busy = '1' OR rt.busy = '1' OR HI.busy = '1' OR LOW.busy = '1' then
+  --         stall_reg <= '1';
+  --       else 
+  --         stall_reg <= '0';
+  --       end if;
 
-      when MOVE_FROM_HI =>
-        if rd.busy = '1' OR HI.busy = '1' then
-          stall_reg <= '1';
-        else
-          stall_reg <= '0';
-        end if;
+  --     when MOVE_FROM_HI =>
+  --       if rd.busy = '1' OR HI.busy = '1' then
+  --         stall_reg <= '1';
+  --       else
+  --         stall_reg <= '0';
+  --       end if;
 
-      when MOVE_FROM_LOW =>
-        if rd.busy = '1' OR LOW.busy = '1' then
-          stall_reg <= '1';
-        else
-          stall_reg <= '0';
-        end if;
+  --     when MOVE_FROM_LOW =>
+  --       if rd.busy = '1' OR LOW.busy = '1' then
+  --         stall_reg <= '1';
+  --       else
+  --         stall_reg <= '0';
+  --       end if;
 
-      when LOAD_UPPER_IMMEDIATE =>
-        if rt.busy = '1' then
-          stall_reg <= '1';
-        else 
-          stall_reg <= '0';
-        end if;
+  --     when LOAD_UPPER_IMMEDIATE =>
+  --       if rt.busy = '1' then
+  --         stall_reg <= '1';
+  --       else 
+  --         stall_reg <= '0';
+  --       end if;
 
-      when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
-        if rd.busy = '1' OR rt.busy = '1' then
-          stall_reg <= '1';
-        else
-          stall_reg <= '0';
-        end if;
+  --     when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+  --       if rd.busy = '1' OR rt.busy = '1' then
+  --         stall_reg <= '1';
+  --       else
+  --         stall_reg <= '0';
+  --       end if;
 
-      when UNKNOWN =>
-        report "ERROR: unknown Instruction type in Decode stage!" severity failure;
+  --     when UNKNOWN =>
+  --       report "ERROR: unknown Instruction type in Decode stage!" severity failure;
 
-    end case;
-    else
-    end if;
-  end process stall_detection;
+  --   end case;
+  --   else
+  --   end if;
+  -- end process stall_detection;
 
 
   instruction_out <= 
@@ -389,11 +389,11 @@ current_state <=
       OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
     else instruction_in;
 
-  write_registers_to_file : process( write_register_file )
-  begin
-    if rising_edge(write_register_file) then
-      dump_registers(register_file);
-    end if;    
-  end process ; -- write_registers_to_file
+  -- write_registers_to_file : process( write_register_file )
+  -- begin
+  --   if rising_edge(write_register_file) then
+  --     dump_registers(register_file);
+  --   end if;    
+  -- end process ; -- write_registers_to_file
 
 end architecture ; -- arch
