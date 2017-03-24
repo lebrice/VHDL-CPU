@@ -292,7 +292,7 @@ current_state <=
   end process;
 
 
-  stall_detection : process(clock, current_state, instruction_in, write_back_instruction, write_back_data, stall_in)
+  stall_detection : process(current_state, instruction_in, write_back_instruction, write_back_data, stall_in)
     variable rs, rt, rd : REGISTER_ENTRY;
   begin
     rs := register_file(instruction_in.rs);
