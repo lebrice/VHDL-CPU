@@ -33,7 +33,7 @@ BEGIN
     a_out <= a_intermediate;
     b_out <= b_intermediate;
 
-    id_ex_process: PROCESS (clock, pc_in, instruction_in, sign_extend_imm_in, a_in, b_in)
+    id_ex_process: PROCESS (clock)
     BEGIN
         IF(rising_edge(clock)) THEN
             -- report "ID_EX Register";

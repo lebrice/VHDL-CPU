@@ -126,7 +126,7 @@ current_state <=
   reading_stalled <= '1' when stall_in = '1' OR stall_reg = '1' else '0';
 
 
-  computation : process(clock, reading_stalled, current_state, register_file, instruction_in, write_back_instruction, write_back_data, stall_reg)
+  computation : process(clock, instruction_in, write_back_instruction, write_back_data, stall_reg)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
@@ -295,7 +295,7 @@ current_state <=
   end process;
 
 
-  stall_detection : process(clock, current_state, instruction_in, write_back_instruction, write_back_data, stall_in)
+  stall_detection : process(clock, instruction_in, write_back_instruction, write_back_data, stall_in)
     variable rs, rt, rd : REGISTER_ENTRY;
   begin
     rs := register_file(instruction_in.rs);
