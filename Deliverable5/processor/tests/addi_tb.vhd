@@ -1,6 +1,10 @@
-library ieee ;
-    use ieee.std_logic_1164.all ;
-    use ieee.numeric_std.all ;
+LIBRARY ieee;
+	USE ieee.std_logic_1164.all;
+	USE ieee.numeric_std.all;
+	USE ieee.std_logic_textio.all;
+
+library std;
+    use std.textio.all;
 
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
@@ -61,6 +65,11 @@ architecture processor_test of addi_tb is
     signal input_instruction : INSTRUCTION := NO_OP_INSTRUCTION;
     signal override_input_instruction : std_logic := '1';
 
+    type register_block is array (NUM_REGISTERS-1 downto 0) of register_entry;
+
+    constant test_max_memory_usage : integer := 10;
+    type results_array_type is array (0 to test_max_memory_usage) of std_logic_vector(31 downto 0);
+    signal expected_results : results_array_type := (others => (others => '0'));
 begin
 
 c1 : CPU 
@@ -98,6 +107,9 @@ end process ; -- clock_process
 
 
 test_process : process
+    file 	 infile: text;
+    variable inline: line;
+    variable result : std_logic_vector(31 downto 0);
 begin
     report "starting test process";
     initialize <= '1';
@@ -108,7 +120,7 @@ begin
     -- When set to '1', input instructions are manually passed with the input_instruction signal. 
     override_input_instruction <= '0';
     
-    -- TEST PROGRAM (should match the corresponding [operation]_program.txt)
+    -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
     -- ADDI R1 R0 15
     -- ADDI R2 R0 15
     -- ADDI R3 R1 1
@@ -118,40 +130,34 @@ begin
     -- SW R3 8(R0)
     -- SW R4 12(R0)
 
-
-
-    -- input_instruction <= makeInstruction(ADDI_OP, 0, 1, 15); -- ADDI R1, R0, 15
-    -- wait for clock_period;
-    -- input_instruction <= NO_OP_INSTRUCTION;
+    -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
+    expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(15, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(16, 32));
+    expected_results(3) <= std_logic_vector(to_unsigned(30, 32));
     
     test_loop : for i in 0 to 50 loop
         wait for clock_period;
     end loop ; -- test_loop
-    
-    -- assert decode_register_file(1).data = x"0000000F" report "ADDI didn't write the right results back into the register" severity error;
-    -- assert decode_register_file(1).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
 
-    -- input_instruction <= makeInstruction(ADDI_OP, 1, 2, 15); -- ADDI R2, R1, 15
-    -- wait for clock_period;
-    -- input_instruction <= NO_OP_INSTRUCTION;
 
-    -- wait for 5 * clock_period;
-    -- -- the result of R1 + 15 is 30 => x"1E"
-    -- assert decode_register_file(2).data = x"0000001E" report "ADDI didn't write the right results back into the register" severity error;
-    -- assert decode_register_file(2).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
-
-    -- input_instruction <= makeInstruction(SW_OP, 0, 1, 0); -- SW R1, 0(R0)
-    -- wait for clock_period;
-    -- input_instruction <= makeInstruction(SW_OP, 0, 2, 4); -- SW R2, 4(R0)
-    -- wait for clock_period;
-    -- input_instruction <= NO_OP_INSTRUCTION;
+        
+	
     
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
     wait for clock_period;
 
-    report "done testing ADDI";
+    file_open(infile, data_memory_dump_path, read_mode);
+    for i in 0 to test_max_memory_usage loop
+        readline(infile, inline);
+        read(inline, result);
+        assert result = expected_results(i) report "Unexpected result at line " & integer'image(i) & " in file " & data_memory_dump_path severity error;
+    end loop;
+    file_close(infile);
+
+    report "done testing ADDI operation.";
     wait;
     
 end process test_process;
