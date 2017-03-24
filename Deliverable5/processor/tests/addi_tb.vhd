@@ -103,7 +103,23 @@ begin
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
+
+    -- To test by loading the corresponding program.txt, set to '0'.
+    -- When set to '1', input instructions are manually passed with the input_instruction signal. 
     override_input_instruction <= '0';
+    
+    -- TEST PROGRAM (should match the corresponding [operation]_program.txt)
+    -- ADDI R1 R0 15
+    -- ADDI R2 R0 15
+    -- ADDI R3 R1 1
+    -- ADDI R4 R2 15
+    -- SW R1 0(R0)
+    -- SW R2 4(R0)
+    -- SW R3 8(R0)
+    -- SW R4 12(R0)
+
+
+
     -- input_instruction <= makeInstruction(ADDI_OP, 0, 1, 15); -- ADDI R1, R0, 15
     -- wait for clock_period;
     -- input_instruction <= NO_OP_INSTRUCTION;
