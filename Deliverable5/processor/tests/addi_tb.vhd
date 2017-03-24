@@ -108,7 +108,10 @@ begin
     wait for clock_period;
     input_instruction <= NO_OP_INSTRUCTION;
     
-    wait for 5 * clock_period;
+    wait for clock_period;
+    wait for clock_period;
+    wait for clock_period;
+    wait for clock_period;
     
     assert decode_register_file(1).data = x"0000000F" report "ADDI didn't write the right results back into the register" severity error;
     assert decode_register_file(1).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
