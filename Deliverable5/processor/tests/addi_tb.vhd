@@ -12,7 +12,7 @@ architecture processor_test of addi_tb is
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/addi_memory.txt";
     -- not used in this case.
-    constant instruction_memory_load_path : string := "tests/program.txt";
+    constant instruction_memory_load_path : string := "tests/addi_program.txt";
     constant register_file_path : string := "tests/addi_register_file.txt";
     COMPONENT CPU is
         generic(
@@ -103,35 +103,32 @@ begin
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
+    override_input_instruction <= '0';
+    -- input_instruction <= makeInstruction(ADDI_OP, 0, 1, 15); -- ADDI R1, R0, 15
+    -- wait for clock_period;
+    -- input_instruction <= NO_OP_INSTRUCTION;
     
-    input_instruction <= makeInstruction(ADDI_OP, 0, 1, 15); -- ADDI R1, R0, 15
-    wait for clock_period;
-    input_instruction <= NO_OP_INSTRUCTION;
+    test_loop : for i in 0 to 50 loop
+        wait for clock_period;
+    end loop ; -- test_loop
     
-    wait for clock_period;
-    wait for clock_period;
-    wait for clock_period;
-    wait for clock_period;
-    
-    assert decode_register_file(1).data = x"0000000F" report "ADDI didn't write the right results back into the register" severity error;
-    assert decode_register_file(1).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
+    -- assert decode_register_file(1).data = x"0000000F" report "ADDI didn't write the right results back into the register" severity error;
+    -- assert decode_register_file(1).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
 
-    input_instruction <= makeInstruction(ADDI_OP, 1, 2, 15); -- ADDI R2, R1, 15
-    wait for clock_period;
-    input_instruction <= NO_OP_INSTRUCTION;
+    -- input_instruction <= makeInstruction(ADDI_OP, 1, 2, 15); -- ADDI R2, R1, 15
+    -- wait for clock_period;
+    -- input_instruction <= NO_OP_INSTRUCTION;
 
-    wait for 5 * clock_period;
-    -- the result of R1 + 15 is 30 => x"1E"
-    assert decode_register_file(2).data = x"0000001E" report "ADDI didn't write the right results back into the register" severity error;
-    assert decode_register_file(2).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
+    -- wait for 5 * clock_period;
+    -- -- the result of R1 + 15 is 30 => x"1E"
+    -- assert decode_register_file(2).data = x"0000001E" report "ADDI didn't write the right results back into the register" severity error;
+    -- assert decode_register_file(2).busy = '0' report "Busy bit was still set when it shouldn't be." severity error;
 
-    input_instruction <= makeInstruction(SW_OP, 0, 1, 0); -- SW R1, 0(R0)
-    wait for clock_period;
-    input_instruction <= makeInstruction(SW_OP, 0, 2, 4); -- SW R2, 4(R0)
-    wait for clock_period;
-    input_instruction <= NO_OP_INSTRUCTION;
-    
-    wait for 10 * clock_period;
+    -- input_instruction <= makeInstruction(SW_OP, 0, 1, 0); -- SW R1, 0(R0)
+    -- wait for clock_period;
+    -- input_instruction <= makeInstruction(SW_OP, 0, 2, 4); -- SW R2, 4(R0)
+    -- wait for clock_period;
+    -- input_instruction <= NO_OP_INSTRUCTION;
     
     dump <= '1'; --dump data
     wait for clock_period;
