@@ -70,7 +70,7 @@ begin
   val_b_out <= val_b; --used to send val b to the next stage
  
   -- Process 2: Pass in values to ALU and get result
-  compute_inputs : process(instruction_in, val_a, val_b, imm_sign_extended)
+  compute_inputs : process(instruction_in, val_a, val_b, imm_sign_extended, PC)
   begin
  
     -- The instruction changes what is passed to the ALU

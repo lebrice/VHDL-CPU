@@ -57,7 +57,7 @@ end process ; -- pc_process
 
 
 
-mem_process : process(clock, reset, m_waitrequest, PC_register)
+mem_process : process(clock, reset, m_waitrequest, PC_register, m_readdata)
 variable inst : INSTRUCTION;
 begin
   -- TODO: add the proper timing and avalon interface stuff later.

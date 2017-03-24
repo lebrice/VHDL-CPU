@@ -31,7 +31,7 @@ BEGIN
     instruction_out <= instruction_in;
     ALU_result_out <= ALU_result_in;
 
-    mem_process : process(instruction_in, m_waitrequest)
+    mem_process : process(instruction_in, ALU_result_in, m_readdata, val_b, m_waitrequest)
     BEGIN
         CASE instruction_in.INSTRUCTION_TYPE IS
             WHEN load_word =>

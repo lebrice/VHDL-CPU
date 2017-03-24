@@ -25,7 +25,7 @@ BEGIN
     data_mem_out <= data_mem_intermediate;
     alu_result_out <= alu_result_intermediate;
 
-    mem_wb_process: PROCESS (clock)
+    mem_wb_process: PROCESS (clock, instruction_in, data_mem_in, alu_result_in)
     BEGIN
         IF(rising_edge(clock)) THEN
             -- report "MEM_WB register";
