@@ -78,7 +78,7 @@ BEGIN
 		END IF;
 	END PROCESS;
 
-	mem_process: PROCESS (clock, memload, address)
+	mem_process: PROCESS (clock, memload, memwrite, address, writedata)
 	BEGIN	
 		if(rising_edge(memload)) THEN
 			report "Loading data memory from file 'program.txt'.";

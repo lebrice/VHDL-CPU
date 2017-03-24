@@ -21,7 +21,7 @@ BEGIN
     pc_out <= pc_intermediate;
     instruction_out <= instruction_intermediate;
 
-    if_id_process: PROCESS (clock)
+    if_id_process: PROCESS (clock, stall, pc_in, instruction_in)
     BEGIN
         IF(rising_edge(clock)) THEN
             -- report "IF_ID Register";
