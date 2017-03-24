@@ -169,7 +169,7 @@ current_state <=
           when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE =>
             val_a <= register_file(rs).data;
             i_sign_extended <= signExtend(instruction_in.immediate_vect);
-            register_file(rt).busy <= '1'; 
+            register_file(rt).busy <= '1';
 
           when BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE =>
             val_a <= register_file(rs).data;
@@ -302,7 +302,7 @@ current_state <=
     rt := register_file(instruction_in.rt);
     rd := register_file(instruction_in.rd);
 
-    if clock = '0' OR rising_edge(clock) then
+    -- if current_state = READING then
       -- report "stall_reg is " & std_logic'image(stall_reg);
       -- we can only set stall_out to '1' during the second part of the cycle.
       
@@ -377,8 +377,8 @@ current_state <=
         report "ERROR: unknown Instruction type in Decode stage!" severity failure;
 
     end case;
-    else
-    end if;
+    -- else
+    -- end if;
   end process stall_detection;
 
 
