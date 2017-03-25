@@ -13,11 +13,13 @@ entity addi_tb is
 end addi_tb ; 
 
 architecture processor_test of addi_tb is
+    constant OPERATION : string := "addi";
+
     constant clock_period : time := 1 ns;
-    constant data_memory_dump_path : string := "tests/addi_memory.txt";
+    constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
-    constant instruction_memory_load_path : string := "tests/addi_program.txt";
-    constant register_file_path : string := "tests/addi_register_file.txt";
+    constant instruction_memory_load_path : string := "tests/"& OPERATION &"_program.txt";
+    constant register_file_path : string := "tests/"& OPERATION & "_register_file.txt";
     COMPONENT CPU is
         generic(
             ram_size : integer := 8196;
@@ -149,6 +151,8 @@ begin
     dump <= '0';
     wait for clock_period;
 
+
+    -- Compare the content of the memory dump with the expected results.
     file_open(infile, data_memory_dump_path, read_mode);
     for i in 0 to test_max_memory_usage loop
         readline(infile, inline);
