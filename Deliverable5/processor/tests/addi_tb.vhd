@@ -123,16 +123,25 @@ begin
     -- ADDI R2 R0 15
     -- ADDI R3 R1 1
     -- ADDI R4 R2 15
+    -- ADDI R5 R4 -1
+    -- ADDI R6 R1 -10
+    -- ADDI R7 R1 -20
     -- SW R1 0(R0)
     -- SW R2 4(R0)
     -- SW R3 8(R0)
     -- SW R4 12(R0)
+    -- SW R5 16(R0)
+    -- SW R6 20(R0)
+    -- SW R7 24(R0)
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(15, 32));
     expected_results(2) <= std_logic_vector(to_unsigned(16, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(30, 32));
+    expected_results(4) <= std_logic_vector(to_unsigned(29, 32));
+    expected_results(5) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(6) <= std_logic_vector(to_signed(-5, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
