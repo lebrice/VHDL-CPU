@@ -9,9 +9,15 @@ entity cpu_tb is
 end cpu_tb ; 
 
 architecture processor_test of cpu_tb is
+    constant clock_period : time := 1 ns;
     COMPONENT CPU is
         generic(
-            ram_size : integer := 8196
+            ram_size : integer := 8196;
+            mem_delay : time := 0.1 ns;
+            data_memory_dump_filepath : STRING := "memory.txt";
+            instruction_memory_load_filepath : STRING := "program.txt";
+            register_file_dump_filepath : STRING := "register_file.txt";
+            clock_period : time := 1 ns
         );
         port (
             clock : in std_logic;
@@ -25,14 +31,14 @@ architecture processor_test of cpu_tb is
             WB_data : out std_logic_vector(63 downto 0);
             fetch_PC : out integer;
             decode_register_file : out REGISTER_BLOCK;
-            ALU_out : out std_logic_vector(63 downto 0)
+            ALU_out : out std_logic_vector(63 downto 0);
+            input_instruction : in INSTRUCTION;
+            override_input_instruction : in std_logic
         );
     end COMPONENT;
     signal dump : std_logic := '0';
     signal clock : std_logic := '0';
     signal initialize : std_logic := '0';
-
-    constant clock_period : time := 10 ns;
 
 
     signal IF_ID_instruction : INSTRUCTION; 
@@ -48,6 +54,9 @@ architecture processor_test of cpu_tb is
 
     signal ALU_out_copy : std_logic_vector(63 downto 0);
 
+    signal input_instruction : INSTRUCTION;
+    signal override_input_instruction : std_logic := '0';
+
 begin
 
 c1 : CPU PORT MAP (
@@ -62,7 +71,9 @@ c1 : CPU PORT MAP (
     WB_data,
     PC,
     decode_register_file,
-    ALU_out_copy
+    ALU_out_copy,
+    input_instruction,
+    override_input_instruction
 );
 
 
@@ -82,21 +93,8 @@ begin
     wait for clock_period;
     initialize <= '0';
 
-    -- for i in 1 to 10 loop
-    --     wait for clock_period;
-    --     -- report "stopped at clock cycle " & integer'image(i) & ", PC is " & integer'image(PC) severity failure;
-    -- end loop;
 
 
-
-    -- wait for 1000 ns;
-    -- dump <= '1'; --dump data
-    -- wait for clock_period;
-    -- dump <= '0';
-    -- wait for clock_period;
-
-
-  
     wait for 9900 ns;
     dump <= '1'; --dump data
     wait for clock_period;
@@ -104,9 +102,6 @@ begin
     wait for clock_period;
     wait;
     report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
-
-   
-
 
 end process test_process;
 

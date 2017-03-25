@@ -13,6 +13,7 @@ entity CPU is
         mem_delay : time := 0.1 ns;
         data_memory_dump_filepath : STRING := "memory.txt";
         instruction_memory_load_filepath : STRING := "program.txt";
+        register_file_dump_filepath : STRING := "register_file.txt";
         clock_period : time := 1 ns
     );
   port (
@@ -27,7 +28,9 @@ entity CPU is
     WB_data : out std_logic_vector(63 downto 0);
     fetch_PC : out integer;
     decode_register_file : out REGISTER_BLOCK;
-    ALU_out : out std_logic_vector(63 downto 0)
+    ALU_out : out std_logic_vector(63 downto 0);
+    input_instruction : in INSTRUCTION;
+    override_input_instruction : in std_logic
   );
   constant bit_width : integer := 32;
 end CPU ;
@@ -71,6 +74,9 @@ architecture CPU_arch of CPU is
 
     --Decode
     COMPONENT decodeStage IS
+        generic (
+            write_register_filepath : string := "register_file.txt"
+        );
         port (
             clock : in std_logic;
 
@@ -350,7 +356,12 @@ begin
 
     decode_register_file <= decode_stage_register_file_out;
 
-    fetch : fetchStage PORT MAP(
+    fetch : fetchStage
+    GENERIC MAP(
+        ram_size => ram_size,
+        bit_width => bit_width
+    ) 
+    PORT MAP(
         clock,
         fetch_stage_reset,
         fetch_stage_branch_target,
@@ -389,7 +400,11 @@ begin
         IF_ID_register_stall
 	);
 
-    decode : decodeStage port map (
+    decode : decodeStage 
+    generic map (
+        write_register_filepath => register_file_dump_filepath
+    )
+    port map (
         clock,
         decode_stage_PC,
         decode_stage_instruction_in,
@@ -505,7 +520,10 @@ begin
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
     fetch_stage_stall <= decode_stage_stall_out;
 
-    IF_ID_register_instruction_in <= NO_OP_INSTRUCTION when initialize = '1' else fetch_stage_instruction_out;
+    IF_ID_register_instruction_in <= 
+        NO_OP_INSTRUCTION when initialize = '1' else 
+        input_instruction when override_input_instruction = '1' else
+        fetch_stage_instruction_out;
     IF_ID_register_pc_in <= fetch_stage_PC;
     IF_ID_register_stall <= decode_stage_stall_out;
 
