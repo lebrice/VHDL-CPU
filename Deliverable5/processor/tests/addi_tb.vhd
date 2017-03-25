@@ -14,7 +14,7 @@ end addi_tb ;
 
 architecture instruction_test of addi_tb is
     constant OPERATION : string := "addi";
-
+    constant test_ram_size : integer := 200;
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -72,6 +72,7 @@ begin
 
 c1 : CPU 
 GENERIC MAP (
+    ram_size => test_ram_size,
     data_memory_dump_filepath => data_memory_dump_path,
     register_file_dump_filepath => register_file_path,
     instruction_memory_load_filepath => instruction_memory_load_path,
