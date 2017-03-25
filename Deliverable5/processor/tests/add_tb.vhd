@@ -9,11 +9,11 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity addi_tb is
-end addi_tb ; 
+entity add_tb is
+end add_tb ; 
 
-architecture instruction_test of addi_tb is
-    constant OPERATION : string := "addi";
+architecture instruction_test of add_tb is
+    constant OPERATION : string := "add";
 
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
@@ -120,9 +120,9 @@ begin
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
     -- ADDI R1 R0 15
-    -- ADDI R2 R0 15
-    -- ADDI R3 R1 1
-    -- ADDI R4 R2 15
+    -- ADDI R2 R0 9
+    -- ADD  R3 R1 R2
+    -- ADD  R4 R1 R3
     -- SW R1 0(R0)
     -- SW R2 4(R0)
     -- SW R3 8(R0)
@@ -130,9 +130,9 @@ begin
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(15, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(16, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(30, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(9, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(24, 32));
+    expected_results(3) <= std_logic_vector(to_unsigned(39, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
