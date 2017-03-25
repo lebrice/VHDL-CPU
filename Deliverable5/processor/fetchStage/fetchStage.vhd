@@ -46,7 +46,7 @@ begin
   elsif( rising_edge(clock) ) then
     if(stall = '1') then
       -- dont change its value.
-      report "fetch stage is STALLED.";
+      -- report "fetch stage is STALLED.";
     else
       PC_register <= PC_next;
     end if;
@@ -64,10 +64,10 @@ begin
   
   
   if reset = '1' then
-    report "reset is '1', we are outputting a no-op.";
+    -- report "reset is '1', we are outputting a no-op.";
     instruction_out <= NO_OP_INSTRUCTION;
   else
-    report " reading instruction from PC address of " & integer'image(PC_register);
+    -- report " reading instruction from PC address of " & integer'image(PC_register);
     m_read <= '1';
     m_addr <= PC_register / 4;
     inst := getInstruction(m_readdata);
@@ -82,7 +82,7 @@ end process;
 report_stall : process( clock, stall )
 begin
   if stall = '1' then
-    report "FETCH IS STALLED";
+    -- report "FETCH IS STALLED";
   end if;
 end process ; -- report_stall
 

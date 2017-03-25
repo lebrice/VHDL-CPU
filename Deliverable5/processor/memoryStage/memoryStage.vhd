@@ -37,12 +37,12 @@ BEGIN
             WHEN load_word =>
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_read <= '1';
-                m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0)));
+                m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0))) / 4;
                 mem_data <= m_readdata;
             WHEN store_word =>
                 -- TODO: add the proper timing and avalon interface stuff later.
                 m_write <= '1';
-                m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0)));
+                m_addr <= to_integer(unsigned(ALU_result_in(31 downto 0))) / 4;
                 m_write_data <= val_b;
             WHEN others =>
               -- do nothing.  
