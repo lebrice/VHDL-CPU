@@ -59,15 +59,11 @@ architecture processor_test of addi_tb is
     signal WB_data : std_logic_vector(63 downto 0);
 
     signal PC : integer;
-
     signal decode_register_file : REGISTER_BLOCK;
-
     signal ALU_out_copy : std_logic_vector(63 downto 0);
 
-    signal input_instruction : INSTRUCTION := NO_OP_INSTRUCTION;
     signal override_input_instruction : std_logic := '1';
-
-    type register_block is array (NUM_REGISTERS-1 downto 0) of register_entry;
+    signal input_instruction : INSTRUCTION := NO_OP_INSTRUCTION;
 
     constant test_max_memory_usage : integer := 10;
     type results_array_type is array (0 to test_max_memory_usage) of std_logic_vector(31 downto 0);
@@ -138,6 +134,7 @@ begin
     expected_results(2) <= std_logic_vector(to_unsigned(16, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(30, 32));
     
+    -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
         wait for clock_period;
     end loop ; -- test_loop
