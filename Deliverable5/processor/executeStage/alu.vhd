@@ -33,6 +33,9 @@ begin
   --shamt is stored in last 5 bits of "a"
   variable shift_amount : integer; 
 
+  variable pc_int : integer := 0;
+  variable address_offset : integer := 0;
+  variable new_address : integer := 0;
   begin
     --set initial values
     a := signed(op_a);
@@ -45,14 +48,18 @@ begin
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
         -- for branch if equal PC = PC + 4 + branch target
         ALU_out <= extend64(std_logic_vector(a + b)); 
+        
       when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-        --b is the unsigned representation of our PC
-        --a is the signed representation of our movement amount
-        --we will add a and b as integers, and store it in an std_logic_vector (as unsigned)
-        --then we extend by 64 since we want a 64 bit output...
-        ALU_out <= extend64(std_logic_vector(to_unsigned(to_integer(a) + to_integer(unsigned(op_b)),32))); 
+        --b is our PC
+        pc_int := to_integer(unsigned(op_b));
+        address_offset := to_integer(a sll 2);
+        new_address := pc_int + address_offset;
+        ALU_out(31 downto 0) <= std_logic_vector(to_unsigned(new_address, 32));
+        ALU_out(63 downto 32) <= (others => '0');
+      
       when SUBTRACT =>
         ALU_out <= extend64(std_logic_vector(a - b)); -- rs - rt
+
       when MULTIPLY =>
         ALU_out <= std_logic_vector(a*b); 
       
