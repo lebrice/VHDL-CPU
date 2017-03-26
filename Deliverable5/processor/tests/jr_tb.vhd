@@ -155,7 +155,7 @@ begin
     for i in 0 to test_max_memory_usage loop
         readline(infile, inline);
         read(inline, result);
-        assert result = expected_results(i) report "Unexpected result at line " & integer'image(i) & " in file " & data_memory_dump_path & ". Was expecting " & integer'image(to_integer(signed(result))) & " but got " & integer'image(to_integer(signed(expected_results(i)))) severity error;
+        assert result = expected_results(i) report "Unexpected result at line " & integer'image(i) & " in file " & data_memory_dump_path & ". Was expecting " & integer'image(to_integer(signed(expected_results(i)))) & " but got " & integer'image(to_integer(signed(result))) severity error;
     end loop;
     file_close(infile);
 
