@@ -9,10 +9,10 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity sll_tb is
-end sll_tb ; 
+entity srl_tb is
+end srl_tb ; 
 
-architecture instruction_test of sll_tb is
+architecture instruction_test of srl_tb is
     constant OPERATION : string := "srl";
 
     constant clock_period : time := 1 ns;
@@ -119,14 +119,10 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R1 R0 15
-    -- ADDI R2 R0 9
-    -- ADD  R3 R1 R2
-    -- ADD  R4 R1 R3
-    -- SW R1 0(R0)
-    -- SW R2 4(R0)
-    -- SW R3 8(R0)
-    -- SW R4 12(R0)
+    -- ADDI R1 R0 5
+    -- srl R2 R1 1
+    -- sw r2 4(r0)
+
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
