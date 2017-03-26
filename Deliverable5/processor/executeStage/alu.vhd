@@ -57,10 +57,11 @@ begin
         ALU_out <= std_logic_vector(a*b); 
       
       when DIVIDE =>  
-        if(to_integer(b) = 0) then
-          report "THIS IS BAD: DIVISION BY ZERO!" severity ERROR;
+        -- $LO = $s / $t; $HI = $s % $t
+        if(b = x"00000000") then
+          -- report "THIS IS BAD: DIVISION BY ZERO!" severity ERROR;
           ALU_out <= std_logic_vector(to_signed(-1, 64));
-        else  
+        else
           ALU_out(63 downto 32) <=  std_logic_vector(a rem b);
           ALU_out(31 downto 0)  <=  std_logic_vector(a / b);
         end if;
