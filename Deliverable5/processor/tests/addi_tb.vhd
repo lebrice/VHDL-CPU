@@ -14,7 +14,7 @@ end addi_tb ;
 
 architecture instruction_test of addi_tb is
     constant OPERATION : string := "addi";
-
+    constant test_ram_size : integer := 200;
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -72,6 +72,7 @@ begin
 
 c1 : CPU 
 GENERIC MAP (
+    ram_size => test_ram_size,
     data_memory_dump_filepath => data_memory_dump_path,
     register_file_dump_filepath => register_file_path,
     instruction_memory_load_filepath => instruction_memory_load_path,
@@ -123,16 +124,25 @@ begin
     -- ADDI R2 R0 15
     -- ADDI R3 R1 1
     -- ADDI R4 R2 15
+    -- ADDI R5 R4 -1
+    -- ADDI R6 R1 -10
+    -- ADDI R7 R1 -20
     -- SW R1 0(R0)
     -- SW R2 4(R0)
     -- SW R3 8(R0)
     -- SW R4 12(R0)
+    -- SW R5 16(R0)
+    -- SW R6 20(R0)
+    -- SW R7 24(R0)
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(15, 32));
     expected_results(2) <= std_logic_vector(to_unsigned(16, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(30, 32));
+    expected_results(4) <= std_logic_vector(to_unsigned(29, 32));
+    expected_results(5) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(6) <= std_logic_vector(to_signed(-5, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop

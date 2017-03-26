@@ -9,11 +9,11 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity add_tb is
-end add_tb ; 
+entity sub_tb is
+end sub_tb ; 
 
-architecture instruction_test of add_tb is
-    constant OPERATION : string := "add";
+architecture instruction_test of sub_tb is
+    constant OPERATION : string := "sub";
     constant test_ram_size : integer := 200;
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
@@ -121,19 +121,34 @@ begin
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
     -- ADDI R1 R0 15
-    -- ADDI R2 R0 9
-    -- ADD  R3 R1 R2
-    -- ADD  R4 R1 R3
+    -- ADDI R2 R0 15
+    -- ADDI R3 R0 17
+    -- ADDI R4 R0 -5
+    -- SUB  R5 R1 R2
+    -- SUB  R6 R1 R4
+    -- SUB  R7 R4 R3
+    -- SUB  R8 R3 R2
+    -- SUB  R9 R5 R4
     -- SW R1 0(R0)
     -- SW R2 4(R0)
     -- SW R3 8(R0)
     -- SW R4 12(R0)
+    -- SW R5 16(R0)
+    -- SW R6 20(R0)
+    -- SW R7 24(R0)
+    -- SW R8 28(R0)
+    -- SW R9 32(R0)
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(9, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(24, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(39, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(15, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(17, 32));
+    expected_results(3) <= std_logic_vector(to_signed(-5, 32));
+    expected_results(4) <= std_logic_vector(to_unsigned(0, 32));
+    expected_results(5) <= std_logic_vector(to_unsigned(20, 32));
+    expected_results(6) <= std_logic_vector(to_signed(-22, 32));
+    expected_results(7) <= std_logic_vector(to_unsigned(2, 32));
+    expected_results(8) <= std_logic_vector(to_unsigned(5, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
