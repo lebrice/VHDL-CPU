@@ -56,9 +56,15 @@ begin
       when MULTIPLY =>
         ALU_out <= std_logic_vector(a*b); 
       
-      when DIVIDE =>
-        ALU_out <= extend64(std_logic_vector(a / b));
-      
+      when DIVIDE =>  
+        if(to_integer(b) = 0) then
+          report "THIS IS BAD: DIVISION BY ZERO!" severity ERROR;
+          ALU_out <= std_logic_vector(to_signed(-1, 64));
+        else  
+          ALU_out(63 downto 32) <=  std_logic_vector(a rem b);
+          ALU_out(31 downto 0)  <=  std_logic_vector(a / b);
+        end if;
+
       when SET_LESS_THAN | SET_LESS_THAN_IMMEDIATE =>
         if a < b then  -- if rs < rd
           ALU_out <= x"0000000000000001";

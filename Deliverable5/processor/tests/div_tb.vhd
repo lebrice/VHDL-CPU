@@ -137,10 +137,10 @@ begin
 
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(5193 / 34, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(5193 MOD 34, 32));
-    expected_results(2) <= std_logic_vector(to_signed(34 / (-5), 32));
-    expected_results(3) <= std_logic_vector(to_signed(34 MOD (-5), 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(5193 REM 34, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(5193 / 34, 32));
+    expected_results(2) <= std_logic_vector(to_signed(34 REM (-5), 32));
+    expected_results(3) <= std_logic_vector(to_signed(34 / (-5), 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
