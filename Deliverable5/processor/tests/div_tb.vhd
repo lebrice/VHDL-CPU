@@ -14,7 +14,7 @@ end div_tb ;
 
 architecture instruction_test of div_tb is
     constant OPERATION : string := "div";
-    constant test_ram_size : integer := 200;
+    constant test_ram_size : integer := 1000;
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -65,7 +65,7 @@ architecture instruction_test of div_tb is
     signal override_input_instruction : std_logic := '1';
     signal input_instruction : INSTRUCTION := NO_OP_INSTRUCTION;
 
-    constant test_max_memory_usage : integer := 10;
+    constant test_max_memory_usage : integer := 100;
     type results_array_type is array (0 to test_max_memory_usage) of std_logic_vector(31 downto 0);
     signal expected_results : results_array_type := (others => (others => '0'));
 begin
@@ -128,22 +128,44 @@ begin
     -- mflo $5
     -- sw   $4, 0($0)
     -- sw   $5, 4($0)
+
     -- div  $2, $3
     -- mfhi $6
     -- mflo $7
     -- sw   $6, 8($0)
     -- sw   $7, 12($0)
 
+    -- addi $8, $0, -7
+    -- addi $9, $0, 2
+    -- div  $8, $9
+    -- mfhi $10
+    -- mflo $11
+    -- sw   $10, 16($0)
+    -- sw   $11, 20($0)
 
+
+    -- addi $12, $0, -7
+    -- addi $13, $0, -2
+    -- div  $12, $13
+    -- mfhi $14
+    -- mflo $15
+    -- sw   $14, 24($0)
+    -- sw   $15, 28($0)
+
+
+    -- 01010001001001
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(5193 / 34, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(5193 MOD 34, 32));
-    expected_results(2) <= std_logic_vector(to_signed(34 / (-5), 32));
-    expected_results(3) <= std_logic_vector(to_signed(34 MOD (-5), 32));
-    
+    expected_results(0) <= std_logic_vector(to_unsigned(5193 REM 34, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(5193 / 34, 32));
+    expected_results(2) <= std_logic_vector(to_signed(34 REM (-5), 32));
+    expected_results(3) <= std_logic_vector(to_signed(34 / (-5), 32));
+    expected_results(4) <= std_logic_vector(to_signed(-1, 32));
+    expected_results(5) <= std_logic_vector(to_signed(-3, 32));
+    expected_results(6) <= std_logic_vector(to_signed(-1, 32));
+    expected_results(7) <= std_logic_vector(to_signed(3, 32));
     -- put a breakpoint on the wait signal when debugging
-    test_loop : for i in 0 to 50 loop
+    test_loop : for i in 0 to 100 loop
         wait for clock_period;
     end loop ; -- test_loop
 
