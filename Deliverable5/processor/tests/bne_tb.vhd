@@ -9,12 +9,12 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity add_tb is
-end add_tb ; 
+entity bne_tb is
+end bne_tb; 
 
-architecture instruction_test of add_tb is
-    constant OPERATION : string := "add";
-    constant test_ram_size : integer := 200;
+architecture instruction_test of bne_tb is
+    constant OPERATION : string := "bne";
+
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -72,7 +72,6 @@ begin
 
 c1 : CPU 
 GENERIC MAP (
-    ram_size => test_ram_size,
     data_memory_dump_filepath => data_memory_dump_path,
     register_file_dump_filepath => register_file_path,
     instruction_memory_load_filepath => instruction_memory_load_path,
@@ -110,7 +109,7 @@ test_process : process
     variable inline: line;
     variable result : std_logic_vector(31 downto 0);
 begin
-    report "starting test process";
+    report "starting " & OPERATION & " test process";
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
@@ -120,28 +119,25 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R1 R0 15
-    -- ADDI R2 R0 9
-    -- ADD  R3 R1 R2
-    -- ADD  R4 R1 R3
-    -- SW R1 0(R0)
-    -- SW R2 4(R0)
-    -- SW R3 8(R0)
-    -- SW R4 12(R0)
+    -- ADDI R1 R0 5             : 00100000000000010000000000000101
+    -- ADDI R2 R0 5             : 00100000000000100000000000000101
+    -- ADDI R3 R0 6             : 00100000000000110000000000000110
+    -- bne r1 r3 GOTO (0x8)     : 00010100001000110000000000001000
+    -- ADDI R2 R0 8             : 00100000000000110000000000000111
+    -- GOTO: sw r2 4(r0)        : 10101100000000100000000000000100
+    -- bne r1 r2 END (0x8)      : 00010100001000100000000000001000
+    -- sw r1 8(r0)              : 10101100000000010000000000001000
+    -- END: sw r3 12(r0)        : 10101100000000011000000000001100
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(9, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(24, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(39, 32));
-    
+    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(3) <= std_logic_vector(to_unsigned(6, 32));
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
         wait for clock_period;
-    end loop ; -- test_loop
-
-
-        
+    end loop ; -- test_loop   
 	
     
     dump <= '1'; --dump data
