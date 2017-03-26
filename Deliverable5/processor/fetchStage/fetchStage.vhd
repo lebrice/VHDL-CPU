@@ -29,14 +29,15 @@ entity fetchStage is
 end fetchStage;
 
 architecture fetchStage_arch of fetchStage is
-signal PC_register : integer := 0;
-signal PC_next : integer := 0;
+signal PC_register : integer range 0 to ram_size - 1 := 0;
+signal PC_next : integer  range 0 to ram_size -1 := 0;
 begin 
 
 PC <= PC_register;
 PC_next <= 
   0 when reset = '1' else
   branch_target when branch_condition = '1' else
+  PC_register when PC_register + 4 >= ram_size-1 else
   PC_register + 4;
 
 pc_process : process( clock, reset )
