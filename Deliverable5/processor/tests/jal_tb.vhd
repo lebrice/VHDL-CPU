@@ -65,7 +65,7 @@ architecture instruction_test of jal_tb is
     signal override_input_instruction : std_logic := '1';
     signal input_instruction : INSTRUCTION := NO_OP_INSTRUCTION;
 
-    constant test_max_memory_usage : integer := 10;
+    constant test_max_memory_usage : integer := 40;
     type results_array_type is array (0 to test_max_memory_usage) of std_logic_vector(31 downto 0);
     signal expected_results : results_array_type := (others => (others => '0'));
 begin
