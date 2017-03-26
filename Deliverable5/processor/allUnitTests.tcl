@@ -38,18 +38,27 @@ vcom tests/sra_tb.vhd
 vcom tests/srl_tb.vhd
 
 
-;# Start simulation
+;# Start simulation and run each tb
 vsim addi_tb
+run 1000ns
 vsim add_tb
+run 1000ns
 vsim beq_tb
+run 1000ns
 vsim bne_tb
+run 1000ns
 vsim j_tb
+run 1000ns
 vsim jal_tb
+run 1000ns
 vsim jr_tb
+run 1000ns
 vsim lw_tb
+run 1000ns
 vsim sll_tb
+run 1000ns
 vsim sra_tb
+run 1000ns
 vsim srl_tb
+run 1000ns
 
-;# Run for 10000 ns
-run 10000ns
