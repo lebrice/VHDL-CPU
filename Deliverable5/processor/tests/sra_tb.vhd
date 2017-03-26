@@ -119,14 +119,17 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R1 R0 5
-    -- sll R2 R1 1
-    -- sw r2 4(r0)
+    -- addi $1, $0, 32
+    -- addi $2, $0, -4
+    -- sra $3, $1, 1
+    -- sra $4, $2, 1 
+    -- sw $3 0($0)
+    -- sw $4 4($0)
 
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(12, 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(16, 32));
+    expected_results(1) <= std_logic_vector(to_signed(-2, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
