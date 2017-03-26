@@ -119,9 +119,9 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R1 R0 5
-    -- srl R2 R1 1
-    -- sw r2 4(r0)
+    -- ADDI R3 R0 5
+    -- srl R4 R3 1
+    -- sw r4 4(r0)
 
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
