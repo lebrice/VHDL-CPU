@@ -26,31 +26,31 @@ vcom ../writebackStage/writebackStage_tb.vhd
 vcom ../cpu.vhd
 vcom ../cpu_tb.vhd
 
-vcom tests/addi_tb.vhd
-vcom tests/add_tb.vhd
-vcom tests/beq_tb.vhd
-vcom tests/bne_tb.vhd
-vcom tests/j_tb.vhd
-vcom tests/jal_tb.vhd
-vcom tests/jr_tb.vhd
-vcom tests/lw_tb.vhd
-vcom tests/sll_tb.vhd
-vcom tests/sra_tb.vhd
-vcom tests/srl_tb.vhd
+vcom addi_tb.vhd
+vcom add_tb.vhd
+vcom beq_tb.vhd
+vcom bne_tb.vhd
+vcom j_tb.vhd
+vcom jal_tb.vhd
+vcom jr_tb.vhd
+vcom lw_tb.vhd
+vcom sll_tb.vhd
+vcom sra_tb.vhd
+vcom srl_tb.vhd
 
 
 ;# Start simulation
-vsim tests/addi_tb.vhd
-vsim tests/add_tb.vhd
-vsim tests/beq_tb.vhd
-vsim tests/bne_tb.vhd
-vsim tests/j_tb.vhd
-vsim tests/jal_tb.vhd
-vsim tests/jr_tb.vhd
-vsim tests/lw_tb.vhd
-vsim tests/sll_tb.vhd
-vsim tests/sra_tb.vhd
-vsim tests/srl_tb.vhd
+vsim addi_tb.vhd
+vsim add_tb.vhd
+vsim beq_tb.vhd
+vsim bne_tb.vhd
+vsim j_tb.vhd
+vsim jal_tb.vhd
+vsim jr_tb.vhd
+vsim lw_tb.vhd
+vsim sll_tb.vhd
+vsim sra_tb.vhd
+vsim srl_tb.vhd
 
 ;# Run for 10000 ns
 run 10000ns
