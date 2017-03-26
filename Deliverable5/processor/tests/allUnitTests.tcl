@@ -33,9 +33,30 @@ vcom cpu.vhd
 vcom cpu_tb.vhd
 
 vcom tests/addi_tb.vhd
+vcom tests/add_tb.vhd
+vcom tests/beq_tb.vhd
+vcom tests/bne_tb.vhd
+vcom tests/j_tb.vhd
+vcom tests/jal_tb.vhd
+vcom tests/jr_tb.vhd
+vcom tests/lw_tb.vhd
+vcom tests/sll_tb.vhd
+vcom tests/sra_tb.vhd
+vcom tests/srl_tb.vhd
+
 
 ;# Start simulation
-vsim addi_tb.vhd
+vsim tests/addi_tb.vhd
+vsim tests/add_tb.vhd
+vsim tests/beq_tb.vhd
+vsim tests/bne_tb.vhd
+vsim tests/j_tb.vhd
+vsim tests/jal_tb.vhd
+vsim tests/jr_tb.vhd
+vsim tests/lw_tb.vhd
+vsim tests/sll_tb.vhd
+vsim tests/sra_tb.vhd
+vsim tests/srl_tb.vhd
 
 ;# Run for 10000 ns
 run 10000ns
