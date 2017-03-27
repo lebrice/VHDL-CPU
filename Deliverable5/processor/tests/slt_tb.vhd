@@ -9,18 +9,12 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity set_less_than_tb is
-end set_less_than_tb ; 
+entity slt_tb is
+end slt_tb ; 
 
-<<<<<<< HEAD:Deliverable5/processor/tests/set_less_than_tb.vhd
-architecture instruction_test of set_less_than_tb is
-    constant OPERATION : string := "set_less_than";
-
-=======
-architecture instruction_test of add_tb is
-    constant OPERATION : string := "add";
+architecture instruction_test of slt_tb is
+    constant OPERATION : string := "slt";
     constant test_ram_size : integer := 200;
->>>>>>> dev:Deliverable5/processor/tests/add_tb.vhd
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.

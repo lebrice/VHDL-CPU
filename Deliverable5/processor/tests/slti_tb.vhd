@@ -9,18 +9,12 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity set_less_than_immediate_tb is
-end set_less_than_immediate_tb ; 
+entity slti_tb is
+end slti_tb ; 
 
-<<<<<<< HEAD:Deliverable5/processor/tests/set_less_than_immediate_tb.vhd
-architecture instruction_test of set_less_than_immediate_tb is
-    constant OPERATION : string := "set_less_than_immediate";
-
-=======
-architecture instruction_test of addi_tb is
-    constant OPERATION : string := "addi";
+architecture instruction_test of slti_tb is
+    constant OPERATION : string := "slti";
     constant test_ram_size : integer := 200;
->>>>>>> dev:Deliverable5/processor/tests/addi_tb.vhd
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -126,21 +120,11 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-<<<<<<< HEAD:Deliverable5/processor/tests/set_less_than_immediate_tb.vhd
     -- SET_LESS_THAN_IMMEDIATE test
     -- slti r1 r0 1 => result in r1 is 1
     -- slti r2 r1 0 => result in r2 is 0
     -- slti r3 r1 9 => result in r3 is 1
     -- slti r4 r3 0 => result in r4 is 0
-=======
-    -- ADDI R1 R0 15
-    -- ADDI R2 R0 15
-    -- ADDI R3 R1 1
-    -- ADDI R4 R2 15
-    -- ADDI R5 R4 -1
-    -- ADDI R6 R1 -10
-    -- ADDI R7 R1 -20
->>>>>>> dev:Deliverable5/processor/tests/addi_tb.vhd
     -- SW R1 0(R0)
     -- SW R2 4(R0)
     -- SW R3 8(R0)
@@ -151,20 +135,10 @@ begin
 
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-<<<<<<< HEAD:Deliverable5/processor/tests/set_less_than_immediate_tb.vhd
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(0, 32));
     expected_results(2) <= std_logic_vector(to_unsigned(1, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(0, 32));
-=======
-    expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(15, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(16, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(30, 32));
-    expected_results(4) <= std_logic_vector(to_unsigned(29, 32));
-    expected_results(5) <= std_logic_vector(to_unsigned(5, 32));
-    expected_results(6) <= std_logic_vector(to_signed(-5, 32));
->>>>>>> dev:Deliverable5/processor/tests/addi_tb.vhd
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
