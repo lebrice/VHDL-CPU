@@ -139,7 +139,7 @@ begin
     expected_results(0) <= std_logic_vector(to_unsigned(2, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(3, 32));
     expected_results(2) <= std_logic_vector(to_unsigned(4, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(20, 32)); --PC + 4 + 4
+    expected_results(3) <= std_logic_vector(to_unsigned(16, 32)); -- PC + 4
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop

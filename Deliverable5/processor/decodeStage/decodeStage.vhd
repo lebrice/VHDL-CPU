@@ -222,7 +222,7 @@ current_state <=
             -- do nothing
 
           when JUMP_AND_LINK =>
-            register_file(link_register).data <= std_logic_vector(to_unsigned(PC + 8, 32));
+            register_file(link_register).data <= std_logic_vector(to_unsigned(PC + 4, 32));
 
           when JUMP_TO_REGISTER =>
             val_a <= register_file(rs).data;
