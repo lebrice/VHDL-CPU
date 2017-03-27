@@ -133,8 +133,8 @@ begin
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(1, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(1, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(0, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(0, 32));
     
     -- put a breakpoint on the wait signal when debugging
@@ -142,9 +142,6 @@ begin
         wait for clock_period;
     end loop ; -- test_loop
 
-
-        
-	
     
     dump <= '1'; --dump data
     wait for clock_period;
