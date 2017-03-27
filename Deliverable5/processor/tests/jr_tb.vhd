@@ -128,16 +128,15 @@ begin
     -- addi $1, $0, 9            
     -- addi $2, $0, 10            
     -- addi $3, $0, 11         
-    -- STORE:   sw $1, 4($0)       
-    --          sw $2, 8($0)              
-    --          sw $3, 12($0)             
+    -- STORE:   sw $1, 0($0)       
+    --          sw $2, 4($0)              
+    --          sw $3, 8($0)             
     
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(1, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(2, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(3, 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(1, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(2, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(3, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
