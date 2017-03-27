@@ -28,7 +28,8 @@ package BRANCH_MANAGEMENT is
         signal state : in pipeline_state_snapshot; 
         signal manual_fetch_stall : out std_logic;
         signal manual_IF_ID_stall : out std_logic;
-        signal manual_decode_stall : out std_logic
+        signal manual_decode_stall : out std_logic;
+        signal feed_IF_ID_no_op : out boolean
         );
         
 
@@ -63,11 +64,12 @@ package body BRANCH_MANAGEMENT is
         signal state : in pipeline_state_snapshot; 
         signal manual_fetch_stall : out std_logic;
         signal manual_IF_ID_stall : out std_logic;
-        signal manual_decode_stall : out std_logic
+        signal manual_decode_stall : out std_logic;
+        signal feed_IF_ID_no_op : out boolean
         ) is
     begin
-        if is_branch_type(state.ID_EX_inst) OR is_branch_type(state.EX_MEM_inst) then
-            -- TODO:
+        if is_branch_type(state.IF_ID_inst) then
+            feed_IF_ID_no_OP <= true;
         end if;
     end detect_branch_stalls;
 

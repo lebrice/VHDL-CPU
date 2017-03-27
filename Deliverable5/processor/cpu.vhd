@@ -356,6 +356,8 @@ architecture CPU_arch of CPU is
     signal manual_IF_ID_stall : std_logic := '0';
     signal manual_fetch_stall : std_logic := '0';
 
+    signal feed_no_op_to_IF_ID : boolean := false;
+
 begin
     ALU_out <= execute_stage_ALU_result;
 
@@ -528,6 +530,7 @@ begin
     IF_ID_register_instruction_in <= 
         NO_OP_INSTRUCTION when initialize = '1' else 
         input_instruction when override_input_instruction = '1' else
+        NO_OP_INSTRUCTION when feed_no_op_to_IF_ID else
         fetch_stage_instruction_out;
     IF_ID_register_pc_in <= fetch_stage_PC;
     IF_ID_register_stall <= decode_stage_stall_out OR manual_IF_ID_stall;
@@ -627,7 +630,8 @@ begin
                 current_state,
                 manual_fetch_stall,
                 manual_IF_ID_stall,
-                decode_stage_stall_in
+                decode_stage_stall_in,
+                feed_no_op_to_IF_ID
                 );
         end if;
     end process;
