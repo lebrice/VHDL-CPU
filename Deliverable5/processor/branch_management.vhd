@@ -8,7 +8,7 @@ use work.REGISTERS.all;
 package BRANCH_MANAGEMENT is
 
     -- Returns True if the given instruction is branch-like, (Jumps and branches)
-    function isBranchType(instruction : INSTRUCTION)
+    function is_branch_type(instruction : INSTRUCTION)
         return boolean;
 
     type pipeline_state_snapshot is
@@ -21,11 +21,13 @@ package BRANCH_MANAGEMENT is
         EX_MEM_branch_taken :   std_logic;
     end record;  
 
-    function shouldTakeBranch(currentState : pipeline_state_snapshot)
+    function should_take_branch(state : pipeline_state_snapshot)
         return boolean;
 
-    procedure detectBranchStalls(
-        currentState : in pipeline_state_snapshot; 
+    procedure detect_branch_stalls(
+        signal state : in pipeline_state_snapshot; 
+        signal manual_fetch_stall : out std_logic;
+        signal manual_IF_ID_stall : out std_logic;
         signal manual_decode_stall : out std_logic
         );
         
@@ -36,7 +38,8 @@ end package ;
 
 package body BRANCH_MANAGEMENT is
 
-    function isBranchType(instruction : INSTRUCTION) 
+    -- Returns True if the given instruction is branch-like, (Jumps and branches)
+    function is_branch_type(instruction : INSTRUCTION) 
         return boolean is
     begin
         case instruction.instruction_type is
@@ -45,20 +48,27 @@ package body BRANCH_MANAGEMENT is
             when others => 
                 return false;
         end case;
-    end isBranchType;
+    end is_branch_type;
 
-    function shouldTakeBranch(currentState : pipeline_state_snapshot)
+
+    -- Function responsible for making an assumption about the taken/not taken behaviour, for branch prediction.
+    function should_take_branch(state : pipeline_state_snapshot)
         return boolean is
     begin
         --TODO: implement branch prediction here later maybe ?
         return true;
-    end shouldTakeBranch;
+    end should_take_branch;
 
-    procedure detectBranchStalls(
-        currentState : in pipeline_state_snapshot; 
+    procedure detect_branch_stalls(
+        signal state : in pipeline_state_snapshot; 
+        signal manual_fetch_stall : out std_logic;
+        signal manual_IF_ID_stall : out std_logic;
         signal manual_decode_stall : out std_logic
         ) is
     begin
-    end detectBranchStalls;
+        if is_branch_type(state.ID_EX_inst) OR is_branch_type(state.EX_MEM_inst) then
+            -- TODO:
+        end if;
+    end detect_branch_stalls;
 
 end BRANCH_MANAGEMENT;

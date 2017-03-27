@@ -353,6 +353,8 @@ architecture CPU_arch of CPU is
     signal dumped : std_logic := '0';
 
     signal current_state : pipeline_state_snapshot;
+    signal manual_IF_ID_stall : std_logic := '0';
+    signal manual_fetch_stall : std_logic := '0';
 
 begin
     ALU_out <= execute_stage_ALU_result;
@@ -521,14 +523,14 @@ begin
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
     fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_ALU_result_out));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-    fetch_stage_stall <= decode_stage_stall_out;
+    fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
     IF_ID_register_instruction_in <= 
         NO_OP_INSTRUCTION when initialize = '1' else 
         input_instruction when override_input_instruction = '1' else
         fetch_stage_instruction_out;
     IF_ID_register_pc_in <= fetch_stage_PC;
-    IF_ID_register_stall <= decode_stage_stall_out;
+    IF_ID_register_stall <= decode_stage_stall_out OR manual_IF_ID_stall;
 
     decode_stage_PC <= IF_ID_register_pc_out;
     decode_stage_instruction_in <= IF_ID_register_instruction_out;
@@ -621,7 +623,12 @@ begin
     branch_stall_management : process(clock, current_state)
     begin
         if rising_edge(clock) then
-            detectBranchStalls(current_state, decode_stage_stall_in);
+            detect_branch_stalls(
+                current_state,
+                manual_fetch_stall,
+                manual_IF_ID_stall,
+                decode_stage_stall_in
+                );
         end if;
     end process;
 
@@ -629,11 +636,11 @@ begin
     variable should_take_branch : std_logic;
     begin
         if rising_edge(clock) then
-            if(shouldTakeBranch(current_state)) then
-                -- TODO: branch prediction
-            else
+            -- if (should_take_branch(current_state)) then
+            --     -- TODO: branch prediction
+            -- else
 
-            end if;  
+            -- end if;  
         end if;
     end process;
 
