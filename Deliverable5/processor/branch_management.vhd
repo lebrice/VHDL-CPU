@@ -22,7 +22,15 @@ package BRANCH_MANAGEMENT is
     end record;  
 
     function shouldTakeBranch(currentState : pipeline_state_snapshot)
-        return boolean;  
+        return boolean;
+
+    procedure detectBranchStalls(
+        currentState : in pipeline_state_snapshot; 
+        signal manual_decode_stall : out std_logic
+        );
+        
+
+
 end package ;
 
 
@@ -45,5 +53,12 @@ package body BRANCH_MANAGEMENT is
         --TODO: implement branch prediction here later maybe ?
         return true;
     end shouldTakeBranch;
+
+    procedure detectBranchStalls(
+        currentState : in pipeline_state_snapshot; 
+        signal manual_decode_stall : out std_logic
+        ) is
+    begin
+    end detectBranchStalls;
 
 end BRANCH_MANAGEMENT;

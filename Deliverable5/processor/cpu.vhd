@@ -621,7 +621,7 @@ begin
     branch_stall_management : process(clock, current_state)
     begin
         if rising_edge(clock) then
-            -- TODO: 
+            detectBranchStalls(current_state, decode_stage_stall_in);
         end if;
     end process;
 
