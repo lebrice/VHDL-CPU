@@ -24,16 +24,6 @@ package BRANCH_MANAGEMENT is
     function should_take_branch(state : pipeline_state_snapshot)
         return boolean;
 
-    procedure detect_branch_stalls(
-        signal state : in pipeline_state_snapshot; 
-        signal manual_fetch_stall : out std_logic;
-        signal manual_IF_ID_stall : out std_logic;
-        signal manual_decode_stall : out std_logic;
-        signal feed_IF_ID_no_op : out boolean
-        );
-        
-
-
 end package ;
 
 
@@ -60,17 +50,5 @@ package body BRANCH_MANAGEMENT is
         return true;
     end should_take_branch;
 
-    procedure detect_branch_stalls(
-        signal state : in pipeline_state_snapshot; 
-        signal manual_fetch_stall : out std_logic;
-        signal manual_IF_ID_stall : out std_logic;
-        signal manual_decode_stall : out std_logic;
-        signal feed_IF_ID_no_op : out boolean
-        ) is
-    begin
-        if is_branch_type(state.IF_ID_inst) then
-            feed_IF_ID_no_OP <= true;
-        end if;
-    end detect_branch_stalls;
 
 end BRANCH_MANAGEMENT;
