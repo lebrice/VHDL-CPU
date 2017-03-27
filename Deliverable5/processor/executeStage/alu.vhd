@@ -37,6 +37,10 @@ begin
   variable pc_int : integer := 0;
   variable address_offset : integer := 0;
   variable new_address : integer := 0;
+
+  variable highest_bits : std_logic_vector(3 downto 0);
+  variable lowest_bits :  std_logic_vector(27 downto 0);
+  variable jump_address : std_logic_vector(31 downto 0);
   begin
     --set initial values
     a := signed(op_a);
@@ -115,8 +119,11 @@ begin
         ALU_out <= extend64(to_stdlogicvector(to_bitvector(op_b) sra shift_amount));
       
       when JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER =>
-        --assumes the correctly formatted new address is set to a.
-        ALU_out <= extend64(op_a);
+        --assumes the PC is in a, and address vector is in b.
+        highest_bits := op_a(31 downto 28);
+        lowest_bits := op_b(25 downto 0) & "00";
+        jump_address := highest_bits & lowest_bits;
+        ALU_out <= extend64(jump_address);
 
       when UNKNOWN =>
         report "ERROR: unknown instruction given to ALU!" severity FAILURE;

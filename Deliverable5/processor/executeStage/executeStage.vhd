@@ -107,8 +107,8 @@ begin
           input_a <= std_logic_vector(to_unsigned(PC, 32)); 
           input_b <= imm_sign_extended;
         when JUMP | JUMP_AND_LINK =>
-          input_a <= std_logic_vector(to_unsigned(PC,32)(31 downto 26)) & instruction_in.address_vect; 
-          input_b <= val_b; --doesn't matter
+          input_a <= std_logic_vector(to_unsigned(PC,32)); 
+          input_b <= "000000" & instruction_in.address_vect;
         when JUMP_TO_REGISTER =>
           input_a <= val_a;
           input_b <= val_b;

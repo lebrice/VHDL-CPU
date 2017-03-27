@@ -312,7 +312,8 @@ current_state <=
           stall_reg <= '0';
         end if;
       
-      when JUMP =>
+      when JUMP | JUMP_AND_LINK =>
+        stall_reg <= '0';
         -- We don't stall, since there can be no data dependencies.
 
       when JUMP_TO_REGISTER =>
@@ -321,10 +322,6 @@ current_state <=
         else
           stall_reg <= '0';
         end if;
-      
-      when JUMP_AND_LINK =>
-        -- We don't do anything here, since register 31 is a special register.
-        
 
       when ADD | SUBTRACT | SET_LESS_THAN | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR =>
         if rs.busy = '1' OR rt.busy = '1' OR rd.busy = '1' then
