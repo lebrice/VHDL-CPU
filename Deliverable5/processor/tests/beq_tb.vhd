@@ -119,21 +119,20 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R1 R0 5             : 00100000000000010000000000000101
-    -- ADDI R2 R0 5             : 00100000000000100000000000000101
-    -- ADDI R3 R0 6             : 00100000000000110000000000000110
-    -- beq r1 r2 GOTO (0x8)     : 00010000001000100000000000001000
-    -- ADDI R3 R0 7             : 00100000000000110000000000000111
-    -- GOTO: sw r3 4(r0)        : 10101100000000110000000000000100
-    -- beq r1 r3 END (0x8)      : 00010000001000110000000000001000
-    -- sw r1 8(r0)              : 10101100000000010000000000001000
-    -- END: sw r2 12(r0)        : 10101100000000100000000000001100
+    -- addi $1, $0, 5        
+    -- addi $2, $0, 5        
+    -- addi $3, $0, 6        
+    -- beq  $1, $2, GOTO
+    -- addi $2, $0, 8
+    -- GOTO:    sw  $1, 0($0) 
+    --          beq $2, $3, END
+    --          sw  $2, 4($0)    
+    -- END:     sw  $3, 8($0)       
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(6, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(5, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(6, 32));
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
         wait for clock_period;
