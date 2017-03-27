@@ -6,12 +6,28 @@ use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
 package BRANCH_MANAGEMENT is
+
+    -- Returns True if the given instruction is branch-like, (Jumps and branches)
     function isBranchType(instruction : INSTRUCTION)
         return boolean;
+
+    type pipeline_state_snapshot is
+    record
+        fetch_inst :    INSTRUCTION;
+        IF_ID_inst :    INSTRUCTION;
+        ID_EX_inst :    INSTRUCTION;
+        EX_MEM_inst :   INSTRUCTION;
+        MEM_WB_inst :   INSTRUCTION;
+        EX_MEM_branch_taken :   std_logic;
+    end record;  
+
+    function shouldTakeBranch(currentState : pipeline_state_snapshot)
+        return boolean;  
 end package ;
 
 
 package body BRANCH_MANAGEMENT is
+
     function isBranchType(instruction : INSTRUCTION) 
         return boolean is
     begin
@@ -22,5 +38,12 @@ package body BRANCH_MANAGEMENT is
                 return false;
         end case;
     end isBranchType;
+
+    function shouldTakeBranch(currentState : pipeline_state_snapshot)
+        return boolean is
+    begin
+        --TODO: implement branch prediction here later maybe ?
+        return true;
+    end shouldTakeBranch;
 
 end BRANCH_MANAGEMENT;

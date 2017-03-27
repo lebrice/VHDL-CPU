@@ -351,6 +351,9 @@ architecture CPU_arch of CPU is
     --misc
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
+
+    signal current_state : pipeline_state_snapshot;
+
 begin
     ALU_out <= execute_stage_ALU_result;
 
@@ -608,22 +611,29 @@ begin
     end process ; -- dump
 
 
-    branch_stall_management : process(
-        clock,
-        fetch_stage_instruction_out, 
-        IF_ID_register_instruction_out,
-        ID_EX_register_instruction_out,
-        EX_MEM_register_branch_target_out,
-        EX_MEM_register_does_branch_out,
-        EX_MEM_register_instruction_out
-          )
+    current_state.fetch_inst    <=  fetch_stage_instruction_out;
+    current_state.IF_ID_inst    <=  IF_ID_register_instruction_out;
+    current_state.ID_EX_inst    <=  ID_EX_register_instruction_out;
+    current_state.EX_MEM_inst   <=  EX_MEM_register_instruction_out;
+    current_state.MEM_WB_inst   <=  MEM_WB_register_instruction_out;
+    current_state.EX_MEM_branch_taken  <=  EX_MEM_register_does_branch_out;
+
+    branch_stall_management : process(clock, current_state)
     begin
         if rising_edge(clock) then
-            if(isBranchType(fetch_stage_instruction_out)) then
-                decode_stage_stall_in <= '1';         
+            -- TODO: 
+        end if;
+    end process;
+
+    branch_prediction : process(clock, current_state)
+    variable should_take_branch : std_logic;
+    begin
+        if rising_edge(clock) then
+            if(shouldTakeBranch(current_state)) then
+                -- TODO: branch prediction
             else
-                decode_stage_stall_in <= '0';
-            end if;
+
+            end if;  
         end if;
     end process;
 
