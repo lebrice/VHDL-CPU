@@ -1,3 +1,4 @@
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -51,8 +52,8 @@ begin
         
       when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
         --b is our PC
-        pc_int := to_integer(unsigned(op_b));
-        address_offset := to_integer(a sll 2);
+        pc_int := to_integer(unsigned(op_a));
+        address_offset := to_integer(b sll 2);
         new_address := pc_int + address_offset;
         ALU_out(31 downto 0) <= std_logic_vector(to_unsigned(new_address, 32));
         ALU_out(63 downto 32) <= (others => '0');
