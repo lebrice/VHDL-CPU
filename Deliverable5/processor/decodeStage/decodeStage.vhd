@@ -225,7 +225,6 @@ current_state <=
             register_file(link_register).data <= std_logic_vector(to_unsigned(PC + 8, 32));
 
           when JUMP_TO_REGISTER =>
-            -- TODO: Clarify this with Asher
             val_a <= register_file(rs).data;
 
           when UNKNOWN =>

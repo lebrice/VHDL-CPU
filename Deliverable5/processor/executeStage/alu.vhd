@@ -118,12 +118,15 @@ begin
       when SHIFT_RIGHT_ARITHMETIC =>
         ALU_out <= extend64(to_stdlogicvector(to_bitvector(op_b) sra shift_amount));
       
-      when JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER =>
+      when JUMP | JUMP_AND_LINK =>
         --assumes the PC is in a, and address vector is in b.
         highest_bits := op_a(31 downto 28);
         lowest_bits := op_b(25 downto 0) & "00";
         jump_address := highest_bits & lowest_bits;
         ALU_out <= extend64(jump_address);
+      
+      when JUMP_TO_REGISTER =>
+        ALU_out <= extend64(op_a);
 
       when UNKNOWN =>
         report "ERROR: unknown instruction given to ALU!" severity FAILURE;
