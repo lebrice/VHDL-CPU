@@ -9,18 +9,12 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity set_less_than_tb is
-end set_less_than_tb ; 
+entity or_tb is
+end or_tb ; 
 
-<<<<<<< HEAD:Deliverable5/processor/tests/set_less_than_tb.vhd
-architecture instruction_test of set_less_than_tb is
-    constant OPERATION : string := "set_less_than";
-
-=======
-architecture instruction_test of add_tb is
-    constant OPERATION : string := "add";
+architecture instruction_test of or_tb is
+    constant OPERATION : string := "or";
     constant test_ram_size : integer := 200;
->>>>>>> dev:Deliverable5/processor/tests/add_tb.vhd
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -126,22 +120,16 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- SET_LESS_THAN test
-    -- addi r5 r0 3 => register 5 contains 3
-    -- slt r1 r0 r0 => result in r1 is 0
-    -- slt r2 r0 r5 => result in r2 is 1
-    -- slt r3 r1 r2 => result in r3 is 0
-    -- slt r4 r5 r0 => result in r4 is 0
-    -- SW R1 0(R0)
-    -- SW R2 4(R0)
-    -- SW R3 8(R0)
-    -- SW R4 12(R0)
+    -- addi R1 R0 4 -> 00100000000000010000000000000100
+    -- addi R2 R0 5 -> 00100000000000100000000000000101
+    -- or R3 R2 R1 -> 00000000010000010001100000100101
+    -- SW R3 4(R0) -> 10101100000000110000000000000100
+
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(1, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(0, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(5, 32));
+
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop

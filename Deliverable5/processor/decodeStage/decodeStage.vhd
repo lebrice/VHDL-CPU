@@ -200,12 +200,12 @@ current_state <=
           when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
             val_b <= register_file(rt).data;
             val_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
-            -- register_file(rd).busy <= '1';
+            register_file(rd).busy <= '1';
 
           when LOAD_WORD =>
             val_a <= register_file(rs).data;
             i_sign_extended <= signExtend(immediate);
-            -- register_file(rt).busy <= '1';
+            register_file(rt).busy <= '1';
 
           when STORE_WORD =>
           -- TODO: It is unclear how we pass data to the EX stage in the case of STORE_WORD.
