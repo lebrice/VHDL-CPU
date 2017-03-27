@@ -119,15 +119,17 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- addi $1, $0, 5             : 00100000000000010000000000000101
-    -- addi $2, $0, 5             : 00100000000000100000000000000101
-    -- ADDI $3, $0, 6             : 00100000000000110000000000000110
-    -- bne  $1, $3, GOTO     : 00010100001000110000000000001000
-    -- addi $2, $0, 8             : 00100000000000110000000000000111
-    -- GOTO:    sw $2, 4($0)        : 10101100000000100000000000000100
-    -- bne  $1, $2, END      : 00010100001000100000000000001000
-    -- sw   $1, 8($0)              : 10101100000000010000000000001000
-    -- END: sw $3, 12($0)        : 10101100000000011000000000001100
+    -- addi $1, $0, 5        
+    -- addi $2, $0, 5        
+    -- ADDI $3, $0, 6        
+    -- bne  $1, $3, GOTO     
+    -- addi $2, $0, 8        
+    -- addi $10, $0, 1
+    -- addi $11, $0, 1
+    -- GOTO:    sw $2, 4($0) 
+    -- bne  $1, $2, END      
+    -- sw   $1, 8($0)        
+    -- END: sw $3, 12($0)    
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
