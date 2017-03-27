@@ -2,10 +2,10 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
--- opcode tool library
 use work.INSTRUCTION_TOOLS.all;
-
 use work.REGISTERS.all;
+use work.BRANCH_MANAGEMENT.all;
+
 --entity declaration
 entity CPU is
     generic(
@@ -607,6 +607,25 @@ begin
         end if;
     end process ; -- dump
 
+
+    branch_stall_management : process(
+        clock,
+        fetch_stage_instruction_out, 
+        IF_ID_register_instruction_out,
+        ID_EX_register_instruction_out,
+        EX_MEM_register_branch_target_out,
+        EX_MEM_register_does_branch_out,
+        EX_MEM_register_instruction_out
+          )
+    begin
+        if rising_edge(clock) then
+            if(isBranchType(fetch_stage_instruction_out)) then
+                decode_stage_stall_in <= '1';         
+            else
+                decode_stage_stall_in <= '0';
+            end if;
+        end if;
+    end process;
 
 
 end architecture;
