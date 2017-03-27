@@ -121,21 +121,21 @@ begin
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
     -- addi $1, $0, 5        
     -- addi $2, $0, 5        
-    -- ADDI $3, $0, 6        
+    -- addi $3, $0, 6        
     -- bne  $1, $3, GOTO     
     -- addi $2, $0, 8        
     -- addi $10, $0, 1
     -- addi $11, $0, 1
-    -- GOTO:    sw $2, 4($0) 
-    -- bne  $1, $2, END      
-    -- sw   $1, 8($0)        
-    -- END: sw $3, 12($0)    
+    -- GOTO:    sw  $2, 0($0) 
+    --          bne $1, $2, END      
+    --          sw  $1, 4($0)        
+    -- END: sw $3, 8($0)    
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(5, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(5, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(5, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(6, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(6, 32));
+    
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
         wait for clock_period;
