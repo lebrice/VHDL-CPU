@@ -9,6 +9,9 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
+
+
+
 entity addi_tb is
 end addi_tb ; 
 
