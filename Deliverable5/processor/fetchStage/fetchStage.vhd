@@ -40,7 +40,7 @@ PC_next <=
   PC_register when PC_register + 4 >= ram_size-1 else
   PC_register + 4;
 
-pc_process : process( clock, reset )
+pc_process : process( clock, reset, PC_next)
 begin
   if( reset = '1' ) then
     PC_register <= 0;
