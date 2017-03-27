@@ -128,7 +128,7 @@ begin
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(5, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(-6, 32));
 
     
     -- put a breakpoint on the wait signal when debugging
