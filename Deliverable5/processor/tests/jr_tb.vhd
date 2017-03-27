@@ -10,11 +10,11 @@ use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
 entity jr_tb is
-end jr_tb; 
+end jr_tb;
 
 architecture instruction_test of jr_tb is
     constant OPERATION : string := "jr";
-
+    constant test_ram_size : integer := 100;
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -72,6 +72,7 @@ begin
 
 c1 : CPU 
 GENERIC MAP (
+    ram_size => test_ram_size,
     data_memory_dump_filepath => data_memory_dump_path,
     register_file_dump_filepath => register_file_path,
     instruction_memory_load_filepath => instruction_memory_load_path,
@@ -119,24 +120,23 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R1 R0 1             : 00100000000000010000000000000001
-    -- ADDI R2 R0 2             : 00100000000000100000000000000010
-    -- ADDI R3 R0 3             : 00100000000000110000000000000011
-    -- ADDI R4 r0 16            : 00100000000001000000000000010000
-    -- jr r4                    : 00000000100000000000000000001000
-    -- ADDI R1 R0 9             : 00100000000000010000000000001001
-    -- ADDI R2 R0 10            : 00100000000000100000000000001010
-    -- ADDI R3 R0 11            : 00100000000000110000000000001011
-    -- STORE: sw r1 4(r0)       : 10101100000000010000000000000100
-    -- sw r2 8(r0)              : 10101100000000100000000000001000
-    -- sw r3 12(r0)             : 10101100000000110000000000001100
+    -- addi $1, $0, 1             
+    -- addi $2, $0, 2             
+    -- addi $3, $0, 3             
+    -- addi $4, $0, 32           
+    -- jr $4                    
+    -- addi $1, $0, 9            
+    -- addi $2, $0, 10            
+    -- addi $3, $0, 11         
+    -- STORE:   sw $1, 0($0)       
+    --          sw $2, 4($0)              
+    --          sw $3, 8($0)             
     
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(1, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(2, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(3, 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(1, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(2, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(3, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop

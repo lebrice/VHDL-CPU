@@ -9,12 +9,14 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity bne_tb is
-end bne_tb; 
 
-architecture instruction_test of bne_tb is
-    constant OPERATION : string := "bne";
 
+entity add_tb is
+end add_tb ; 
+
+architecture instruction_test of add_tb is
+    constant OPERATION : string := "add";
+    constant test_ram_size : integer := 200;
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
     -- not used in this case.
@@ -72,6 +74,7 @@ begin
 
 c1 : CPU 
 GENERIC MAP (
+    ram_size => test_ram_size,
     data_memory_dump_filepath => data_memory_dump_path,
     register_file_dump_filepath => register_file_path,
     instruction_memory_load_filepath => instruction_memory_load_path,
@@ -109,7 +112,7 @@ test_process : process
     variable inline: line;
     variable result : std_logic_vector(31 downto 0);
 begin
-    report "starting " & OPERATION & " test process";
+    report "starting test process";
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
@@ -119,27 +122,28 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- addi $1, $0, 5        
-    -- addi $2, $0, 5        
-    -- addi $3, $0, 6        
-    -- bne  $1, $3, GOTO     
-    -- addi $2, $0, 8        
-    -- addi $10, $0, 1
-    -- addi $11, $0, 1
-    -- GOTO:    sw  $2, 0($0) 
-    --          bne $1, $2, END      
-    --          sw  $1, 4($0)        
-    -- END: sw $3, 8($0)    
+    -- ADDI R1 R0 15
+    -- ADDI R2 R0 9
+    -- ADD  R3 R1 R2
+    -- ADD  R4 R1 R3
+    -- SW R1 0(R0)
+    -- SW R2 4(R0)
+    -- SW R3 8(R0)
+    -- SW R4 12(R0)
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(5, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(5, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(6, 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(15, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(9, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(24, 32));
+    expected_results(3) <= std_logic_vector(to_unsigned(39, 32));
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
         wait for clock_period;
-    end loop ; -- test_loop   
+    end loop ; -- test_loop
+
+
+        
 	
     
     dump <= '1'; --dump data

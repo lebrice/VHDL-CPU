@@ -2,10 +2,10 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
--- opcode tool library
 use work.INSTRUCTION_TOOLS.all;
-
 use work.REGISTERS.all;
+use work.BRANCH_MANAGEMENT.all;
+
 --entity declaration
 entity CPU is
     generic(
@@ -351,6 +351,13 @@ architecture CPU_arch of CPU is
     --misc
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
+
+    signal current_state : pipeline_state_snapshot;
+    signal manual_IF_ID_stall : std_logic := '0';
+    signal manual_fetch_stall : std_logic := '0';
+
+    signal feed_no_op_to_IF_ID : boolean := false;
+
 begin
     ALU_out <= execute_stage_ALU_result;
 
@@ -518,14 +525,15 @@ begin
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
     fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_ALU_result_out));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-    fetch_stage_stall <= decode_stage_stall_out;
+    fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
     IF_ID_register_instruction_in <= 
         NO_OP_INSTRUCTION when initialize = '1' else 
         input_instruction when override_input_instruction = '1' else
+        NO_OP_INSTRUCTION when feed_no_op_to_IF_ID else
         fetch_stage_instruction_out;
     IF_ID_register_pc_in <= fetch_stage_PC;
-    IF_ID_register_stall <= decode_stage_stall_out;
+    IF_ID_register_stall <= decode_stage_stall_out OR manual_IF_ID_stall;
 
     decode_stage_PC <= IF_ID_register_pc_out;
     decode_stage_instruction_in <= IF_ID_register_instruction_out;
@@ -607,6 +615,39 @@ begin
         end if;
     end process ; -- dump
 
+
+    current_state.fetch_inst    <=  fetch_stage_instruction_out;
+    current_state.IF_ID_inst    <=  IF_ID_register_instruction_out;
+    current_state.ID_EX_inst    <=  ID_EX_register_instruction_out;
+    current_state.EX_MEM_inst   <=  EX_MEM_register_instruction_out;
+    current_state.MEM_WB_inst   <=  MEM_WB_register_instruction_out;
+    current_state.EX_MEM_branch_taken  <=  EX_MEM_register_does_branch_out;
+
+    branch_stall_management : process(clock, current_state)
+    begin
+            if  is_branch_type(current_state.IF_ID_inst) OR
+                is_branch_type(current_state.ID_EX_inst) OR
+                (is_branch_type(current_state.EX_MEM_inst) AND current_state.EX_MEM_branch_taken = '1')
+            then
+                feed_no_op_to_IF_ID <= true;
+                manual_fetch_stall <= '1';
+            else
+                feed_no_op_to_IF_ID <= false;
+                manual_fetch_stall <= '0';
+            end if;
+    end process;
+
+    branch_prediction : process(clock, current_state)
+    variable should_take_branch : std_logic;
+    begin
+        if rising_edge(clock) then
+            -- if (should_take_branch(current_state)) then
+            --     -- TODO: branch prediction
+            -- else
+
+            -- end if;  
+        end if;
+    end process;
 
 
 end architecture;

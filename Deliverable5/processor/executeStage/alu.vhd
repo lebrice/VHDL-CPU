@@ -1,3 +1,4 @@
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -33,6 +34,13 @@ begin
   --shamt is stored in last 5 bits of "a"
   variable shift_amount : integer; 
 
+  variable pc_int : integer := 0;
+  variable address_offset : integer := 0;
+  variable new_address : integer := 0;
+
+  variable highest_bits : std_logic_vector(3 downto 0);
+  variable lowest_bits :  std_logic_vector(27 downto 0);
+  variable jump_address : std_logic_vector(31 downto 0);
   begin
     --set initial values
     a := signed(op_a);
@@ -45,14 +53,18 @@ begin
         --for load word, provide the target address, (R[rs] + SignExtendedImmediate).
         -- for branch if equal PC = PC + 4 + branch target
         ALU_out <= extend64(std_logic_vector(a + b)); 
+        
       when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-        --b is the unsigned representation of our PC
-        --a is the signed representation of our movement amount
-        --we will add a and b as integers, and store it in an std_logic_vector (as unsigned)
-        --then we extend by 64 since we want a 64 bit output...
-        ALU_out <= extend64(std_logic_vector(to_unsigned(to_integer(a) + to_integer(unsigned(op_b)),32))); 
+        --b is our PC
+        pc_int := to_integer(unsigned(op_a));
+        address_offset := to_integer(b sll 2);
+        new_address := pc_int + 4 + address_offset;
+        ALU_out(31 downto 0) <= std_logic_vector(to_unsigned(new_address, 32));
+        ALU_out(63 downto 32) <= (others => '0');
+      
       when SUBTRACT =>
         ALU_out <= extend64(std_logic_vector(a - b)); -- rs - rt
+
       when MULTIPLY =>
         ALU_out <= std_logic_vector(a*b); 
       
@@ -106,8 +118,14 @@ begin
       when SHIFT_RIGHT_ARITHMETIC =>
         ALU_out <= extend64(to_stdlogicvector(to_bitvector(op_b) sra shift_amount));
       
-      when JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER =>
-        --assumes the correctly formatted new address is set to a.
+      when JUMP | JUMP_AND_LINK =>
+        --assumes the PC is in a, and address vector is in b.
+        highest_bits := op_a(31 downto 28);
+        lowest_bits := op_b(25 downto 0) & "00";
+        jump_address := highest_bits & lowest_bits;
+        ALU_out <= extend64(jump_address);
+      
+      when JUMP_TO_REGISTER =>
         ALU_out <= extend64(op_a);
 
       when UNKNOWN =>
