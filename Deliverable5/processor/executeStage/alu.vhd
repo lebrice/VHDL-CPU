@@ -54,7 +54,7 @@ begin
         --b is our PC
         pc_int := to_integer(unsigned(op_a));
         address_offset := to_integer(b sll 2);
-        new_address := pc_int + address_offset;
+        new_address := pc_int + 4 + address_offset;
         ALU_out(31 downto 0) <= std_logic_vector(to_unsigned(new_address, 32));
         ALU_out(63 downto 32) <= (others => '0');
       

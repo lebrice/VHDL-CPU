@@ -625,15 +625,19 @@ begin
 
     branch_stall_management : process(clock, current_state)
     begin
-        if rising_edge(clock) then
-            detect_branch_stalls(
-                current_state,
-                manual_fetch_stall,
-                manual_IF_ID_stall,
-                decode_stage_stall_in,
-                feed_no_op_to_IF_ID
-                );
-        end if;
+        -- if rising_edge(clock) then
+            if  is_branch_type(IF_ID_register_instruction_out) OR
+                is_branch_type(ID_EX_register_instruction_out) OR
+                (is_branch_type(EX_MEM_register_instruction_out) AND EX_MEM_register_does_branch_out = '1')
+                -- is_branch_type(MEM_WB_register_instruction_out)
+            then
+                feed_no_op_to_IF_ID <= true;
+                manual_fetch_stall <= '1';
+            else
+                feed_no_op_to_IF_ID <= false;
+                manual_fetch_stall <= '0';
+            end if;
+        -- end if;
     end process;
 
     branch_prediction : process(clock, current_state)
