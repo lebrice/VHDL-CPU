@@ -119,23 +119,27 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R1 R0 1             : 00100000000000010000000000000001
-    -- ADDI R2 R0 2             : 00100000000000100000000000000010
-    -- ADDI R3 R0 3             : 00100000000000110000000000000011
-    -- jal STORE (0x16)         : 00001100000000000000000000010000
-    -- ADDI R1 R0 9             : 00100000000000010000000000001001
-    -- ADDI R2 R0 10            : 00100000000000100000000000001010
-    -- ADDI R3 R0 11            : 00100000000000110000000000001011
-    -- STORE: sw r1 4(r0)       : 10101100000000010000000000000100
-    -- sw r2 8(r0)              : 10101100000000100000000000001000
-    -- sw r3 12(r0)             : 10101100000000110000000000001100
+    -- addi $1, $0, 1        
+    -- addi $2, $0, 2        
+    -- addi $3, $0, 3      
+    -- jal INCREMENT
+    -- sw $1,  0($0) 
+    -- sw $2,  4($0) 
+    -- sw $3,  8($0)  
+    -- sw $31, 12($0)
+    -- j END
+    -- INCREMENT:   addi $1, $1, 1
+    --              addi $2, $2, 1
+    --              addi $3, $3, 1
+    --              jr $31
+    -- END: add $0, $0, $0
+
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(1, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(2, 32));
-    expected_results(3) <= std_logic_vector(to_unsigned(3, 32));
-    expected_results(31) <= std_logic_vector(to_unsigned(16, 32)); --PC + 4 + 4
+    expected_results(0) <= std_logic_vector(to_unsigned(2, 32));
+    expected_results(1) <= std_logic_vector(to_unsigned(3, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(4, 32));
+    expected_results(3) <= std_logic_vector(to_unsigned(20, 32)); --PC + 4 + 4
     
     -- put a breakpoint on the wait signal when debugging
     test_loop : for i in 0 to 50 loop
