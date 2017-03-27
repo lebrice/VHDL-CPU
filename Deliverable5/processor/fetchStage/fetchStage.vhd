@@ -50,7 +50,7 @@ begin
       PC_register <= branch_target;
     elsif(stall = '1') then
       -- dont change its value.
-      report "fetch stage is STALLED.";
+      -- report "fetch stage is STALLED.";
     else
       PC_register <= PC_next;
     end if;
