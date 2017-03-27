@@ -129,13 +129,10 @@ begin
     -- SW R2 4(R0)
     -- SW R3 8(R0)
     -- SW R4 12(R0)
-    -- SW R5 16(R0)
-    -- SW R6 20(R0)
-    -- SW R7 24(R0)
 
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
+    expected_results(0) <= std_logic_vector(to_unsigned(1, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(0, 32));
     expected_results(2) <= std_logic_vector(to_unsigned(1, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(0, 32));
