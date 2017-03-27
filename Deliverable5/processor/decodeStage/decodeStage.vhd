@@ -276,7 +276,7 @@ current_state <=
           HI.busy <= '0';
 
         when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
-          -- Do nothing, these instructions are handled immediately by the process handling the incoming instruction from fetchStage.
+          -- Do nothing, these instructions are handled immediately during the reading phase.
 
         when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
           -- TODO: Not 100% sure if we're supposed to do anything here.
@@ -295,34 +295,36 @@ current_state <=
   end process;
 
 
-  stall_detection : process(current_state, instruction_in, write_back_instruction, write_back_data, stall_in)
+  data_dependency_detection : process(current_state, instruction_in, write_back_instruction, write_back_data, stall_in)
     variable rs, rt, rd : REGISTER_ENTRY;
   begin
     rs := register_file(instruction_in.rs);
     rt := register_file(instruction_in.rt);
     rd := register_file(instruction_in.rd);
 
-    -- if current_state = READING then
-      -- report "stall_reg is " & std_logic'image(stall_reg);
-      -- we can only set stall_out to '1' during the second part of the cycle.
-      
+    
     case instruction_in.instruction_type is
-      -- TODO: Maybe this has to only happen on the second half of the clock cycle ?
-
-      when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
-        -- if the instruction coming in from Fetch is one of these, then we wait until the same instruction 
-        -- comes back from Write-Back until releasing the pipeline.
-        -- (We assume here that whenever a BRANCH-like instruction comes into the DECODE stage, it will stay at the input of the Decode stage until
-        -- it comes back from Write-Back, since we freeze the fetch stage, but let the instruction through to EX-MEM-WB-Etc.)
-        
-        -- TODO: We HAVE to make sure that Fetch will work properly with this: 
-        --    - Even when stalled, it should latch the PC_NEXT value from a JUMP or BRANCH instruction.
-        --    - HOWEVER, the instruction coming into DECODE should stay the same until STALL is DE-ASSERTED! (This seems like a challenge right now.)
-        if (write_back_instruction.instruction_type = instruction_in.instruction_type) then
-          stall_reg <= '0';
-        else
+      
+      when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+        if rs.busy = '1' or rt.busy = '1' then
           stall_reg <= '1';
+        else
+          stall_reg <= '0';
         end if;
+      
+      when JUMP =>
+        -- We don't stall, since there can be no data dependencies.
+
+      when JUMP_TO_REGISTER =>
+        if rs.busy = '1' then
+          stall_reg <= '1';
+        else
+          stall_reg <= '0';
+        end if;
+      
+      when JUMP_AND_LINK =>
+        -- We don't do anything here, since register 31 is a special register.
+        
 
       when ADD | SUBTRACT | SET_LESS_THAN | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR =>
         if rs.busy = '1' OR rt.busy = '1' OR rd.busy = '1' then
@@ -377,9 +379,7 @@ current_state <=
         report "ERROR: unknown Instruction type in Decode stage!" severity failure;
 
     end case;
-    -- else
-    -- end if;
-  end process stall_detection;
+  end process;
 
 
   instruction_out <= 
