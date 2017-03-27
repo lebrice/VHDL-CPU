@@ -9,11 +9,11 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity bitwise_and_tb is
-end bitwise_and_tb ; 
+entity set_less_than_immediate_tb is
+end set_less_than_immediate_tb ; 
 
-architecture instruction_test of bitwise_and_tb is
-    constant OPERATION : string := "BITWISE_AND";
+architecture instruction_test of set_less_than_immediate_tb is
+    constant OPERATION : string := "set_less_than_immediate";
 
     constant clock_period : time := 1 ns;
     constant data_memory_dump_path : string := "tests/"& OPERATION &"_memory.txt";
@@ -119,15 +119,16 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- ADDI R5 R0 1
-    -- AND R1 R0 R0
-    -- AND R2 R1 R0
-    -- AND R3 R5 R5
-    -- AND R4 R3 R0
+    -- SET_LESS_THAN_IMMEDIATE test
+    -- slti r1 r0 1 => result in r1 is 1
+    -- slti r2 r1 0 => result in r2 is 0
+    -- slti r3 r1 9 => result in r3 is 1
+    -- slti r4 r3 0 => result in r4 is 0
     -- SW R1 0(R0)
     -- SW R2 4(R0)
     -- SW R3 8(R0)
     -- SW R4 12(R0)
+
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
