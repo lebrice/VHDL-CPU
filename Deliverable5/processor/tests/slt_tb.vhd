@@ -110,7 +110,7 @@ test_process : process
     variable inline: line;
     variable result : std_logic_vector(31 downto 0);
 begin
-    report "starting test process";
+    -- report "starting test process";
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
@@ -121,20 +121,20 @@ begin
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
     -- SET_LESS_THAN test
-    -- addi r5 r0 3 => register 5 contains 3
-    -- slt r1 r0 r0 => result in r1 is 0
-    -- slt r2 r0 r5 => result in r2 is 1
-    -- slt r3 r1 r2 => result in r3 is 0
-    -- slt r4 r5 r0 => result in r4 is 0
-    -- SW R1 0(R0)
-    -- SW R2 4(R0)
-    -- SW R3 8(R0)
-    -- SW R4 12(R0)
+    -- addi $5, $0, 3   # register 5 contains 3
+    -- slt  $1, $0, $0  # result in r1 is 0
+    -- slt  $2, $0, $5  # result in r2 is 1
+    -- slt  $3, $1, $2  # result in r3 is 1, since 0 < 1
+    -- slt  $4, $5, $0  # result in r4 is 0
+    -- sw   $1, 0($0)
+    -- sw   $2, 4($0)
+    -- sw   $3, 8($0)
+    -- sw   $4, 12($0)
 
-    -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
+    -- EXPECTED $ESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(1, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(0, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(1, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(0, 32));
     
     -- put a breakpoint on the wait signal when debugging

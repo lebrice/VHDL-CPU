@@ -110,7 +110,7 @@ test_process : process
     variable inline: line;
     variable result : std_logic_vector(31 downto 0);
 begin
-    report "starting test process";
+    -- report "starting test process";
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
@@ -120,15 +120,18 @@ begin
     override_input_instruction <= '0';
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
-    -- addi R1 R0 4 -> 00100000000000010000000000000100
-    -- addi R2 R0 5 -> 00100000000000100000000000000101
-    -- nor R3 R2 R1 -> 00000000010000010001100000100111
-    -- SW R3 4(R0) -> 10101100000000110000000000000100
+    -- addi $1, $0, 4 
+    -- addi $2, $0, 5 
+    -- nor  $3, $2, $1
+    -- sw   $3, 0($0)
 
+    -- 00100000000000010000000000000100
+    -- 00100000000000100000000000000101
+    -- 00000000010000010001100000100111
+    -- 10101100000000110000000000000000
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
-    expected_results(1) <= std_logic_vector(to_unsigned(-6, 32));
+    expected_results(0) <= std_logic_vector(to_signed(-6, 32));
 
     
     -- put a breakpoint on the wait signal when debugging

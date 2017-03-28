@@ -110,7 +110,7 @@ test_process : process
     variable inline: line;
     variable result : std_logic_vector(31 downto 0);
 begin
-    report "starting test process";
+    -- report "starting test process";
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
@@ -121,14 +121,14 @@ begin
     
     -- TEST PROGRAM: (should match the corresponding [operation]_program.txt)
     -- SET_LESS_THAN_IMMEDIATE test
-    -- slti r1 r0 1 => result in r1 is 1
-    -- slti r2 r1 0 => result in r2 is 0
-    -- slti r3 r1 9 => result in r3 is 1
-    -- slti r4 r3 0 => result in r4 is 0
-    -- SW R1 0(R0)
-    -- SW R2 4(R0)
-    -- SW R3 8(R0)
-    -- SW R4 12(R0)
+    -- slti $1, $0, 1   # result in r1 is 1
+    -- slti $2, $1, 0   # result in r2 is 0
+    -- slti $3, $1, 9   # result in r3 is 1
+    -- slti $4, $3, 0   # result in r4 is 0
+    -- sw   $1, 0($0)
+    -- sw   $2, 4($0)
+    -- sw   $3, 8($0)
+    -- sw   $4, 12($0)
 
 
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)

@@ -523,7 +523,7 @@ begin
     );
 
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
-    fetch_stage_branch_target <= to_integer(unsigned(EX_MEM_register_ALU_result_out));
+    fetch_stage_branch_target <= to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0)));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
@@ -590,7 +590,7 @@ begin
     init : process( clock, initialize )
     begin
         if initialize = '1' AND initialized = '0' then
-            report "Initializing...";
+            -- report "Initializing...";
             -- fetch_stage_reset <= '1';
             instruction_memory_load <= '1';
             initialized <= '1';  
@@ -603,7 +603,7 @@ begin
     dump_process : process( clock, dump )
     begin
         if dump = '1' AND dumped = '0' then
-            report "Dumping...";
+            -- report "Dumping...";
             data_memory_dump <= '1';
             -- instruction_memory_dump <= '1';
             decode_stage_write_register_file <= '1';

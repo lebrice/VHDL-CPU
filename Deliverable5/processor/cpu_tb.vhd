@@ -92,16 +92,18 @@ begin
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
-
+    wait for clock_period;
+    report "initialized.";
 
 
     wait for 9900 ns;
+    report "dumping...";
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
     wait for clock_period;
-    wait;
     report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
+    wait;
 
 end process test_process;
 
