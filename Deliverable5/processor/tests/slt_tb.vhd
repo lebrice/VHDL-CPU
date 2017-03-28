@@ -110,7 +110,7 @@ test_process : process
     variable inline: line;
     variable result : std_logic_vector(31 downto 0);
 begin
-    report "starting test process";
+    -- report "starting test process";
     initialize <= '1';
     wait for clock_period;
     initialize <= '0';
