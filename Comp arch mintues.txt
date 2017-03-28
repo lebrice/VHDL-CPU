@@ -1,0 +1,7 @@
+March 21 2017
+
+Met with Comp arch group
+Things that went well:
+	Overall structure
+Things that went poorly:
+	Testing (particular integration)
