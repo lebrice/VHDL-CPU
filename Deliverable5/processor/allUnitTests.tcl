@@ -50,7 +50,6 @@ vcom tests/bne_tb.vhd -quiet
 vcom tests/j_tb.vhd -quiet
 vcom tests/jr_tb.vhd -quiet
 vcom tests/jal_tb.vhd -quiet
-vcom 
 
 
 ;# Start simulation and run each tb
