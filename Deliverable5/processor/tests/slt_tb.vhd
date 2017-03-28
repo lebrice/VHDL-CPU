@@ -124,7 +124,7 @@ begin
     -- addi $5, $0, 3   # register 5 contains 3
     -- slt  $1, $0, $0  # result in r1 is 0
     -- slt  $2, $0, $5  # result in r2 is 1
-    -- slt  $3, $1, $2  # result in r3 is 0
+    -- slt  $3, $1, $2  # result in r3 is 1, since 0 < 1
     -- slt  $4, $5, $0  # result in r4 is 0
     -- sw   $1, 0($0)
     -- sw   $2, 4($0)
@@ -134,7 +134,7 @@ begin
     -- EXPECTED $ESULTS: (should match the corresponding lines in [operation]_memory.txt)
     expected_results(0) <= std_logic_vector(to_unsigned(0, 32));
     expected_results(1) <= std_logic_vector(to_unsigned(1, 32));
-    expected_results(2) <= std_logic_vector(to_unsigned(0, 32));
+    expected_results(2) <= std_logic_vector(to_unsigned(1, 32));
     expected_results(3) <= std_logic_vector(to_unsigned(0, 32));
     
     -- put a breakpoint on the wait signal when debugging
