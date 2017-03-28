@@ -129,9 +129,9 @@ begin
     -- 00100000000000100000000000000101
     -- 00000000010000010001100000100111
     -- 10101100000000110000000000000000
-    
+
     -- EXPECTED RESULTS: (should match the corresponding lines in [operation]_memory.txt)
-    expected_results(1) <= std_logic_vector(to_signed(-6, 32));
+    expected_results(0) <= std_logic_vector(to_signed(-6, 32));
 
     
     -- put a breakpoint on the wait signal when debugging
