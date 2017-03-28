@@ -590,7 +590,7 @@ begin
     init : process( clock, initialize )
     begin
         if initialize = '1' AND initialized = '0' then
-            report "Initializing...";
+            -- report "Initializing...";
             -- fetch_stage_reset <= '1';
             instruction_memory_load <= '1';
             initialized <= '1';  
@@ -603,7 +603,7 @@ begin
     dump_process : process( clock, dump )
     begin
         if dump = '1' AND dumped = '0' then
-            report "Dumping...";
+            -- report "Dumping...";
             data_memory_dump <= '1';
             -- instruction_memory_dump <= '1';
             decode_stage_write_register_file <= '1';

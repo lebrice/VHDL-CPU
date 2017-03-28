@@ -81,7 +81,7 @@ BEGIN
 	mem_process: PROCESS (clock, memload, memwrite, address, writedata)
 	BEGIN	
 		if(rising_edge(memload)) THEN
-			report "Loading data memory from file 'program.txt'.";
+			-- report "Loading data memory from file '" & MEMORY_LOAD_FILEPATH & "'.";
 			load_memory_from_file(ram_block);
 		else
 			IF (memwrite = '1') THEN
