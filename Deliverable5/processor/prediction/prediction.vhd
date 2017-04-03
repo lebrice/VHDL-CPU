@@ -13,39 +13,22 @@ package prediction is
     -- bits to predict
     constant N_BIT_PREDICTION : integer := 2;
 
-    -- fifo queue to record history of branches taken on a certain instruction
-    type taken_fifo is
-    record
-        head : integer;
-        tail : integer;
-        bits : std_logic_vector(N_BIT_PREDICTION-1 downto 0);
-    end record;
-
      -- branch buffer table data structure
     type buffer_entry is
     record
-        taken : taken_fifo; -- use when updating to N bit prediction
+        taken : std_logic_vector(N_BIT_PREDICTION-1 downto 0);
         pc : Integer;
     end record;
 
-    type pc_data is array (SIZE-1 downto 0) of buffer_entry;
-
-    type branch_buffer is
-    record
-        head : integer;
-        tail : integer;
-        data : pc_data;
-    end record;
-
+    type branch_buffer is array (SIZE-1 downto 0) of buffer_entry;
 
     -- function declarations
     function buffer_init return branch_buffer;
     function update_branch(buff : branch_buffer ; pc : Integer ; taken : std_logic ; inst : Instruction) 
         return branch_buffer;
+    function update_taken(entry : buffer_entry ; taken : std_logic) 
+        return buffer_entry;
     
-
-
-
 end prediction;
 
 
@@ -56,11 +39,9 @@ package body prediction is
     function buffer_init return branch_buffer is
         variable buff : branch_buffer;
     begin
-        buff.head := 0;
-        buff.tail := N_BIT_PREDICTION;
-        for i in buff.data' range loop
-            buff.data(i).pc := 0;
-            buff.data(i).taken.bits := (others => '0');
+        for i in buff' range loop
+            buff(i).pc := 0;
+            buff(i).taken := (others => '0');
         end loop;
         return buff;
     end buffer_init;
@@ -76,10 +57,10 @@ package body prediction is
         if (inst.instruction_type = branch_if_equal or inst.instruction_type = branch_if_not_equal) then
 
             -- check to see if this instruction/line/pc is already in the buffer
-            for i in buff_fn.data'range loop
-                if (buff_fn.data(i).pc = pc) then
+            for i in buff_fn'range loop
+                if (buff_fn(i).pc = pc) then
                     found := '1'; -- it is in the buffer, update its taken bit profile
-                    -- buff_fn = update_taken(buff_fn, taken, i) -- update taken fifo
+                    buff_fn(i) := update_taken(buff_fn(i), taken); -- update taken fifo
                 end if;
             end loop;
 
@@ -87,23 +68,33 @@ package body prediction is
                 -- buff_fn = add_entry(buff_fn, pc)
             end if;
         end if;
+        return buff_fn;
     end update_branch;
     
 
+    -- update_taken operates on a branch_buffer entry (buffer_entry) by updating its taken bits
+    -- it adds the latest taken bit and pushes the oldest one out
+    function update_taken(entry : buffer_entry ; taken : std_logic) 
+        return buffer_entry is 
+        variable entry_fn : buffer_entry := entry;
+    begin
+        for i in 0 to N_BIT_PREDICTION-2 loop
+            entry_fn.taken(i+1) := entry_fn.taken(i);
+        end loop;
+        entry_fn.taken(0) := taken;
+        return entry_fn; 
+    end update_taken;
 
-    -- function update_taken(taken : std_logic_vector(N_BIT_PREDICTION-1 downto 0)) 
-    --     return std_logic_vector(N_BIT_PREDICTION-1 downto 0) is 
-    -- begin
-    -- end update_taken;
-
-
-    -- function update_buffer(buff: branch_buffer; pc : Integer; taken std_logic) 
-    --     return branch_buffer is
-        
-    -- begin
-        
-    -- end update_buffer;
-
-
+    -- add_entry adds and entry to the buffer and pushes the oldest one out
+    function add_entry(buff : branch_buffer; pc : Integer)
+        return branch_buffer is
+        variable buff_fn : branch_buffer := buff;
+    begin
+       for i in 0 to N_BIT_PREDICTION-2 loop
+            buff_fn(i+1).pc := buff_fn(i).pc;
+        end loop;
+        buff_fn(0).pc := pc;
+        return buff_fn;
+    end add_entry;
 
 end prediction;
