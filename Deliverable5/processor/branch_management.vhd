@@ -50,6 +50,7 @@ package body BRANCH_MANAGEMENT is
     begin
         for i in branch_buff' range loop
             if (branch_buff(i).pc = fetch_stage_pc) then
+                -- access: branch_buff(i).taken to evaluate
                 -- do some magic i.e. look at the string of taken bits and decide
                 -- if some condition on taken bits : return true;
             else
