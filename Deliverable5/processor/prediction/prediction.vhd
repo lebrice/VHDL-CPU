@@ -24,17 +24,18 @@ package prediction is
 
     -- function declarations
     function buffer_init return branch_buffer;
-    function update_branch(buff : branch_buffer ; pc : Integer ; taken : std_logic ; inst : Instruction) 
+    function update_branch_buff(buff : branch_buffer ; pc : Integer ; taken : std_logic ; inst : Instruction) 
         return branch_buffer;
     function update_taken(entry : buffer_entry ; taken : std_logic) 
         return buffer_entry;
+    function add_entry(buff : branch_buffer; pc : Integer)
+        return branch_buffer;
     
 end prediction;
 
 
 -- package body
 package body prediction is
-
     -- initializes the branch buffer to have 0's as all it's PCs and to set all taken bits to 0
     function buffer_init return branch_buffer is
         variable buff : branch_buffer;
@@ -46,9 +47,10 @@ package body prediction is
         return buff;
     end buffer_init;
 
-    -- update_branch is called on instruction exiting the execute stage
+    -- update_branch_buff is called on all instructions exiting the execute stage
     -- if instruction is a branch, this function handles updating the buffer
-    function update_branch(buff : branch_buffer ; pc : Integer ; taken : std_logic ; inst : Instruction)
+    -- if not, it does nothing
+    function update_branch_buff(buff : branch_buffer ; pc : Integer ; taken : std_logic ; inst : Instruction)
         return branch_buffer is
         variable buff_fn : branch_buffer := buff;
         variable found : std_logic := '0';
@@ -65,11 +67,11 @@ package body prediction is
             end loop;
 
             if(found = '0') then -- it was not in the buffer, add it
-                -- buff_fn = add_entry(buff_fn, pc)
+                buff_fn := add_entry(buff_fn, pc);
             end if;
         end if;
         return buff_fn;
-    end update_branch;
+    end update_branch_buff;
     
 
     -- update_taken operates on a branch_buffer entry (buffer_entry) by updating its taken bits
