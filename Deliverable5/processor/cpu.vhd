@@ -5,6 +5,7 @@ use IEEE.numeric_std.all;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 use work.BRANCH_MANAGEMENT.all;
+use work.prediction.all;
 
 --entity declaration
 entity CPU is
@@ -348,6 +349,9 @@ architecture CPU_arch of CPU is
     signal data_memory_dump : std_logic := '0';
     signal data_memory_load : std_logic := '0';
 
+    --branch prediction
+    signal branch_buff : branch_buffer;
+
     --misc
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
@@ -638,14 +642,23 @@ begin
     end process;
 
     branch_prediction : process(clock, current_state)
-    variable should_take_branch : std_logic;
+    -- variable should_take_branch : std_logic;
+        variable init_buffer: boolean := true;
     begin
+        if (init_buffer) then
+            branch_buff <= buffer_init;
+            init_buffer := false;
+        end if;
         if rising_edge(clock) then
-            -- if (should_take_branch(current_state)) then
-            --     -- TODO: branch prediction
-            -- else
+            branch_buff <= update_branch_buff(branch_buff, execute_stage_PC_out, current_state.EX_MEM_branch_taken, current_state.EX_MEM_inst);
+            if (is_branch_type(current_state.fetch_inst)) then
+                if (should_take_branch(fetch_stage_PC, branch_buff)) then
+                    -- TODO: branch prediction is a go -> act on it
+                else
+                    null;
+            end if;
 
-            -- end if;  
+            end if;  
         end if;
     end process;
 

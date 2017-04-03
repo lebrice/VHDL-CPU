@@ -111,10 +111,10 @@ package INSTRUCTION_TOOLS is
     function getInstruction(instruction_vector : std_logic_vector(31 downto 0))
         return INSTRUCTION;
 
-    function makeInstruction(opCode : std_logic_vector; rs: integer; rt : integer; rd : integer; shamt : integer; funct : std_logic_vector)
+    function makeInstruction(opCode : std_logic_vector (5 downto 0); rs: integer; rt : integer; rd : integer; shamt : integer; funct : std_logic_vector(5 downto 0))
         return INSTRUCTION;
 
-    function makeInstruction(opCode : std_logic_vector; rs: integer; rt : integer; immediate : integer)
+    function makeInstruction(opCode : std_logic_vector (5 downto 0); rs: integer; rt : integer; immediate : integer)
         return INSTRUCTION;
 
     function makeInstruction(opCode : std_logic_vector(5 downto 0); address : integer)
