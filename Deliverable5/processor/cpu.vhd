@@ -4,8 +4,8 @@ use IEEE.numeric_std.all;
 
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
+use work.BRANCH_PREDICTION.all;
 use work.BRANCH_MANAGEMENT.all;
-use work.prediction.all;
 
 --entity declaration
 entity CPU is

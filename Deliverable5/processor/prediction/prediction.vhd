@@ -6,7 +6,7 @@ library ieee;
 use work.instruction_tools.all;
 
 -- package head
-package prediction is
+package branch_prediction is
 
     -- size of the buffer
     constant SIZE : integer := 64;
@@ -31,11 +31,11 @@ package prediction is
     function add_entry(buff : branch_buffer; pc : Integer)
         return branch_buffer;
     
-end prediction;
+end branch_prediction;
 
 
 -- package body
-package body prediction is
+package body branch_prediction is
     -- initializes the branch buffer to have 0's as all it's PCs and to set all taken bits to 0
     function buffer_init return branch_buffer is
         variable buff : branch_buffer;
@@ -99,4 +99,4 @@ package body prediction is
         return buff_fn;
     end add_entry;
 
-end prediction;
+end branch_prediction;

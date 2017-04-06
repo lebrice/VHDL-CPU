@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
-use work.prediction.all;
+use work.BRANCH_PREDICTION.all;
 
 package BRANCH_MANAGEMENT is
 
