@@ -165,7 +165,7 @@ BEGIN
         accessing_memory <= '1';
         test_addr <= 0;
         mem_write <= '1';
-        test_instruction := makeInstruction(x"00", 1,2,3,0, "100000"); -- ADD R1 R2 R3
+        test_instruction := makeInstruction("000000", 1,2,3,0, "100000"); -- ADD R1 R2 R3
         assert test_instruction.instruction_type = ADD report "The Instruction package failed to create the proper instruction!" severity failure;
         mem_writedata <= test_instruction.vector;
         wait until rising_edge(mem_waitrequest);
