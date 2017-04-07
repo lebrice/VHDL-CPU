@@ -560,8 +560,9 @@ begin
     );
 
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
-    fetch_stage_branch_target <= to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0)));
-    fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+    fetch_stage_branch_target <= 
+        to_integer(unsigned(decode_stage_branch_target_out));
+    fetch_stage_branch_condition <= decode_stage_branch;
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
     IF_ID_register_instruction_in <= 
