@@ -677,6 +677,7 @@ begin
             when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
                 if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
                     bad_prediction_occured <= true;
+                    -- report "bad branch prediction occured! Feeding no-ops to the ID_EX and EX_MEM registers.";
                 end if;
             when others =>   
                 -- do nothing.      

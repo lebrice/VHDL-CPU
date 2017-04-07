@@ -95,10 +95,6 @@ begin
     wait for clock_period;
     report "initialized.";
 
-    for i in 0 to 100 loop
-        wait for clock_period;
-    end loop;
-
     for i in 0 to 50 loop
       wait for clock_period;
     end loop;
