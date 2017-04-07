@@ -108,9 +108,9 @@ architecture CPU_arch of CPU is
             stall_in : in std_logic;
 
             -- Stall signal out.
-            stall_out : out std_logic
-            
-        ) ;
+            stall_out : out std_logic;
+            branch_target_out : std_logic_vector(31 downto 0)            
+        );
     END COMPONENT;
 
     --Decode Execute Register
@@ -286,7 +286,7 @@ architecture CPU_arch of CPU is
     signal decode_stage_reset_register_file : std_logic;
     signal decode_stage_stall_in : std_logic;
     signal decode_stage_stall_out :  std_logic;
-
+    signal decode_stage_branch_target_out : std_logic_vector(31 downto 0); 
     --Decode Execute Register 
     signal ID_EX_register_pc_in: INTEGER;
     signal ID_EX_register_pc_out:  INTEGER;
@@ -451,7 +451,8 @@ begin
         decode_stage_write_register_file,
         decode_stage_reset_register_file,
         decode_stage_stall_in,
-        decode_stage_stall_out
+        decode_stage_stall_out,
+        decode_stage_branch_target_out
     );
 
     ID_EX_reg : ID_EX_Register PORT MAP (

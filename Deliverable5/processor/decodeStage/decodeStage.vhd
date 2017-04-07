@@ -31,7 +31,8 @@ entity decodeStage is
     -- might have to add this in at some point:
     stall_in : in std_logic;
     -- Stall signal out.
-    stall_out : out std_logic    
+    stall_out : out std_logic;
+    branch_target_out : out std_logic_vector(31 downto 0)   
   ) ;
 end decodeStage ;
 
@@ -125,7 +126,43 @@ current_state <=
 
   reading_stalled <= '1' when stall_in = '1' OR stall_reg = '1' else '0';
 
+
+  branch_target_calculation : process(instruction_in, PC, register_file) 
+    variable rs, rt : integer range 0 to NUM_REGISTERS-1;
+    variable PC_vector : std_logic_vector(31 downto 0);
+    variable target_address_int : integer;
+    variable target_address : std_logic_vector(31 downto 0);
+    variable highest_bits : std_logic_vector(3 downto 0);
+    variable lowest_bits :  std_logic_vector(27 downto 0);
+    variable address : std_logic_vector(25 downto 0);
+    variable immediate : std_logic_vector(15 downto 0);
+    variable address_offset : integer;
+  begin
+    target_address_int := PC + 4;
+    rs := instruction_in.rs;
+    rt := instruction_in.rt;
+    immediate := instruction_in.immediate_vect;
+    address := instruction_in.address_vect;
+    PC_vector := std_logic_vector(to_unsigned(PC, 32));
+
+    case instruction_in.instruction_type is 
+        when JUMP| JUMP_AND_LINK =>
+          highest_bits := PC_vector(31 downto 28);
+          lowest_bits := address & "00";
+          target_address := highest_bits & lowest_bits;
+        when JUMP_TO_REGISTER =>
+          target_address := register_file(rs).data;
+        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+          address_offset := to_integer(signed(signExtend(immediate)) sll 2);
+          target_address_int := PC + 4 + address_offset;
+          target_address := std_logic_vector(to_unsigned(target_address_int, 32));
+        when others =>
+          -- do nothing.
+    end case;
+    branch_target_out <= target_address;
+  end process;
     
+
   computation : process(current_state,  register_file, reading_stalled, instruction_in, write_back_instruction, write_back_data, stall_reg)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
