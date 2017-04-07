@@ -100,7 +100,7 @@ package body prediction is
     begin
         if (N_BIT_PREDICTION >= 2) then
             for i in 0 to N_BIT_PREDICTION-2 loop
-                    buff_fn(i+1).pc := buff_fn(i).pc;
+                    buff_fn(i+1) := buff_fn(i);
             end loop;
         end if;
         buff_fn(0).pc := pc;
