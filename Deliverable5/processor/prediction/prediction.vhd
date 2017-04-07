@@ -11,7 +11,7 @@ package prediction is
     -- size of the buffer
     constant SIZE : integer := 64;
     -- bits to predict
-    constant N_BIT_PREDICTION : integer := 2;
+    constant N_BIT_PREDICTION : integer := 1;
 
      -- branch buffer table data structure
     type buffer_entry is
@@ -80,9 +80,11 @@ package body prediction is
         return buffer_entry is 
         variable entry_fn : buffer_entry := entry;
     begin
-        for i in 0 to N_BIT_PREDICTION-2 loop
-            entry_fn.taken(i+1) := entry_fn.taken(i);
-        end loop;
+        if (N_BIT_PREDICTION >= 2) then
+            for i in 0 to N_BIT_PREDICTION-2 loop
+                entry_fn.taken(i+1) := entry_fn.taken(i);
+            end loop;
+        end if;
         entry_fn.taken(0) := taken;
         return entry_fn; 
     end update_taken;
@@ -92,9 +94,11 @@ package body prediction is
         return branch_buffer is
         variable buff_fn : branch_buffer := buff;
     begin
-       for i in 0 to N_BIT_PREDICTION-2 loop
-            buff_fn(i+1).pc := buff_fn(i).pc;
-        end loop;
+        if (N_BIT_PREDICTION >= 2) then
+            for i in 0 to N_BIT_PREDICTION-2 loop
+                    buff_fn(i+1).pc := buff_fn(i).pc;
+            end loop;
+        end if;
         buff_fn(0).pc := pc;
         return buff_fn;
     end add_entry;

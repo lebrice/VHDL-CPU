@@ -56,6 +56,17 @@ package body BRANCH_MANAGEMENT is
 
             -- fetch pc matches one in buffer
             if (branch_buff(i).pc = fetch_stage_pc) then
+                
+                -- 1 bit branch prediction
+                if (N_BIT_PREDICTION = 1) then
+                    if (branch_buff(i).taken(0) = '1') then -- branch was taken last
+                        return true;    -- assume it will be taken again
+                    else
+                        return false;  -- branch was not taken last, assume not taken
+                    end if;
+                end if;
+
+                -- multiple bit branch prediction
 
                 -- count the number of ones in the in the taken history of identified PC
                 for j in branch_buff(i).taken' range loop     
