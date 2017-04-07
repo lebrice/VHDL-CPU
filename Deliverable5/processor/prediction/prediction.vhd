@@ -58,7 +58,6 @@ package body prediction is
         variable found : std_logic := '0';
     begin
         -- check to see if instruction is branch type 
-        -- this check is redundant if using the is_branch_type in CPU from branch management
         if (inst.instruction_type = branch_if_equal or inst.instruction_type = branch_if_not_equal) then
 
             -- check to see if this instruction/line/pc is already in the buffer
@@ -72,6 +71,8 @@ package body prediction is
             if(found = '0') then -- it was not in the buffer, add it
                 buff_fn := add_entry(buff_fn, pc);
             end if;
+        else
+            null;
         end if;
         return buff_fn;
     end update_branch_buff;
