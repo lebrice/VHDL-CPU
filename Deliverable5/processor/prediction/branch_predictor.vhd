@@ -26,7 +26,7 @@ architecture branch_prediction_arch of branch_predictor is
             
     type predictor_array is array (PREDICTOR_COUNT-1 downto 0) of integer range minimum_predictor_value to maximum_predictor_value;
     signal predictors : predictor_array := (others => 0);
-    signal predictor_index : integer;
+    signal predictor_index : integer range 0 to PREDICTOR_COUNT-1;
     signal current_predictor_value : integer range minimum_predictor_value to maximum_predictor_value;
     signal next_predictor_value : integer range minimum_predictor_value to maximum_predictor_value;
 
