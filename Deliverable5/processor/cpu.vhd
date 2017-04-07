@@ -5,7 +5,6 @@ use IEEE.numeric_std.all;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 use work.BRANCH_PREDICTION.all;
-use work.BRANCH_MANAGEMENT.all;
 
 --entity declaration
 entity CPU is
@@ -376,11 +375,13 @@ architecture CPU_arch of CPU is
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
 
-    signal current_state : pipeline_state_snapshot;
     signal manual_IF_ID_stall : std_logic := '0';
     signal manual_fetch_stall : std_logic := '0';
 
     signal feed_no_op_to_IF_ID : boolean := false;
+
+    type branch_prediction_type is (NOT_TAKEN, TAKEN);
+    signal current_prediction : branch_prediction_type := NOT_TAKEN;
 
 begin
     ALU_out <= execute_stage_ALU_result;
@@ -650,26 +651,21 @@ begin
         end if;
     end process ; -- dump
 
+    -- branch_stall_management : process(clock, current_state)
+    -- begin
+    --         if  is_branch_type(current_state.IF_ID_inst) OR
+    --             is_branch_type(current_state.ID_EX_inst) OR
+    --             (is_branch_type(current_state.EX_MEM_inst) AND current_state.EX_MEM_branch_taken = '1')
+    --         then
+    --             feed_no_op_to_IF_ID <= true;
+    --             manual_fetch_stall <= '1';
+    --         else
+    --             feed_no_op_to_IF_ID <= false;
+    --             manual_fetch_stall <= '0';
+    --         end if;
+    -- end process;
 
-    current_state.fetch_inst    <=  fetch_stage_instruction_out;
-    current_state.IF_ID_inst    <=  IF_ID_register_instruction_out;
-    current_state.ID_EX_inst    <=  ID_EX_register_instruction_out;
-    current_state.EX_MEM_inst   <=  EX_MEM_register_instruction_out;
-    current_state.MEM_WB_inst   <=  MEM_WB_register_instruction_out;
-    current_state.EX_MEM_branch_taken  <=  EX_MEM_register_does_branch_out;
 
-    branch_stall_management : process(clock, current_state)
-    begin
-            if  is_branch_type(current_state.IF_ID_inst) OR
-                is_branch_type(current_state.ID_EX_inst) OR
-                (is_branch_type(current_state.EX_MEM_inst) AND current_state.EX_MEM_branch_taken = '1')
-            then
-                feed_no_op_to_IF_ID <= true;
-                manual_fetch_stall <= '1';
-            else
-                feed_no_op_to_IF_ID <= false;
-                manual_fetch_stall <= '0';
-            end if;
-    end process;
+
 
 end architecture;
