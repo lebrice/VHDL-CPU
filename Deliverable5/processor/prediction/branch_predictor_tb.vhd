@@ -20,6 +20,7 @@ architecture arch of branch_predictor_tb is
             instruction : in INSTRUCTION;
             branch_target : in std_logic_vector(31 downto 0);
             branch_taken : in std_logic;
+            branch_target_to_evaluate : in std_logic_vector(31 downto 0);
             prediction : out std_logic
         );
     end component;
@@ -27,6 +28,7 @@ architecture arch of branch_predictor_tb is
     signal instruction :INSTRUCTION := NO_OP_INSTRUCTION;
     signal branch_target : std_logic_vector(31 downto 0) := (others => '0');
     signal branch_taken : std_logic := '0';
+    signal branch_target_to_evaluate : std_logic_vector(31 downto 0);
     signal prediction : std_logic;
 begin
 
@@ -39,6 +41,7 @@ begin
         instruction,
         branch_target,
         branch_taken,
+        branch_target_to_evaluate,
         prediction
     );
 
@@ -53,6 +56,14 @@ begin
 
     test_process : process
     begin
+        report "start of branch predictor testing.";
+
+        instruction <= makeInstruction(BEQ_OP, 1, 2, 10); -- BEQ $1, $2, 10
+        wait for clock_period;
+        assert prediction = '1';
+        -- TODO: add some tests.
+
+
         wait;
     end process;
 
