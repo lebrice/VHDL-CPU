@@ -4,8 +4,6 @@ library ieee;
     use ieee.numeric_std.all;
 
 use work.instruction_tools.all;
-use work.branch_prediction.all;
-
 
 entity branch_predictor is
     generic(
@@ -21,7 +19,7 @@ entity branch_predictor is
     );
 end branch_predictor;
 
-architecture branch_prediction_buffer of branch_predictor is
+architecture branch_prediction_arch of branch_predictor is
 
     constant minimum_predictor_value : integer := - (2**PREDICTOR_BIT_WIDTH); 
     constant maximum_predictor_value : integer :=   (2**PREDICTOR_BIT_WIDTH) -1;
@@ -77,5 +75,5 @@ begin
 
     
 
-end branch_prediction_buffer;
+end branch_prediction_arch;
 
