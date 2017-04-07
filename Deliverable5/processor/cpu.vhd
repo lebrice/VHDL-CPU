@@ -642,7 +642,6 @@ begin
     end process;
 
     branch_prediction : process(clock, current_state)
-    -- variable should_take_branch : std_logic;
         variable init_buffer: boolean := true;
     begin
         if (init_buffer) then
