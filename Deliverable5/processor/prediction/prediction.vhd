@@ -30,6 +30,8 @@ package prediction is
         return buffer_entry;
     function add_entry(buff : branch_buffer; pc : Integer)
         return branch_buffer;
+    function branch_decision(fetch_stage_pc : Integer ; branch_buff: branch_buffer)
+        return boolean;
     
 end prediction;
 
@@ -55,7 +57,8 @@ package body prediction is
         variable buff_fn : branch_buffer := buff;
         variable found : std_logic := '0';
     begin
-        -- check to see if instruction is branch type
+        -- check to see if instruction is branch type 
+        -- this check is redundant if using the is_branch_type in CPU from branch management
         if (inst.instruction_type = branch_if_equal or inst.instruction_type = branch_if_not_equal) then
 
             -- check to see if this instruction/line/pc is already in the buffer
@@ -102,5 +105,61 @@ package body prediction is
         buff_fn(0).pc := pc;
         return buff_fn;
     end add_entry;
+
+    
+    -- Function responsible for making an assumption about the taken/not taken behaviour, for branch prediction.
+    function branch_decision(fetch_stage_pc : Integer ; branch_buff: branch_buffer)
+        return boolean is
+        variable ones : Integer;
+        variable zeros: Integer;
+    begin
+        ones := 0;
+        -- parse through branch buffer entries
+        for i in branch_buff' range loop
+
+            -- fetch pc matches one in buffer
+            if (branch_buff(i).pc = fetch_stage_pc) then
+                
+                -- 1 bit branch prediction
+                if (N_BIT_PREDICTION = 1) then
+                    if (branch_buff(i).taken(0) = '1') then -- branch was taken last
+                        return true;    -- assume it will be taken again
+                    else
+                        return false;  -- branch was not taken last, assume not taken
+                    end if;
+                end if;
+
+                -- multiple bit branch prediction
+
+                -- count the number of ones in the in the taken history of identified PC
+                for j in branch_buff(i).taken' range loop     
+                    if branch_buff(i).taken(j) = '1' then
+                        ones := ones + 1; 
+                    end if;
+                end loop;
+
+                -- determine if the number of 1s if greater than number of 0s
+                zeros := N_BIT_PREDICTION - ones;
+
+                -- act
+                if (ones > zeros) then      -- more branches, predict taken
+                    return true;
+                elsif (ones < zeros)then    -- less branches, assume not taken
+                    return false;
+                elsif(ones = zeros) then    -- equal taken and not taken
+                    
+                    -- check to see which happened last
+                    if (branch_buff(i).taken(0) = '1') then -- branch was taken last
+                        return true;    -- assume it will be taken again
+                    else
+                        return false;  -- branch was not taken last, assume not taken
+                    end if;
+
+                end if;  -- act 
+            end if; -- fetch pc matches one in buffer
+        end loop; -- parse through branch buffer entries
+
+        return false;   -- default return is false for prediction not taken
+    end branch_decision;
 
 end prediction;
