@@ -15,7 +15,8 @@ entity CPU is
         data_memory_dump_filepath : STRING := "memory.txt";
         instruction_memory_load_filepath : STRING := "program.txt";
         register_file_dump_filepath : STRING := "register_file.txt";
-        clock_period : time := 1 ns
+        clock_period : time := 1 ns;
+        predictor_bit_width : integer := 2
     );
   port (
     clock : in std_logic;
@@ -233,6 +234,20 @@ architecture CPU_arch of CPU is
             memload: IN STD_LOGIC          
         );
     END COMPONENT;
+
+    COMPONENT branch_predictor IS
+    GENERIC(
+        PREDICTOR_BIT_WIDTH : integer := 2;
+        PREDICTOR_COUNT : integer := 8
+    );
+    PORT(
+        clock : in std_logic;
+        instruction : in INSTRUCTION;
+        branch_target : in std_logic_vector(31 downto 0);
+        branch_taken : in std_logic;
+        prediction : out std_logic
+    );
+    END COMPONENT;
     
     
     -- SIGNALS
@@ -348,6 +363,11 @@ architecture CPU_arch of CPU is
     signal instruction_memory_load : std_logic := '0';
     signal data_memory_dump : std_logic := '0';
     signal data_memory_load : std_logic := '0';
+
+    signal predictor_instruction : INSTRUCTION;
+    signal predictor_branch_target : std_logic_vector(31 downto 0);
+    signal predictor_branch_taken : std_logic;
+    signal predictor_prediction : std_logic;
 
     --branch prediction
     signal branch_buff : branch_buffer;
@@ -526,6 +546,17 @@ begin
         write_back_stage_instruction_out
     );
 
+    predictor : branch_predictor GENERIC MAP(
+        PREDICTOR_BIT_WIDTH => predictor_bit_width
+    )
+    PORT MAP(
+        clock,
+        predictor_instruction,
+        predictor_branch_target,
+        predictor_branch_taken,
+        predictor_prediction
+    );
+
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
     fetch_stage_branch_target <= to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0)));
     fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
@@ -640,27 +671,5 @@ begin
                 manual_fetch_stall <= '0';
             end if;
     end process;
-
-    branch_prediction : process(clock, current_state)
-    -- variable should_take_branch : std_logic;
-        variable init_buffer: boolean := true;
-    begin
-        if (init_buffer) then
-            branch_buff <= buffer_init;
-            init_buffer := false;
-        end if;
-        if rising_edge(clock) then
-            branch_buff <= update_branch_buff(branch_buff, execute_stage_PC_out, current_state.EX_MEM_branch_taken, current_state.EX_MEM_inst);
-            if (is_branch_type(current_state.fetch_inst)) then
-                if (should_take_branch(fetch_stage_PC, branch_buff)) then
-                    -- TODO: branch prediction is a go -> act on it
-                else
-                    null;
-            end if;
-
-            end if;  
-        end if;
-    end process;
-
 
 end architecture;
