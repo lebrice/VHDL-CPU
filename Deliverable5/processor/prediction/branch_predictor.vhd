@@ -32,7 +32,7 @@ architecture branch_prediction_arch of branch_predictor is
     signal evaluation_predictor_index : integer range 0 to PREDICTOR_COUNT-1;
     signal predictor_index : integer range 0 to PREDICTOR_COUNT-1;
     signal current_predictor_value : integer range minimum_predictor_value to maximum_predictor_value;
-    signal next_predictor_value : integer range minimum_predictor_value to maximum_predictor_value := current_predictor_value;
+    signal next_predictor_value : integer range minimum_predictor_value to maximum_predictor_value;
 
     function increment_predictor(value : integer) return integer is
     begin

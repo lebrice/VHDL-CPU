@@ -34,7 +34,8 @@ begin
 
     p1 : branch_predictor
     generic map (
-        predictor_bit_width => 2
+        predictor_bit_width => 2,
+        predictor_count => 16
     )
     port map (
         clock,
@@ -59,6 +60,9 @@ begin
         report "start of branch predictor testing.";
 
         instruction <= makeInstruction(BEQ_OP, 1, 2, 10); -- BEQ $1, $2, 10
+        branch_taken <= '1';
+        wait for clock_period;
+        -- branch_target_to_evaluate <=
         wait for clock_period;
         assert prediction = '1';
         -- TODO: add some tests.
