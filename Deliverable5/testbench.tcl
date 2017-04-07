@@ -5,7 +5,9 @@ vcom decodeStage/reg_file/reg_file.vhd -quiet
 vcom decodeStage/reg_file/reg_file_tb.vhd -quiet
 vcom instruction/instruction.vhd -quiet
 vcom instruction/instruction_tb.vhd -quiet
-vcom branch_management.vhd -quiet
+vcom prediction/branch_predictor.vhd -quiet
+vcom prediction/branch_predictor_tb.vhd -quiet
+vcom prediction/prediction.vhd -quiet
 vcom fetchStage/fetchStage.vhd -quiet
 vcom fetchStage/fetchStage_tb.vhd -quiet
 vcom decodeStage/decodeStage.vhd -quiet
