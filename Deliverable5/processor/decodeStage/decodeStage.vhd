@@ -31,7 +31,10 @@ entity decodeStage is
     -- might have to add this in at some point:
     stall_in : in std_logic;
     -- Stall signal out.
-    stall_out : out std_logic    
+    stall_out : out std_logic ;
+
+    branch : out std_logic;
+    branch_target_out : out std_logic   
   ) ;
 end decodeStage ;
 
@@ -67,6 +70,8 @@ architecture decodeStage_arch of decodeStage is
   signal current_state : state;
   signal reading_stalled : std_logic;
 
+  signal term_a, term_b : std_logic_vector(31 downto 0);
+  signal immediate : std_logic_vector(31 downto 0);
 begin
   stall_out <= stall_reg;
   PC_out <= PC;
@@ -114,6 +119,46 @@ begin
   -- JUMP_TO_REGISTER,
   -- JUMP_AND_LINK,
   -- UNKNOWN
+    val_a <= register_file(instruction_in.rs).data;
+    val_b <= register_file(instruction_in.rt).data;
+
+    branch <=
+    '1' when instruction_in.INSTRUCTION_TYPE = BRANCH_IF_EQUAL AND val_a = val_b else
+    '1' when instruction_in.INSTRUCTION_TYPE = BRANCH_IF_NOT_EQUAL AND val_a /= val_b else
+    '1' when instruction_in.INSTRUCTION_TYPE = JUMP else
+    '1' when instruction_in.INSTRUCTION_TYPE = JUMP_AND_LINK else
+    '1' when instruction_in.INSTRUCTION_TYPE = JUMP_TO_REGISTER else
+    '0';
+
+    -- TODO: calculate the branch target here.
+
+    branch_target_calculation : process(instruction_in, register_file, val_a, val_b, i_sign_extended) 
+    variable PC_vector : std_logic_vector(31 downto 0);
+    variable target_address_int : integer := PC + 4;
+    variable target_address : std_logic_vector(31 downto 0);
+    variable highest_bits : std_logic_vector(3 downto 0);
+    variable lowest_bits :  std_logic_vector(27 downto 0);
+    begin
+      PC_vector := std_logic_vector(to_unsigned(PC, 32));
+
+      case instruction_in.instruction_type is 
+          when JUMP| JUMP_AND_LINK =>
+            highest_bits := PC_vector(31 downto 28);
+            lowest_bits := instruction_in.address_vect & "00";
+            target_address := highest_bits & lowest_bits;
+          when JUMP_TO_REGISTER =>
+            target_address := register_file(rs).data;
+          when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+            address_offset := instruction_in.immediate sll 2;
+            target_address_int := PC + 4 + address_offset;
+            target_address := std_logic_vector(to_unsigned(target_address_int, 32));
+          when others =>
+            -- do nothing.
+      end case;
+      branch_target_out <= target_address;
+   
+
+    end process;
 
 
 
@@ -214,9 +259,11 @@ current_state <=
             i_sign_extended <= signExtend(immediate); -- the offset
 
           when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-            val_a <= register_file(rs).data;
-            val_b <= register_file(rt).data;
-            i_sign_extended <= signExtend(immediate);
+            -- do nothing: the logic for this instruction is already taken care of outside this process block.
+            -- We don't need to send anything through the rest of the pipeline in case of a branch
+            val_a <= (others => '0');
+            val_b <= (others => '0');
+
 
           when JUMP =>
             -- do nothing
@@ -225,7 +272,7 @@ current_state <=
             register_file(link_register).data <= std_logic_vector(to_unsigned(PC + 4, 32));
 
           when JUMP_TO_REGISTER =>
-            val_a <= register_file(rs).data;
+            -- do nothing.
 
           when UNKNOWN =>
             report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
