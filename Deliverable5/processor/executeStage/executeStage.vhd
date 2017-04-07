@@ -12,9 +12,7 @@ entity executeStage is
     imm_sign_extended : in std_logic_vector(31 downto 0);
     PC : in integer; 
     instruction_out : out Instruction;
-    branch : out std_logic;
     ALU_result : out std_logic_vector(63 downto 0);
-    branch_target_out : out std_logic_vector(31 downto 0);
     val_b_out : out std_logic_vector(31 downto 0);
     PC_out : out integer
   ) ;
@@ -33,7 +31,6 @@ architecture executeStage_arch of executeStage is
   --Signals for what go into the ALU
   SIGNAL input_a: std_logic_vector(31 downto 0);
   SIGNAL input_b: std_logic_vector(31 downto 0);
-  SIGNAL internal_branch : std_logic;
   SIGNAL internal_ALU_result : std_logic_vector(63 downto 0);
 
   function signExtend(immediate : std_logic_vector(15 downto 0))
@@ -53,19 +50,10 @@ begin
   --define alu component
   exAlu: ALU port map (instruction_in.instruction_type, input_a, input_b, internal_ALU_result);
 
-  --calculate the branch target
-  branch <=
-    '1' when instruction_in.INSTRUCTION_TYPE = BRANCH_IF_EQUAL AND val_a = val_b else
-    '1' when instruction_in.INSTRUCTION_TYPE = BRANCH_IF_NOT_EQUAL AND val_a /= val_b else
-    '1' when instruction_in.INSTRUCTION_TYPE = JUMP else
-    '1' when instruction_in.INSTRUCTION_TYPE = JUMP_AND_LINK else
-    '1' when instruction_in.INSTRUCTION_TYPE = JUMP_TO_REGISTER else
-    '0';
 
   --ALU_result <= ALU_result; --from alu --not needed since done in port map
   instruction_out <= instruction_in; --pass through
   PC_out <= PC;
-  branch_target_out <= internal_ALU_result(31 downto 0); --this won't always be a branch.
   ALU_result <= internal_ALU_result;
   val_b_out <= val_b; --used to send val b to the next stage
  
@@ -102,16 +90,10 @@ begin
         when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
           input_b <= val_b;
-        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-          --with branches, we want "a" to have the PC, b the immediate
-          input_a <= std_logic_vector(to_unsigned(PC, 32)); 
-          input_b <= imm_sign_extended;
-        when JUMP | JUMP_AND_LINK =>
-          input_a <= std_logic_vector(to_unsigned(PC,32)); 
-          input_b <= "000000" & instruction_in.address_vect;
-        when JUMP_TO_REGISTER =>
-          input_a <= val_a;
-          input_b <= val_b;
+        when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER =>
+          -- Do nothing, the logic was added into the ID stage.
+          input_a <= (others => '0');
+          input_b <= (others => '0');
         when UNKNOWN => --this is unknown: report an error.
           report "ERROR: unknown instruction format in execute stage!" severity WARNING;
     end case;
