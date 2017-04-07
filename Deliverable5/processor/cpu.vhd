@@ -380,8 +380,8 @@ architecture CPU_arch of CPU is
 
     signal feed_no_op_to_IF_ID : boolean := false;
 
-    type branch_prediction_type is (NOT_TAKEN, TAKEN);
-    signal current_prediction : branch_prediction_type := NOT_TAKEN;
+    type branch_prediction_type is (PREDICT_NOT_TAKEN, PREDICT_TAKEN);
+    signal current_prediction : branch_prediction_type := PREDICT_NOT_TAKEN;
 
 begin
     ALU_out <= execute_stage_ALU_result;
@@ -651,6 +651,25 @@ begin
             -- instruction_memory_dump <= '0';         
         end if;
     end process ; -- dump
+
+    detect_wrong_prediction : process(clock, EX_MEM_register_instruction_out, EX_MEM_register_does_branch_out)
+        variable instruction : INSTRUCTION;
+        variable actual_branch : std_logic;
+        variable we_predicted_wrong : std_logic := '0';
+    begin
+        instruction := EX_MEM_register_instruction_out;
+        actual_branch := EX_MEM_register_does_branch_out;
+        we_predicted_wrong := '0';
+        case instruction.instruction_type is
+            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+                if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
+                    we_predicted_wrong := '1';
+                end if;
+            when others =>
+                -- do nothing.               
+        end case;
+    end process;
+
 
     -- branch_stall_management : process(clock, current_state)
     -- begin
