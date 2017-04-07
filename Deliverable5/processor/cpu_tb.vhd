@@ -99,6 +99,10 @@ begin
         wait for clock_period;
     end loop;
 
+    for i in 0 to 50 loop
+      wait for clock_period;
+    end loop;
+
     wait for 9900 ns;
     report "dumping...";
     dump <= '1'; --dump data
