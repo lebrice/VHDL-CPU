@@ -82,18 +82,9 @@ begin
       when BITWISE_XOR | BITWISE_XOR_IMMEDIATE =>
         ALU_out <= extend64(op_a XOR op_b);
       
-      when MOVE_FROM_HI =>
-        -- This case is never reached (handled in decode)
-        report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
-
-      when MOVE_FROM_LOW =>
-        -- This case is never reached (handled in decode)
-        report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
-
-      when LOAD_UPPER_IMMEDIATE =>
-        -- This is never reached (handled in decode)
-        report "ERROR: LOAD_UPPER_IMMEDIATE should not be given to ALU!" severity WARNING;
-      
+      when MOVE_FROM_HI | MOVE_FROM_LOW | LOAD_UPPER_IMMEDIATE =>
+        ALU_out <= extend64(op_a);
+        
       when SHIFT_LEFT_LOGICAL =>
         ALU_out <= extend64(std_logic_vector(b SLL shift_amount)); 
       

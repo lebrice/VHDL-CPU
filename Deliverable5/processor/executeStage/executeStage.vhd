@@ -76,17 +76,15 @@ begin
         when ADD | SUBTRACT | MULTIPLY | DIVIDE | SET_LESS_THAN | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR =>
           input_a <= val_a; -- rs
           input_b <= val_b; -- rt
-        when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | LOAD_UPPER_IMMEDIATE | LOAD_WORD | STORE_WORD =>
+        when ADD_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | LOAD_WORD | STORE_WORD =>
           input_a <= val_a; -- rs
           -- FIXME: temp fix:
           input_b <= signExtend(instruction_in.immediate_vect);
           -- input_b <= imm_sign_extended;
-        when MOVE_FROM_HI =>
-          -- This case is never reached (handled in decode)
-          report "ERROR: MOVE_FROM_HI should not be given to ALU!" severity WARNING;
-        when MOVE_FROM_LOW =>
-          -- This case is never reached (handled in decode)
-          report "ERROR: MOVE_FROM_LOW should not be given to ALU!" severity WARNING;
+        when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
+          -- Note: in these special cases, decode already constructed the right information for us, and it is in the val_a signal.
+          input_a <= val_a;
+          input_b <= val_b;
         when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
           input_a <= (31 downto 5 => '0') & instruction_in.shamt_vect;
           input_b <= val_b;

@@ -235,19 +235,24 @@ current_state <=
             HI.busy <= '1';
 
           when MOVE_FROM_HI =>
-            register_file(rd).data <= HI.data;
-            val_a <= (others => '0');
+            -- register_file(rd).data <= HI.data;
+            val_a <= HI.data;
             val_b <= (others => '0');
+            register_file(rd).busy <= '1';
+            HI.busy <= '1';
 
           when MOVE_FROM_LOW =>
-            register_file(rd).data <= LOW.data;
-            val_a <= (others => '0');
+            -- register_file(rd).data <= LOW.data;
+            val_a <= LOW.data;
             val_b <= (others => '0');
+            register_file(rd).busy <= '1';
+            LOW.busy <= '1';
 
           when LOAD_UPPER_IMMEDIATE =>
-            register_file(rt).data <= immediate & (15 downto 0 => '0');
-            val_a <= (others => '0');
+            -- register_file(rt).data <= immediate & (15 downto 0 => '0');
+            val_a <=  immediate & (15 downto 0 => '0');
             val_b <= (others => '0');
+            register_file(rt).busy <= '1';
 
           when SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
             val_b <= register_file(rt).data;
@@ -324,8 +329,19 @@ current_state <=
           HI.data <= write_back_data(63 downto 32);
           HI.busy <= '0';
 
-        when LOAD_UPPER_IMMEDIATE | MOVE_FROM_HI | MOVE_FROM_LOW =>
-          -- Do nothing, these instructions are handled immediately during the reading phase.
+        when LOAD_UPPER_IMMEDIATE =>
+          register_file(wb_rt).data <= write_back_data(31 downto 0);
+          register_file(wb_rt).busy <= '0';
+        
+        when MOVE_FROM_HI =>
+          register_file(wb_rd).data <= write_back_data(31 downto 0);
+          register_file(wb_rd).busy <= '0';
+          HI.busy <= '0';
+        
+        when MOVE_FROM_LOW =>
+          register_file(wb_rd).data <= write_back_data(31 downto 0);
+          register_file(wb_rd).busy <= '0';
+          LOW.busy <= '0';
 
         when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
           -- TODO: Not 100% sure if we're supposed to do anything here.
@@ -429,10 +445,7 @@ current_state <=
 
 
   instruction_out <= 
-    NO_OP_INSTRUCTION when (reading_stalled = '1')
-      OR instruction_in.instruction_type = MOVE_FROM_HI
-      OR instruction_in.instruction_type = MOVE_FROM_LOW
-      OR instruction_in.instruction_type = LOAD_UPPER_IMMEDIATE 
+    NO_OP_INSTRUCTION when (reading_stalled = '1') 
     else instruction_in;
 
   write_registers_to_file : process( write_register_file )
