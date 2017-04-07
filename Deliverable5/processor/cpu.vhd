@@ -108,8 +108,11 @@ architecture CPU_arch of CPU is
             stall_in : in std_logic;
 
             -- Stall signal out.
-            stall_out : out std_logic
-            
+            stall_out : out std_logic;
+
+            branch : out std_logic;
+            branch_target_out : out std_logic_vector(31 downto 0)
+                    
         ) ;
     END COMPONENT;
 
@@ -139,9 +142,7 @@ architecture CPU_arch of CPU is
             imm_sign_extended : in std_logic_vector(31 downto 0);
             PC : in integer; 
             instruction_out : out Instruction;
-            branch : out std_logic;
             ALU_result : out std_logic_vector(63 downto 0);
-            branch_target_out : out std_logic_vector(31 downto 0);
             val_b_out : out std_logic_vector(31 downto 0);
             PC_out : out integer
     );
@@ -286,6 +287,8 @@ architecture CPU_arch of CPU is
     signal decode_stage_reset_register_file : std_logic;
     signal decode_stage_stall_in : std_logic;
     signal decode_stage_stall_out :  std_logic;
+    signal decode_stage_branch : std_logic;
+    signal decode_stage_branch_target_out : std_logic_vector(31 downto 0);
 
     --Decode Execute Register 
     signal ID_EX_register_pc_in: INTEGER;
@@ -307,9 +310,7 @@ architecture CPU_arch of CPU is
     signal execute_stage_imm_sign_extended : std_logic_vector(31 downto 0);
     signal execute_stage_PC : integer; 
     signal execute_stage_instruction_out : Instruction;
-    signal execute_stage_branch : std_logic;
     signal execute_stage_ALU_result : std_logic_vector(63 downto 0);
-    signal execute_stage_branch_target_out : std_logic_vector(31 downto 0);
     signal execute_stage_val_b_out : std_logic_vector(31 downto 0);
     signal execute_stage_PC_out : integer;
 
@@ -451,7 +452,9 @@ begin
         decode_stage_write_register_file,
         decode_stage_reset_register_file,
         decode_stage_stall_in,
-        decode_stage_stall_out
+        decode_stage_stall_out,
+        decode_stage_branch,
+        decode_stage_branch_target_out
     );
 
     ID_EX_reg : ID_EX_Register PORT MAP (
@@ -475,9 +478,7 @@ begin
         execute_stage_imm_sign_extended,
         execute_stage_PC, 
         execute_stage_instruction_out,
-        execute_stage_branch,
         execute_stage_ALU_result,
-        execute_stage_branch_target_out,
         execute_stage_val_b_out,
         execute_stage_PC_out
     );
@@ -590,8 +591,8 @@ begin
     
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
     EX_MEM_register_b_value_in <= execute_stage_val_b; 
-    EX_MEM_register_does_branch_in <= execute_stage_branch;
-    EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
+    -- EX_MEM_register_does_branch_in <= execute_stage_branch;
+    -- EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
     EX_MEM_register_instruction_in <= execute_stage_instruction_out;
 
