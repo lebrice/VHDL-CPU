@@ -110,7 +110,8 @@ architecture CPU_arch of CPU is
 
             -- Stall signal out.
             stall_out : out std_logic;
-            branch_target_out : out std_logic_vector(31 downto 0)            
+            branch_target_out : out std_logic_vector(31 downto 0);            
+            release_instructions : in INSTRUCTION_ARRAY        
         );
     END COMPONENT;
 
@@ -289,6 +290,8 @@ architecture CPU_arch of CPU is
     signal decode_stage_stall_in : std_logic;
     signal decode_stage_stall_out :  std_logic;
     signal decode_stage_branch_target_out : std_logic_vector(31 downto 0); 
+    signal decode_stage_release_instructions : INSTRUCTION_ARRAY := (others => NO_OP_INSTRUCTION);
+
     --Decode Execute Register 
     signal ID_EX_register_pc_in: INTEGER;
     signal ID_EX_register_pc_out:  INTEGER;
@@ -469,7 +472,8 @@ begin
         decode_stage_reset_register_file,
         decode_stage_stall_in,
         decode_stage_stall_out,
-        decode_stage_branch_target_out
+        decode_stage_branch_target_out,
+        decode_stage_release_instructions
     );
 
     ID_EX_reg : ID_EX_Register PORT MAP (
@@ -648,8 +652,9 @@ begin
     fetch_PC <= IF_ID_register_pc_out;
     fetch_stage_reset <= '1' when initialize = '1' else '0';
 
-
-
+    decode_stage_release_instructions(0) <= ID_EX_register_instruction_out when use_branch_prediction AND bad_prediction_occured else NO_OP_INSTRUCTION;
+    decode_stage_release_instructions(1) <= EX_MEM_register_instruction_out when use_branch_prediction AND bad_prediction_occured else NO_OP_INSTRUCTION;
+    
     init : process( clock, initialize )
     begin
         if initialize = '1' AND initialized = '0' then
@@ -690,7 +695,8 @@ begin
             when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
                 if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
                     bad_prediction_occured <= true;
-                    -- report "bad branch prediction occured! Feeding no-ops to the ID_EX and EX_MEM registers.";
+
+                    report "bad branch prediction occured! Feeding no-ops to the ID_EX and EX_MEM registers.";
                 end if;
             when others =>   
                 -- do nothing.      

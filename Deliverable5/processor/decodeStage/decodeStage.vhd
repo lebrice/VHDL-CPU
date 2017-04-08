@@ -32,8 +32,9 @@ entity decodeStage is
     stall_in : in std_logic;
     -- Stall signal out.
     stall_out : out std_logic;
-    branch_target_out : out std_logic_vector(31 downto 0)   
-  ) ;
+    branch_target_out : out std_logic_vector(31 downto 0);
+    release_instructions : in INSTRUCTION_ARRAY
+  );
 end decodeStage ;
 
 architecture decodeStage_arch of decodeStage is
@@ -163,7 +164,7 @@ current_state <=
   end process;
     
 
-  computation : process(current_state,  register_file, reading_stalled, instruction_in, write_back_instruction, write_back_data, stall_reg)
+  computation : process(current_state,  register_file, reading_stalled, instruction_in, write_back_instruction, write_back_data, stall_reg, release_instructions)
     variable rs, rt, rd : integer range 0 to NUM_REGISTERS-1;
     variable wb_rs, wb_rt, wb_rd : integer range 0 to NUM_REGISTERS-1;
     variable immediate : std_logic_vector(15 downto 0);
@@ -287,6 +288,42 @@ current_state <=
 
     when WRITING =>
 
+      for i in 0 to 1 loop
+        -- "reset" the busy bits of the instructions to release.
+          case release_instructions(i).instruction_type is 
+            when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
+              -- instructions where we simply write back the data to the "rd" register:
+              register_file(release_instructions(i).rd).busy <= '0';
+
+            when ADD_IMMEDIATE | BITWISE_AND_IMMEDIATE | BITWISE_OR_IMMEDIATE | BITWISE_XOR_IMMEDIATE | SET_LESS_THAN_IMMEDIATE | LOAD_WORD =>
+              -- instructions where we use "rt" as a destination
+              register_file(release_instructions(i).rt).busy <= '0';
+
+            when MULTIPLY | DIVIDE =>
+              LOW.busy <= '0';
+              HI.busy <= '0';
+
+            when LOAD_UPPER_IMMEDIATE =>
+              register_file(release_instructions(i).rt).busy <= '0';
+            
+            when MOVE_FROM_HI =>
+              register_file(release_instructions(i).rd).busy <= '0';
+              HI.busy <= '0';
+            
+            when MOVE_FROM_LOW =>
+              register_file(release_instructions(i).rd).busy <= '0';
+              LOW.busy <= '0';
+
+            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL | JUMP | JUMP_TO_REGISTER | JUMP_AND_LINK =>
+              -- TODO: Not 100% sure if we're supposed to do anything here.
+
+            when STORE_WORD =>
+              -- Do Nothing.
+
+            when UNKNOWN =>
+              report "ERROR: There is an unknown instruction coming into the DECODE stage from the WRITE-BACK stage!" severity failure;
+          end case;
+      end loop;
       -- report " current state is WRITING ";  
       
       -- first half of clock cycle: write result of instruction to the registers.

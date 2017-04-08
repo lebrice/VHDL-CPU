@@ -102,6 +102,8 @@ package INSTRUCTION_TOOLS is
         vector : std_logic_vector(31 downto 0);
     end record;
 
+    type INSTRUCTION_ARRAY is ARRAY (1 downto 0) of INSTRUCTION;
+
     function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT;
 

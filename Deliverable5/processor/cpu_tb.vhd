@@ -12,12 +12,14 @@ architecture processor_test of cpu_tb is
     constant clock_period : time := 1 ns;
     COMPONENT CPU is
         generic(
-            ram_size : integer := 8196;
-            mem_delay : time := 0.1 ns;
-            data_memory_dump_filepath : STRING := "memory.txt";
-            instruction_memory_load_filepath : STRING := "program.txt";
-            register_file_dump_filepath : STRING := "register_file.txt";
-            clock_period : time := 1 ns
+        ram_size : integer := 8196;
+        mem_delay : time := 0.1 ns;
+        data_memory_dump_filepath : STRING := "memory.txt";
+        instruction_memory_load_filepath : STRING := "program.txt";
+        register_file_dump_filepath : STRING := "register_file.txt";
+        clock_period : time := 1 ns;
+        predictor_bit_width : integer := 2;
+        use_branch_prediction : boolean := false
         );
         port (
             clock : in std_logic;
@@ -59,7 +61,10 @@ architecture processor_test of cpu_tb is
 
 begin
 
-c1 : CPU PORT MAP (
+c1 : CPU GENERIC MAP (
+    use_branch_prediction => true
+    )
+    PORT MAP (
     clock,
     initialize,
     dump,
