@@ -15,7 +15,8 @@ entity CPU is
         instruction_memory_load_filepath : STRING := "program.txt";
         register_file_dump_filepath : STRING := "register_file.txt";
         clock_period : time := 1 ns;
-        predictor_bit_width : integer := 2
+        predictor_bit_width : integer := 2;
+        use_branch_prediction : boolean := false
     );
   port (
     clock : in std_logic;
@@ -388,6 +389,17 @@ architecture CPU_arch of CPU is
 
     signal bad_prediction_occured : boolean := false;
 
+    function is_branch_type(instruction : INSTRUCTION) return boolean is
+    begin
+        case instruction.instruction_type is
+            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+                return true;
+            when others => 
+                return false;
+        end case;
+    end is_branch_type;
+
+
 begin
     ALU_out <= execute_stage_ALU_result;
 
@@ -586,7 +598,7 @@ begin
     ID_EX_register_a_in <= decode_stage_val_a;
     ID_EX_register_b_in <= decode_stage_val_b;
     ID_EX_register_instruction_in <= 
-        NO_OP_INSTRUCTION when bad_prediction_occured else decode_stage_instruction_out;
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else decode_stage_instruction_out;
     ID_EX_register_pc_in <= decode_stage_PC_out;
     ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended;
 
@@ -602,7 +614,7 @@ begin
     EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
     EX_MEM_register_instruction_in <= 
-         NO_OP_INSTRUCTION when bad_prediction_occured else execute_stage_instruction_out;
+         NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else execute_stage_instruction_out;
 
     memory_stage_ALU_result_in <= EX_MEM_register_ALU_result_out;
     memory_stage_instruction_in <= EX_MEM_register_instruction_out;
@@ -670,6 +682,7 @@ begin
         variable instruction : INSTRUCTION;
         variable actual_branch : std_logic;
     begin
+        if (use_branch_prediction) then
         instruction := EX_MEM_register_instruction_out;
         actual_branch := EX_MEM_register_does_branch_out;
         bad_prediction_occured <= false;
@@ -682,22 +695,31 @@ begin
             when others =>   
                 -- do nothing.      
         end case;
+        end if;
     end process;
 
 
-    -- branch_stall_management : process(clock, current_state)
-    -- begin
-    --         if  is_branch_type(current_state.IF_ID_inst) OR
-    --             is_branch_type(current_state.ID_EX_inst) OR
-    --             (is_branch_type(current_state.EX_MEM_inst) AND current_state.EX_MEM_branch_taken = '1')
-    --         then
-    --             feed_no_op_to_IF_ID <= true;
-    --             manual_fetch_stall <= '1';
-    --         else
-    --             feed_no_op_to_IF_ID <= false;
-    --             manual_fetch_stall <= '0';
-    --         end if;
-    -- end process;
+    branch_stall_management : process(
+        clock, 
+        IF_ID_register_instruction_out,
+        ID_EX_register_instruction_out,
+        EX_MEM_register_instruction_out,
+        EX_MEM_register_does_branch_out
+        )
+    begin
+        if (NOT use_branch_prediction) then
+            if  is_branch_type(IF_ID_register_instruction_out) OR
+                is_branch_type(ID_EX_register_instruction_out) OR
+                (is_branch_type(EX_MEM_register_instruction_out) AND EX_MEM_register_does_branch_out = '1')
+            then
+                feed_no_op_to_IF_ID <= true;
+                manual_fetch_stall <= '1';
+            else
+                feed_no_op_to_IF_ID <= false;
+                manual_fetch_stall <= '0';
+            end if;
+        end if;
+    end process;
 
 
 
