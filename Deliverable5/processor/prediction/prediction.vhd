@@ -3,15 +3,13 @@ library ieee;
     use ieee.std_logic_textio.all;
     use ieee.numeric_std.all;
 
-use work.instruction_tools.all;
-
 -- package head
 package prediction is
 
     -- size of the buffer
     constant SIZE : integer := 64;
     -- bits to predict
-    constant N_BIT_PREDICTION : integer := 1;
+    constant N_BIT_PREDICTION : integer := 4;
 
      -- branch buffer table data structure
     type buffer_entry is
@@ -24,7 +22,7 @@ package prediction is
 
     -- function declarations
     function buffer_init return branch_buffer;
-    function update_branch_buff(buff : branch_buffer ; pc : Integer ; taken : std_logic ; inst : Instruction) 
+    function update_branch_buff(buff : branch_buffer ; pc : Integer ; taken : std_logic) 
         return branch_buffer;
     function update_taken(entry : buffer_entry ; taken : std_logic) 
         return buffer_entry;
@@ -38,43 +36,46 @@ end prediction;
 
 -- package body
 package body prediction is
-    -- initializes the branch buffer to have 0's as all it's PCs and to set all taken bits to 0
+    
+    -- initializes the branch buffer to have 0's as all it's PCs 
+    -- and to sets taken bits to alternation 1's and 0's beginning with 0
     function buffer_init return branch_buffer is
         variable buff : branch_buffer;
     begin
         for i in buff' range loop
             buff(i).pc := 0;
-            buff(i).taken := (others => '0');
+            for j in buff(i).taken' range loop
+                if ((j mod 2)) = 0 then
+                    buff(i).taken(j) := '0';
+                    else
+                    buff(i).taken(j) := '1';
+                end if; 
+            end loop;
         end loop;
         return buff;
     end buffer_init;
 
-    -- update_branch_buff is called on all instructions exiting the execute stage
-    -- if instruction is a branch, this function handles updating the buffer
-    -- if not, it does nothing
-    function update_branch_buff(buff : branch_buffer ; pc : Integer ; taken : std_logic ; inst : Instruction)
+    -- update_branch_buff is called on all branching instructions exiting the execute stage
+    -- this function handles updating the buffer
+    function update_branch_buff(buff : branch_buffer ; pc : Integer ; taken : std_logic)
         return branch_buffer is
-        variable buff_fn : branch_buffer := buff;
-        variable found : std_logic := '0';
-    begin
-        -- check to see if instruction is branch type 
-        if (inst.instruction_type = branch_if_equal or inst.instruction_type = branch_if_not_equal) then
-
-            -- check to see if this instruction/line/pc is already in the buffer
-            for i in buff_fn'range loop
-                if (buff_fn(i).pc = pc) then
-                    found := '1'; -- it is in the buffer, update its taken bit profile
-                    buff_fn(i) := update_taken(buff_fn(i), taken); -- update taken fifo
-                end if;
-            end loop;
-
-            if(found = '0') then -- it was not in the buffer, add it
-                buff_fn := add_entry(buff_fn, pc);
+        variable buff_v : branch_buffer := buff;
+        variable found : std_logic;
+    begin  
+        -- check to see if this instruction/line/pc is already in the buffer
+        found := '0';
+        for i in buff_v'range loop
+            if (buff_v(i).pc = pc) then
+                found := '1'; -- it is in the buffer, update its taken bit profile
+                buff_v(i) := update_taken(buff_v(i), taken); -- update taken fifo
             end if;
-        else
-            null;
+        end loop;
+
+        if(found = '0') then -- it was not in the buffer, add it
+            buff_v := add_entry(buff_v, pc);
         end if;
-        return buff_fn;
+        
+        return buff_v;
     end update_branch_buff;
     
 
@@ -82,29 +83,28 @@ package body prediction is
     -- it adds the latest taken bit and pushes the oldest one out
     function update_taken(entry : buffer_entry ; taken : std_logic) 
         return buffer_entry is 
-        variable entry_fn : buffer_entry := entry;
+        variable entry_v : buffer_entry := entry;
     begin
         if (N_BIT_PREDICTION >= 2) then
-            for i in 0 to N_BIT_PREDICTION-2 loop
-                entry_fn.taken(i+1) := entry_fn.taken(i);
+            for i in N_BIT_PREDICTION-2 downto 0 loop
+                entry_v.taken(i+1) := entry_v.taken(i);
             end loop;
         end if;
-        entry_fn.taken(0) := taken;
-        return entry_fn; 
+        entry_v.taken(0) := taken;
+        return entry_v; 
     end update_taken;
 
     -- add_entry adds and entry to the buffer and pushes the oldest one out
     function add_entry(buff : branch_buffer; pc : Integer)
         return branch_buffer is
-        variable buff_fn : branch_buffer := buff;
+        variable buff_v : branch_buffer := buff;
     begin
-        if (N_BIT_PREDICTION >= 2) then
-            for i in 0 to N_BIT_PREDICTION-2 loop
-                    buff_fn(i+1) := buff_fn(i);
-            end loop;
-        end if;
-        buff_fn(0).pc := pc;
-        return buff_fn;
+        for i in SIZE-2 downto 0 loop
+                buff_v(i+1) := buff_v(i);
+        end loop;
+        buff_v(0).pc := pc;
+        buff_v(0).taken := "1010";
+        return buff_v;
     end add_entry;
 
     
