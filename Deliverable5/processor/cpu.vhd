@@ -388,7 +388,7 @@ architecture CPU_arch of CPU is
     signal feed_no_op_to_IF_ID : boolean := false;
 
     type branch_prediction_type is (PREDICT_NOT_TAKEN, PREDICT_TAKEN);
-    signal current_prediction : branch_prediction_type := PREDICT_NOT_TAKEN;
+    signal current_prediction : branch_prediction_type := PREDICT_TAKEN;
 
     signal bad_prediction_occured : boolean := false;
 
@@ -620,12 +620,21 @@ begin
                 else
                     case current_prediction is
                         when PREDICT_TAKEN =>
-                            if(is_branch_type(decode_stage_instruction_out) 
-                                AND NOT is_branch_type(execute_stage_instruction_out) 
-                                AND NOT is_branch_type(memory_stage_instruction_out) 
-                                AND NOT is_branch_type(write_back_stage_instruction_out)) then
+                            if(is_branch_type(IF_ID_register_instruction_out) 
+                                AND NOT is_branch_type(ID_EX_register_instruction_out) 
+                                AND NOT is_branch_type(EX_MEM_register_instruction_out) 
+                                AND NOT is_branch_type(MEM_WB_register_instruction_out))
+                                then
                                 branch_target := decode_stage_branch_target_out;
                                 fetch_stage_branch_condition <= '1';
+
+                            elsif(NOT is_branch_type(IF_ID_register_instruction_out) 
+                                AND NOT is_branch_type(ID_EX_register_instruction_out) 
+                                AND is_branch_type(EX_MEM_register_instruction_out) 
+                                AND NOT is_branch_type(MEM_WB_register_instruction_out))
+                                then
+                                branch_target := (others => '0'); -- doesn't matter, we don't branch, since we already correctly predicted we would.
+                                fetch_stage_branch_condition <= '0';
                             else
                                 branch_target := EX_MEM_register_branch_target_out;
                                 fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
