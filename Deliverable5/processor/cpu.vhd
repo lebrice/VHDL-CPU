@@ -686,7 +686,7 @@ begin
     ID_EX_register_b_in <= decode_stage_val_b;
     ID_EX_register_instruction_in <= 
         NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else 
-        increment_instruction_pc(decode_stage_instruction_out) when is_branch_type(IF_ID_register_instruction_out) AND use_branch_prediction AND PREDICT_TAKEN else
+        increment_instruction_pc(decode_stage_instruction_out) when is_branch_type(IF_ID_register_instruction_out) AND use_branch_prediction AND current_prediction = PREDICT_TAKEN else
         decode_stage_instruction_out;
     ID_EX_register_pc_in <= decode_stage_PC_out;
     ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended;
