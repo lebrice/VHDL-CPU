@@ -402,6 +402,13 @@ architecture CPU_arch of CPU is
         end case;
     end is_branch_type;
 
+    function increment_instruction_pc(old_instruction : INSTRUCTION) return INSTRUCTION is
+        variable instruction_result : INSTRUCTION;
+    begin
+        instruction_result := makeInstruction(instruction_result.vector(31 downto 26), old_instruction.rs, old_instruction.rt, old_instruction.immediate + 4);
+        return instruction_result;
+    end increment_instruction_pc;
+
 
 begin
     ALU_out <= execute_stage_ALU_result;
@@ -678,7 +685,9 @@ begin
     ID_EX_register_a_in <= decode_stage_val_a;
     ID_EX_register_b_in <= decode_stage_val_b;
     ID_EX_register_instruction_in <= 
-        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else decode_stage_instruction_out;
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else 
+        increment_instruction_pc(decode_stage_instruction_out) when is_branch_type(IF_ID_register_instruction_out) AND use_branch_prediction AND PREDICT_TAKEN else
+        decode_stage_instruction_out;
     ID_EX_register_pc_in <= decode_stage_PC_out;
     ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended;
 
@@ -788,19 +797,19 @@ begin
         variable actual_branch : std_logic;
     begin
         if (use_branch_prediction) then
-        instruction := EX_MEM_register_instruction_out;
-        actual_branch := EX_MEM_register_does_branch_out;
-        bad_prediction_occured <= false;
-        case instruction.instruction_type is
-            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-                if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
-                    bad_prediction_occured <= true;
+            instruction := EX_MEM_register_instruction_out;
+            actual_branch := EX_MEM_register_does_branch_out;
+            bad_prediction_occured <= false;
+            case instruction.instruction_type is
+                when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+                    if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
+                        bad_prediction_occured <= true;
 
-                    report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
-                end if;
-            when others =>   
-                -- do nothing.      
-        end case;
+                        report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
+                    end if;
+                when others =>   
+                    -- do nothing.
+            end case;
         end if;
     end process;
 
