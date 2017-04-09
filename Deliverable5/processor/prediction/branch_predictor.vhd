@@ -23,9 +23,8 @@ entity branch_predictor is
 end branch_predictor;
 
 architecture branch_prediction_arch of branch_predictor is
-
-    constant minimum_predictor_value : integer := - (2**PREDICTOR_BIT_WIDTH); 
-    constant maximum_predictor_value : integer :=   (2**PREDICTOR_BIT_WIDTH) -1;
+    constant minimum_predictor_value : integer := - (2**(PREDICTOR_BIT_WIDTH-1)); 
+    constant maximum_predictor_value : integer :=   (2**(PREDICTOR_BIT_WIDTH-1)) -1;
             
     type predictor_array is array (PREDICTOR_COUNT-1 downto 0) of integer range minimum_predictor_value to maximum_predictor_value;
     signal predictors : predictor_array := (others => 0);
@@ -69,6 +68,7 @@ begin
     evaluation_predictor_index <= to_integer(unsigned(target_to_evaluate(2 + PREDICTOR_BIT_WIDTH-1 downto 2)));
     -- we predict taken when the counter is positive or zero, and not_taken whenever it is negative.
     prediction <= 
+        '1' when is_jump_type(instruction_in) else
         'U' when NOT is_branch_type(instruction_in) else
         '1' when predictors(evaluation_predictor_index) >= 0 else 
         '0';
