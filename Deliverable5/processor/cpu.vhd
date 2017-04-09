@@ -16,7 +16,9 @@ entity CPU is
         register_file_dump_filepath : STRING := "register_file.txt";
         clock_period : time := 1 ns;
         predictor_bit_width : integer := 2;
-        use_branch_prediction : boolean := false
+        use_branch_prediction : boolean := false;
+        use_static_taken : boolean := false;
+        use_static_not_taken : boolean := false
     );
   port (
     clock : in std_logic;
@@ -763,7 +765,9 @@ begin
 
 
     -- HERE is the code that actually uses the predictor:
-    current_prediction <=
+    current_prediction <= 
+        PREDICT_NOT_TAKEN when use_static_not_taken else
+        PREDICT_TAKEN when use_static_taken else
         PREDICT_TAKEN when branch_predictor_prediction = '1' else
         PREDICT_NOT_TAKEN when branch_predictor_prediction = '0'
         else current_prediction;
@@ -792,7 +796,7 @@ begin
                 if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
                     bad_prediction_occured <= true;
 
-                    report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
+                    -- report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
                 end if;
             when others =>   
                 -- do nothing.      
