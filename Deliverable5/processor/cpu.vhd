@@ -582,46 +582,71 @@ begin
     );
 
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
-    fetch_stage_branch_target <= 
-        to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when NOT use_branch_prediction else
-        to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
-        to_integer(signed(decode_stage_branch_target_out)) when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
-        fetch_stage_PC + 4 when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
-        360;
+    -- fetch_stage_branch_target <= 
+    --     to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when NOT use_branch_prediction else
+    --     to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
+    --     to_integer(signed(decode_stage_branch_target_out)) when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+    --     fetch_stage_PC + 4 when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
+    --     360;
             
-    fetch_stage_branch_condition <= 
-        EX_MEM_register_does_branch_out when NOT use_branch_prediction else
-        '1' when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
-        '0' when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
-        '0' when current_prediction = PREDICT_NOT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
-        '1' when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
-        EX_MEM_register_does_branch_out;
+    -- fetch_stage_branch_condition <= 
+    --     EX_MEM_register_does_branch_out when NOT use_branch_prediction else
+    --     '1' when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+    --     '0' when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
+    --     '0' when current_prediction = PREDICT_NOT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+    --     '1' when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
+    --     EX_MEM_register_does_branch_out;
 
-    -- manage_fetch_branching : process
-    -- begin
-    --     case use_branch_prediction is
-    --         when false =>
-    --             fetch_stage_branch_target <= EX_MEM_register_branch_target_out;
-    --             fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-    --         when true =>
-    --             case current_prediction is
-    --                 when PREDICT_TAKEN =>
-    --                     if(bad_prediction_occured) then
-
-    --                     else
-                            
-    --                     end if;
-    --                 when PREDICT_NOT_TAKEN =>
-    --                     if(bad_prediction_occured) then
-    --                         fetch_stage_branch_target <= EX_MEM_register_branch_target_out;
-    --                         fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-    --                     else
-
-    --                     end if;
-
-    --             end case;
-    --     end case;
-    -- end process;
+    manage_fetch_branching : process(
+        current_prediction, 
+        EX_MEM_register_branch_target_out,
+        EX_MEM_register_does_branch_out,
+        decode_stage_instruction_out,
+        execute_stage_instruction_out,
+        memory_stage_instruction_out,
+        write_back_stage_instruction_out,
+        fetch_stage_PC
+    ) is 
+    variable branch_target : std_logic_vector(31 downto 0) := (others => '0');
+    begin
+        case use_branch_prediction is
+            when false =>
+                branch_target := EX_MEM_register_branch_target_out;
+                fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+            when true =>
+                case current_prediction is
+                    when PREDICT_TAKEN =>
+                        if(bad_prediction_occured) then
+                            branch_target := EX_MEM_register_branch_target_out;
+                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                        elsif(is_branch_type(decode_stage_instruction_out) 
+                            AND NOT is_branch_type(execute_stage_instruction_out) 
+                            AND NOT is_branch_type(memory_stage_instruction_out) 
+                            AND NOT is_branch_type(write_back_stage_instruction_out)) then
+                            branch_target := decode_stage_branch_target_out;
+                            fetch_stage_branch_condition <= '1';
+                        else
+                            branch_target := EX_MEM_register_branch_target_out;
+                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                        end if;
+                    when PREDICT_NOT_TAKEN =>
+                        if(bad_prediction_occured) then
+                            branch_target := EX_MEM_register_branch_target_out;
+                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                        elsif(is_branch_type(decode_stage_instruction_out) 
+                            AND NOT is_branch_type(execute_stage_instruction_out) 
+                            AND NOT is_branch_type(memory_stage_instruction_out) 
+                            AND NOT is_branch_type(write_back_stage_instruction_out)) then
+                            branch_target := std_logic_vector(to_unsigned((fetch_stage_PC + 4), 32));
+                            fetch_stage_branch_condition <= '0';
+                        else
+                            branch_target := EX_MEM_register_branch_target_out;
+                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                        end if;
+                end case;
+        end case;
+        fetch_stage_branch_target <= to_integer(signed(branch_target));
+    end process;
 
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
