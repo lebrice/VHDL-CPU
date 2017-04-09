@@ -12,7 +12,7 @@ entity branch_predictor is
     );
     port(
         clock : in std_logic;
-        instruction : in INSTRUCTION;
+        instruction_in : in INSTRUCTION;
         -- inputs that are used to update the predictor.
         target : in std_logic_vector(31 downto 0);
         branch_taken : in std_logic;
@@ -52,6 +52,15 @@ architecture branch_prediction_arch of branch_predictor is
         end if;  
     end decrement_predictor;
 
+    function is_branch_type(instr : INSTRUCTION) return boolean is
+    begin
+        case instr.instruction_type is
+            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+                return true;
+            when others => 
+                return false;
+        end case;
+    end is_branch_type;
 
 begin
 
@@ -59,19 +68,22 @@ begin
     -- Since the target can be the PC or the target address, etc, we forget about the lowest two bits, since they would always be zeroes.
     evaluation_predictor_index <= to_integer(unsigned(target_to_evaluate(2 + PREDICTOR_BIT_WIDTH-1 downto 2)));
     -- we predict taken when the counter is positive or zero, and not_taken whenever it is negative.
-    prediction <= '1' when predictors(evaluation_predictor_index) >= 0 else '0';
+    prediction <= 
+        'U' when NOT is_branch_type(instruction_in) else
+        '1' when predictors(evaluation_predictor_index) >= 0 else 
+        '0';
 
     -- index of the predictor to update
     predictor_index <= to_integer(unsigned(target(PREDICTOR_BIT_WIDTH-1 downto 0)));
     current_predictor_value <= predictors(predictor_index);
     predictors(predictor_index) <= next_predictor_value;
 
-    update_predictors : process(clock, instruction, target, branch_taken)
+    update_predictors : process(clock, instruction_in, target, branch_taken)
     begin
         -- start with this assumption. We will overwrite it if we find there should be a change.
         next_predictor_value <= current_predictor_value;
         if(rising_edge(clock)) then
-            if(instruction.instruction_type = BRANCH_IF_EQUAL OR instruction.instruction_type = BRANCH_IF_NOT_EQUAL) then
+            if(is_branch_type(instruction_in)) then
                 if(branch_taken = '1') then
                     next_predictor_value <= increment_predictor(current_predictor_value);
                 else

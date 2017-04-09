@@ -243,7 +243,7 @@ architecture CPU_arch of CPU is
     );
     PORT(
         clock : in std_logic;
-        instruction : in INSTRUCTION;
+        instruction_in : in INSTRUCTION;
         target : in std_logic_vector(31 downto 0);
         branch_taken : in std_logic;
         target_to_evaluate : in std_logic_vector(31 downto 0);
@@ -369,7 +369,7 @@ architecture CPU_arch of CPU is
     signal data_memory_load : std_logic := '0';
 
    
-    signal branch_predictor_instruction : INSTRUCTION;
+    signal branch_predictor_instruction_in : INSTRUCTION;
     signal branch_predictor_target : std_logic_vector(31 downto 0);
     signal branch_predictor_branch_taken : std_logic;
     signal branch_predictor_target_to_evaluate : std_logic_vector(31 downto 0);
@@ -574,7 +574,7 @@ begin
     )
     PORT MAP(
         clock,
-        branch_predictor_instruction,
+        branch_predictor_instruction_in,
         branch_predictor_target,
         branch_predictor_branch_taken,
         branch_predictor_target_to_evaluate,
@@ -724,10 +724,12 @@ begin
     WB_data <= write_back_stage_write_data;
 
 
-    branch_predictor_instruction <= EX_MEM_register_instruction_out;
+    branch_predictor_instruction_in <= EX_MEM_register_instruction_out;
     branch_predictor_target <= EX_MEM_register_branch_target_out;
     branch_predictor_branch_taken <= EX_MEM_register_does_branch_out;
+    -- TODO: change the target to be the PC, if that makes more sense.
     branch_predictor_target_to_evaluate <= decode_stage_branch_target_out;
+    -- branch_predictor_target_to_evaluate <= std_logic_vector(to_unsigned(decode_stage_PC_out);
 
     fetch_PC <= IF_ID_register_pc_out;
     fetch_stage_reset <= '1' when initialize = '1' else '0';
@@ -762,6 +764,24 @@ begin
             -- instruction_memory_dump <= '0';         
         end if;
     end process ; -- dump
+
+
+    -- HERE is the code that actually uses the predictor:
+    current_prediction <=
+        PREDICT_TAKEN when branch_predictor_prediction = '1' else
+        PREDICT_NOT_TAKEN when branch_predictor_prediction = '0'
+        else current_prediction;
+
+    report_prediction : process(current_prediction)
+    begin
+        case current_prediction is 
+            when PREDICT_TAKEN =>
+                report "current prediction is TAKEN";
+            when PREDICT_NOT_TAKEN =>
+                report "current prediction is NOT_TAKEN";
+        end case;
+    end process;
+
 
     detect_wrong_prediction : process(clock, current_prediction, EX_MEM_register_instruction_out, EX_MEM_register_does_branch_out)
         variable instruction : INSTRUCTION;
