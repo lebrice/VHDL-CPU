@@ -593,6 +593,7 @@ begin
         current_prediction, 
         EX_MEM_register_branch_target_out,
         EX_MEM_register_does_branch_out,
+        execute_stage_branch,
         decode_stage_instruction_out,
         execute_stage_instruction_out,
         memory_stage_instruction_out,
@@ -601,6 +602,7 @@ begin
     ) is 
     variable branch_target : std_logic_vector(31 downto 0) := (others => '0');
     begin
+        -- if(rising_edge(clock)) then
         case use_branch_prediction is
             when false =>
                 branch_target := EX_MEM_register_branch_target_out;
@@ -617,20 +619,25 @@ begin
                                 AND NOT is_branch_type(EX_MEM_register_instruction_out) 
                                 AND NOT is_branch_type(MEM_WB_register_instruction_out))
                                 then
+                                -- report "we're telling fetch to branch, since ID has a branch instruction and we're doing PREDICT TAKEN";
                                 branch_target := decode_stage_branch_target_out;
                                 fetch_stage_branch_condition <= '1';
 
                             elsif(NOT is_branch_type(IF_ID_register_instruction_out) 
-                                AND NOT is_branch_type(ID_EX_register_instruction_out) 
+                                AND NOT is_branch_type(ID_EX_register_instruction_out)
                                 AND is_branch_type(EX_MEM_register_instruction_out) 
+                                AND EX_MEM_register_does_branch_out = '1'
                                 AND NOT is_branch_type(MEM_WB_register_instruction_out))
                                 then
                                 -- we don't branch, since we already correctly predicted we would.
+                                -- report "we correctly predicted that we would branch!";
                                 branch_target := (others => '0');
                                 fetch_stage_branch_condition <= '0';
+
                             else
+                                -- report "Default case";
                                 branch_target := EX_MEM_register_branch_target_out;
-                                fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                                fetch_stage_branch_condition <= EX_mem_register_does_branch_out;
                             end if;
                         when PREDICT_NOT_TAKEN =>
                             if(is_branch_type(decode_stage_instruction_out) 
@@ -647,6 +654,7 @@ begin
                 end if;
         end case;
         fetch_stage_branch_target <= to_integer(signed(branch_target));
+        -- end if;
     end process;
 
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
@@ -681,10 +689,7 @@ begin
     
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
     EX_MEM_register_b_value_in <= execute_stage_val_b; 
-    EX_MEM_register_does_branch_in <= 
-        execute_stage_branch when NOT use_branch_prediction else
-        '0' when bad_prediction_occured else 
-        execute_stage_branch;
+    EX_MEM_register_does_branch_in <= execute_stage_branch;
     EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
     EX_MEM_register_instruction_in <= 
