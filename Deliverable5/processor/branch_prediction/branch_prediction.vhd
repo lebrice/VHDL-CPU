@@ -3,14 +3,13 @@ library ieee;
     use ieee.std_logic_textio.all;
     use ieee.numeric_std.all;
 
--- use work.prediction.all;
 use work.instruction_tools.all;
 
 entity branch_prediction is
     generic(
-		size : Integer := 64;
+        size : Integer := 64;
         history_size : Integer := 2;
-        precition_active : std_logic := '1'
+        prediction_active : std_logic := '1'
 	);
 	port (
 		clock : in std_logic;	
@@ -185,8 +184,8 @@ begin
         variable branch_buff : branch_buffer;
         variable make_buffer : boolean := true;
     begin
-        -- check to see if branch prediction is precition_active
-        if (precition_active = '1') then
+        -- check to see if branch prediction is prediction_active
+        if (prediction_active = '1') then
             -- initialize a buffer
             if (make_buffer) then
                 branch_buff := init_buffer;
@@ -205,7 +204,7 @@ begin
                     end if;  
                 end if; -- is_branch   
             end if; -- rising edge
-        end if; -- precition_active
+        end if; -- prediction_active
 
     end process;
 
