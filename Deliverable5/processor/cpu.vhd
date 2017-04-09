@@ -392,15 +392,6 @@ architecture CPU_arch of CPU is
 
     signal bad_prediction_occured : boolean := false;
 
-    function is_branch_type(instruction : INSTRUCTION) return boolean is
-    begin
-        case instruction.instruction_type is
-            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-                return true;
-            when others => 
-                return false;
-        end case;
-    end is_branch_type;
 
 
 begin
@@ -635,7 +626,7 @@ begin
                                 AND NOT is_branch_type(MEM_WB_register_instruction_out))
                                 then
                                 -- we don't branch, since we already correctly predicted we would.
-                                branch_target := (others => '0'); 
+                                branch_target := (others => '0');
                                 fetch_stage_branch_condition <= '0';
                             else
                                 branch_target := EX_MEM_register_branch_target_out;
@@ -814,9 +805,9 @@ begin
         )
     begin
         if (NOT use_branch_prediction) then
-            if  is_branch_type(IF_ID_register_instruction_out) OR
-                is_branch_type(ID_EX_register_instruction_out) OR
-                (is_branch_type(EX_MEM_register_instruction_out) AND EX_MEM_register_does_branch_out = '1')
+            if  is_branch_type(IF_ID_register_instruction_out) OR is_jump_type(IF_ID_register_instruction_out) OR 
+                is_branch_type(ID_EX_register_instruction_out) OR is_jump_type(ID_EX_register_instruction_out) OR
+                ((is_branch_type(EX_MEM_register_instruction_out) OR is_jump_type(EX_MEM_register_instruction_out)) AND EX_MEM_register_does_branch_out = '1')
             then
                 feed_no_op_to_IF_ID <= true;
                 manual_fetch_stall <= '1';
