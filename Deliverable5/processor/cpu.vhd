@@ -388,7 +388,7 @@ architecture CPU_arch of CPU is
     signal feed_no_op_to_IF_ID : boolean := false;
 
     type branch_prediction_type is (PREDICT_NOT_TAKEN, PREDICT_TAKEN);
-    signal current_prediction : branch_prediction_type := PREDICT_TAKEN;
+    signal current_prediction : branch_prediction_type := PREDICT_NOT_TAKEN;
 
     signal bad_prediction_occured : boolean := false;
 
@@ -583,11 +583,46 @@ begin
 
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
     fetch_stage_branch_target <= 
-        to_integer(signed(decode_stage_branch_target_out)) when use_branch_prediction AND current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
-        to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0)));
+        to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when NOT use_branch_prediction else
+        to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
+        to_integer(signed(decode_stage_branch_target_out)) when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+        fetch_stage_PC + 4 when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
+        360;
+            
     fetch_stage_branch_condition <= 
-        '1' when use_branch_prediction AND current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+        EX_MEM_register_does_branch_out when NOT use_branch_prediction else
+        '1' when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+        '0' when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
+        '0' when current_prediction = PREDICT_NOT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+        '1' when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
         EX_MEM_register_does_branch_out;
+
+    -- manage_fetch_branching : process
+    -- begin
+    --     case use_branch_prediction is
+    --         when false =>
+    --             fetch_stage_branch_target <= EX_MEM_register_branch_target_out;
+    --             fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+    --         when true =>
+    --             case current_prediction is
+    --                 when PREDICT_TAKEN =>
+    --                     if(bad_prediction_occured) then
+
+    --                     else
+                            
+    --                     end if;
+    --                 when PREDICT_NOT_TAKEN =>
+    --                     if(bad_prediction_occured) then
+    --                         fetch_stage_branch_target <= EX_MEM_register_branch_target_out;
+    --                         fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+    --                     else
+
+    --                     end if;
+
+    --             end case;
+    --     end case;
+    -- end process;
+
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
     IF_ID_register_instruction_in <= 
@@ -620,7 +655,8 @@ begin
     
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
     EX_MEM_register_b_value_in <= execute_stage_val_b; 
-    EX_MEM_register_does_branch_in <= execute_stage_branch;
+    EX_MEM_register_does_branch_in <= 
+        '0' when use_branch_prediction AND bad_prediction_occured else execute_stage_branch;
     EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
     EX_MEM_register_instruction_in <= 
