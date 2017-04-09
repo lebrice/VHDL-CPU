@@ -587,6 +587,7 @@ begin
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
     IF_ID_register_instruction_in <= 
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else
         NO_OP_INSTRUCTION when initialize = '1' else 
         input_instruction when override_input_instruction = '1' else
         NO_OP_INSTRUCTION when feed_no_op_to_IF_ID else
@@ -595,7 +596,8 @@ begin
     IF_ID_register_stall <= decode_stage_stall_out OR manual_IF_ID_stall;
 
     decode_stage_PC <= IF_ID_register_pc_out;
-    decode_stage_instruction_in <= IF_ID_register_instruction_out;
+    decode_stage_instruction_in <= 
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else IF_ID_register_instruction_out;
     decode_stage_write_back_data <= write_back_stage_write_data;
     decode_stage_write_back_instruction <= write_back_stage_instruction_out;
 
@@ -626,7 +628,8 @@ begin
 
     MEM_WB_register_ALU_result_in <= memory_stage_ALU_result_out;
     MEM_WB_register_data_mem_in <= memory_stage_mem_data;
-    MEM_WB_register_instruction_in <= memory_stage_instruction_out;
+    MEM_WB_register_instruction_in <= 
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else memory_stage_instruction_out;
     
     write_back_stage_ALU_result_in <= MEM_WB_register_ALU_result_out;
     write_back_stage_instruction_in <= MEM_WB_register_instruction_out;
@@ -696,7 +699,7 @@ begin
                 if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
                     bad_prediction_occured <= true;
 
-                    report "bad branch prediction occured! Feeding no-ops to the ID_EX and EX_MEM registers.";
+                    report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
                 end if;
             when others =>   
                 -- do nothing.      

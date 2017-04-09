@@ -288,7 +288,7 @@ current_state <=
 
     when WRITING =>
 
-      for i in 0 to 1 loop
+      for i in release_instructions'range loop
         -- "reset" the busy bits of the instructions to release.
           case release_instructions(i).instruction_type is 
             when ADD | SUBTRACT | BITWISE_AND | BITWISE_OR | BITWISE_NOR | BITWISE_XOR | SET_LESS_THAN | SHIFT_LEFT_LOGICAL | SHIFT_RIGHT_LOGICAL | SHIFT_RIGHT_ARITHMETIC =>
