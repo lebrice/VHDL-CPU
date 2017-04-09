@@ -4,15 +4,13 @@
 	addi $1, $0, 10	
 	addi $2, $0, 15
 	bne  $1, $2, END
-	j MODIFY
+	addi $1, $0, 35
 	addi $2, $0, 35
-	addi $3, $0, 10
-	addi $4, $0, 10
+	addi $3, $0, 35
+	j END
 MODIFY: addi $1, $0, 17
 	addi $2, $0, 17
 	addi $3, $0, 17
-	addi $4, $0, 17
-
 END:	sw $1, 0($0)
 		sw $2, 4($0)
 
