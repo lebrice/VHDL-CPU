@@ -388,7 +388,7 @@ architecture CPU_arch of CPU is
     signal feed_no_op_to_IF_ID : boolean := false;
 
     type branch_prediction_type is (PREDICT_NOT_TAKEN, PREDICT_TAKEN);
-    signal current_prediction : branch_prediction_type := PREDICT_NOT_TAKEN;
+    signal current_prediction : branch_prediction_type := PREDICT_TAKEN;
 
     signal bad_prediction_occured : boolean := false;
 
@@ -582,8 +582,12 @@ begin
     );
 
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
-    fetch_stage_branch_target <= to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0)));
-    fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+    fetch_stage_branch_target <= 
+        to_integer(signed(decode_stage_branch_target_out)) when use_branch_prediction AND current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+        to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0)));
+    fetch_stage_branch_condition <= 
+        '1' when use_branch_prediction AND current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+        EX_MEM_register_does_branch_out;
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
     IF_ID_register_instruction_in <= 
