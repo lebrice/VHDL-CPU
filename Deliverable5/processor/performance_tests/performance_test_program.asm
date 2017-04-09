@@ -3,7 +3,7 @@
 # It stores the generated Fibonacci numbers first into Reg[2] ($2), and then into memory
 # Assume that your data section in memory starts from address 2000. (Of course, since you will use separate memories for code and data for this part of the project, you could put data at address 0, but in the next phase of the project, you may use a single memory for both code and data, which is why we give you this program assuming a unified memory.)
 
-	addi $7, $0, 6	# number of generating Fibonacci-numbers
+	addi $7, $0, 25	# number of Fibonacci-numbers to generate
 	add $10,  $0, $0	# loop index 
 	addi $1,   $0, 1	# initializing Fib(-1) = 0
 	addi $2,   $0, 1	# initializing Fib(0) = 1

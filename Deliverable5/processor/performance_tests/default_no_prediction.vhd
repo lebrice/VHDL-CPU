@@ -15,7 +15,9 @@ end cpu_tb ;
 architecture processor_test of cpu_tb is
     constant clock_period : time := 1 ns;
     constant TEST_NAME : STRING := "NO_PREDICTION";
+    constant TEST_FILE_NAME : STRING := "performance_test_program.txt";
     constant RESULTS_FILEPATH : STRING := "./performance_tests/" & TEST_NAME & "_results.txt";
+    constant TEST_PROGRAM_FILEPATH : STRING := "./performance_tests/" & TEST_FILE_NAME;
     COMPONENT CPU is
         generic(
         ram_size : integer := 8196;
@@ -80,7 +82,10 @@ architecture processor_test of cpu_tb is
 begin
 
 c1 : CPU GENERIC MAP (
-    use_branch_prediction => false
+    -- TODO: change this depending on the test case. (Also change the constant TEST_NAME)
+    use_branch_prediction => false,
+    predictor_bit_width => 2,
+    instruction_memory_load_filepath => TEST_PROGRAM_FILEPATH
     )
     PORT MAP (
     clock,
