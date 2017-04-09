@@ -8,10 +8,10 @@
 	addi $2, $0, 35
 	addi $3, $0, 10
 	addi $4, $0, 10
-MODIFY : addi $1, $0, 17
+MODIFY: addi $1, $0, 17
 	addi $2, $0, 17
-	addi $11 $0, 17
-	addi $12, $0, 17
+	addi $3, $0, 17
+	addi $4, $0, 17
 
 END:	sw $1, 0($0)
 		sw $2, 4($0)
