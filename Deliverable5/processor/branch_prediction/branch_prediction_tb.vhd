@@ -5,19 +5,27 @@ library ieee;
 
 use work.instruction_tools.all;
 
-entity predictor_tb is
-end predictor_tb;
+entity branch_prediction_tb is
+end branch_prediction_tb;
 
         -----------------------------------------------------------------------------
         -- note this test is configured to run on a taken history vector of size 4 --
         -----------------------------------------------------------------------------
 
 
-architecture behavior of predictor_tb is 
+architecture behavior of branch_prediction_tb is 
     
     constant clock_period : time := 1 ns;
+    constant size : Integer := 5;
+    constant history_size : Integer := 4;
+    constant precition_active : std_logic := '1';
 
-    component predictor is 
+    component branch_prediction is 
+        generic(
+            size : Integer := size;
+            history_size : Integer := history_size;
+            precition_active : std_logic := precition_active
+        );
         port (
             clock : in std_logic;	
             fetch_pc : in Integer;
@@ -37,7 +45,13 @@ architecture behavior of predictor_tb is
 
     begin
 
-        pre : predictor port map(
+        pre : branch_prediction 
+        generic map(
+            size => size,
+            history_size => history_size,
+            precition_active => precition_active
+        )
+        port map(
             clock,
             fetch_pc,
             execute_pc,

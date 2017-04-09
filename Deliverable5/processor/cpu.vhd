@@ -620,11 +620,11 @@ begin
 
 
     branch_prediction : process(clock)
-        variable init_buffer: boolean := true;
+        variable make_buffer: boolean := true;
     begin
-        if (init_buffer) then
-            branch_buff <= buffer_init;
-            init_buffer := false;
+        if (make_buffer) then
+            branch_buff <= init_buffer;
+            make_buffer := false;
         end if;
         if rising_edge(clock) then
             --if (is a branch intruction) then
