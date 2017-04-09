@@ -12,7 +12,7 @@ entity branch_prediction is
         prediction_active : std_logic := '1'
 	);
 	port (
-		clock : in std_logic;	
+        clock : in std_logic;	
         fetch_pc : in Integer;
         execute_pc : in Integer;
         taken : in std_logic;
@@ -112,15 +112,12 @@ architecture behavior of branch_prediction is
                 buff_v(i) := update_taken(buff_v(i), taken); -- update taken fifo
             end if;
         end loop;
-
         if(found = '0') then -- it was not in the buffer, add it
             buff_v := add_entry(buff_v, pc);
-        end if;
-        
+        end if;   
         return buff_v;
     end update_branch_buff;
 
-    
     -- Function responsible for making an assumption about the taken/not taken behaviour, for branch prediction.
     function branch_decision(fetch_stage_pc : Integer ; branch_buff: branch_buffer)
         return boolean is
@@ -130,10 +127,8 @@ architecture behavior of branch_prediction is
         ones := 0;
         -- parse through branch buffer entries
         for i in branch_buff' range loop
-
             -- fetch pc matches one in buffer
-            if (branch_buff(i).pc = fetch_stage_pc) then
-                
+            if (branch_buff(i).pc = fetch_stage_pc) then         
                 -- 1 bit branch prediction
                 if (history_size = 1) then
                     if (branch_buff(i).taken(0) = '1') then -- branch was taken last
@@ -142,19 +137,15 @@ architecture behavior of branch_prediction is
                         return false;  -- branch was not taken last, assume not taken
                     end if;
                 end if;
-
                 -- multiple bit branch prediction
-
                 -- count the number of ones in the in the taken history of identified PC
                 for j in branch_buff(i).taken' range loop     
                     if branch_buff(i).taken(j) = '1' then
                         ones := ones + 1; 
                     end if;
                 end loop;
-
                 -- determine if the number of 1s if greater than number of 0s
                 zeros := history_size - ones;
-
                 -- act
                 if (ones > zeros) then      -- more branches, predict taken
                     return true;
@@ -168,16 +159,13 @@ architecture behavior of branch_prediction is
                     else
                         return false;  -- branch was not taken last, assume not taken
                     end if;
-
                 end if;  -- act 
             end if; -- fetch pc matches one in buffer
         end loop; -- parse through branch buffer entries
-
         return false;   -- default return is false for prediction not taken
     end branch_decision;
 
 begin
-
     -- check to see if branch should be taken
     -- sets branch to '1' is it should and '0' otherwise
     branch_prediction : process(clock)
@@ -192,20 +180,16 @@ begin
                 make_buffer := false;
             end if;
             -- run the check on the clock
-            if rising_edge(clock) then
-                if (is_branch(inst)) then
-                    -- update the branch buffer
-                    branch_buff := update_branch_buff(branch_buff, execute_pc, taken);
-                    -- ask if branch should be taken
-                    if (branch_decision(fetch_pc, branch_buff)) then
-                        branch <= '1';
-                    else
-                        branch <= '0';
-                    end if;  
-                end if; -- is_branch   
+            if rising_edge(clock) and is_branch(inst) then              
+                -- update the branch buffer
+                branch_buff := update_branch_buff(branch_buff, execute_pc, taken);
+                -- ask if branch should be taken
+                if (branch_decision(fetch_pc, branch_buff)) then
+                    branch <= '1';
+                else
+                    branch <= '0';
+                end if;        
             end if; -- rising edge
         end if; -- prediction_active
-
     end process;
-
 end behavior;

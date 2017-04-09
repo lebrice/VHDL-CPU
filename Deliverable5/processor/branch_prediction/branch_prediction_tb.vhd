@@ -18,13 +18,13 @@ architecture behavior of branch_prediction_tb is
     constant clock_period : time := 1 ns;
     constant size : Integer := 5;
     constant history_size : Integer := 4;
-    constant precition_active : std_logic := '1';
+    constant prediction_active : std_logic := '1';
 
     component branch_prediction is 
         generic(
             size : Integer := size;
             history_size : Integer := history_size;
-            precition_active : std_logic := precition_active
+            prediction_active : std_logic := prediction_active
         );
         port (
             clock : in std_logic;	
@@ -49,7 +49,7 @@ architecture behavior of branch_prediction_tb is
         generic map(
             size => size,
             history_size => history_size,
-            precition_active => precition_active
+            prediction_active => prediction_active
         )
         port map(
             clock,
