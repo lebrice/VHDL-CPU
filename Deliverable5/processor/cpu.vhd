@@ -244,9 +244,9 @@ architecture CPU_arch of CPU is
     PORT(
         clock : in std_logic;
         instruction : in INSTRUCTION;
-        branch_target : in std_logic_vector(31 downto 0);
+        target : in std_logic_vector(31 downto 0);
         branch_taken : in std_logic;
-        branch_target_to_evaluate : in std_logic_vector(31 downto 0);
+        target_to_evaluate : in std_logic_vector(31 downto 0);
         prediction : out std_logic
     );
     END COMPONENT;
@@ -370,9 +370,9 @@ architecture CPU_arch of CPU is
 
    
     signal branch_predictor_instruction : INSTRUCTION;
-    signal branch_predictor_branch_target : std_logic_vector(31 downto 0);
+    signal branch_predictor_target : std_logic_vector(31 downto 0);
     signal branch_predictor_branch_taken : std_logic;
-    signal branch_predictor_branch_target_to_evaluate : std_logic_vector(31 downto 0);
+    signal branch_predictor_target_to_evaluate : std_logic_vector(31 downto 0);
     signal branch_predictor_prediction  : std_logic;
 
     --branch prediction
@@ -575,9 +575,9 @@ begin
     PORT MAP(
         clock,
         branch_predictor_instruction,
-        branch_predictor_branch_target,
+        branch_predictor_target,
         branch_predictor_branch_taken,
-        branch_predictor_branch_target_to_evaluate,
+        branch_predictor_target_to_evaluate,
         branch_predictor_prediction
     );
 
@@ -725,9 +725,9 @@ begin
 
 
     branch_predictor_instruction <= EX_MEM_register_instruction_out;
-    branch_predictor_branch_target <= EX_MEM_register_branch_target_out;
+    branch_predictor_target <= EX_MEM_register_branch_target_out;
     branch_predictor_branch_taken <= EX_MEM_register_does_branch_out;
-    branch_predictor_branch_target_to_evaluate <= decode_stage_branch_target_out;
+    branch_predictor_target_to_evaluate <= decode_stage_branch_target_out;
 
     fetch_PC <= IF_ID_register_pc_out;
     fetch_stage_reset <= '1' when initialize = '1' else '0';

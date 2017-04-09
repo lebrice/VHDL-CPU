@@ -14,10 +14,10 @@ entity branch_predictor is
         clock : in std_logic;
         instruction : in INSTRUCTION;
         -- inputs that are used to update the predictor.
-        branch_target : in std_logic_vector(31 downto 0);
+        target : in std_logic_vector(31 downto 0);
         branch_taken : in std_logic;
         -- input that is used to query the branch predictor for a prediction.
-        branch_target_to_evaluate : in std_logic_vector(31 downto 0);
+        target_to_evaluate : in std_logic_vector(31 downto 0);
         prediction : out std_logic
     );
 end branch_predictor;
@@ -32,7 +32,7 @@ architecture branch_prediction_arch of branch_predictor is
     signal evaluation_predictor_index : integer range 0 to PREDICTOR_COUNT-1;
     signal predictor_index : integer range 0 to PREDICTOR_COUNT-1;
     signal current_predictor_value : integer range minimum_predictor_value to maximum_predictor_value;
-    signal next_predictor_value : integer range minimum_predictor_value to maximum_predictor_value := current_predictor_value;
+    signal next_predictor_value : integer range minimum_predictor_value to maximum_predictor_value;
 
     function increment_predictor(value : integer) return integer is
     begin
@@ -55,17 +55,18 @@ architecture branch_prediction_arch of branch_predictor is
 
 begin
 
-    -- index of the predictor to evaluate
-    evaluation_predictor_index <= to_integer(unsigned(branch_target_to_evaluate(PREDICTOR_BIT_WIDTH-1 downto 0)));
+    -- index of the predictor to evaluate: we use only some of the lowest bits, to index into the array.
+    -- Since the target can be the PC or the target address, etc, we forget about the lowest two bits, since they would always be zeroes.
+    evaluation_predictor_index <= to_integer(unsigned(target_to_evaluate(2 + PREDICTOR_BIT_WIDTH-1 downto 2)));
     -- we predict taken when the counter is positive or zero, and not_taken whenever it is negative.
     prediction <= '1' when predictors(evaluation_predictor_index) >= 0 else '0';
 
     -- index of the predictor to update
-    predictor_index <= to_integer(unsigned(branch_target(PREDICTOR_BIT_WIDTH-1 downto 0)));
+    predictor_index <= to_integer(unsigned(target(PREDICTOR_BIT_WIDTH-1 downto 0)));
     current_predictor_value <= predictors(predictor_index);
     predictors(predictor_index) <= next_predictor_value;
 
-    update_predictors : process(clock, instruction, branch_target, branch_taken)
+    update_predictors : process(clock, instruction, target, branch_taken)
     begin
         -- start with this assumption. We will overwrite it if we find there should be a change.
         next_predictor_value <= current_predictor_value;
