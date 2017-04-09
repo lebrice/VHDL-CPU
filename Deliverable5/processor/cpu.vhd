@@ -598,6 +598,7 @@ begin
     --     EX_MEM_register_does_branch_out;
 
     manage_fetch_branching : process(
+        clock,
         current_prediction, 
         EX_MEM_register_branch_target_out,
         EX_MEM_register_does_branch_out,
@@ -633,7 +634,8 @@ begin
                                 AND is_branch_type(EX_MEM_register_instruction_out) 
                                 AND NOT is_branch_type(MEM_WB_register_instruction_out))
                                 then
-                                branch_target := (others => '0'); -- doesn't matter, we don't branch, since we already correctly predicted we would.
+                                -- we don't branch, since we already correctly predicted we would.
+                                branch_target := (others => '0'); 
                                 fetch_stage_branch_condition <= '0';
                             else
                                 branch_target := EX_MEM_register_branch_target_out;
@@ -641,9 +643,9 @@ begin
                             end if;
                         when PREDICT_NOT_TAKEN =>
                             if(is_branch_type(decode_stage_instruction_out) 
-                                AND NOT is_branch_type(execute_stage_instruction_out) 
-                                AND NOT is_branch_type(memory_stage_instruction_out) 
-                                AND NOT is_branch_type(write_back_stage_instruction_out)) then
+                                AND NOT is_branch_type(ID_EX_register_instruction_out)
+                                AND NOT is_branch_type(EX_MEM_register_instruction_out)
+                                AND NOT is_branch_type(MEM_WB_register_instruction_out)) then
                                 branch_target := std_logic_vector(to_unsigned((fetch_stage_PC + 4), 32));
                                 fetch_stage_branch_condition <= '0';
                             else
@@ -689,7 +691,9 @@ begin
     EX_MEM_register_ALU_result_in <= execute_stage_ALU_result;
     EX_MEM_register_b_value_in <= execute_stage_val_b; 
     EX_MEM_register_does_branch_in <= 
-        '0' when use_branch_prediction AND bad_prediction_occured else execute_stage_branch;
+        execute_stage_branch when NOT use_branch_prediction else
+        '0' when bad_prediction_occured else 
+        execute_stage_branch;
     EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
     EX_MEM_register_instruction_in <= 
