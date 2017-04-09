@@ -614,36 +614,35 @@ begin
                 branch_target := EX_MEM_register_branch_target_out;
                 fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
             when true =>
-                case current_prediction is
-                    when PREDICT_TAKEN =>
-                        if(bad_prediction_occured) then
-                            branch_target := EX_MEM_register_branch_target_out;
-                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-                        elsif(is_branch_type(decode_stage_instruction_out) 
-                            AND NOT is_branch_type(execute_stage_instruction_out) 
-                            AND NOT is_branch_type(memory_stage_instruction_out) 
-                            AND NOT is_branch_type(write_back_stage_instruction_out)) then
-                            branch_target := decode_stage_branch_target_out;
-                            fetch_stage_branch_condition <= '1';
-                        else
-                            branch_target := EX_MEM_register_branch_target_out;
-                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-                        end if;
-                    when PREDICT_NOT_TAKEN =>
-                        if(bad_prediction_occured) then
-                            branch_target := EX_MEM_register_branch_target_out;
-                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-                        elsif(is_branch_type(decode_stage_instruction_out) 
-                            AND NOT is_branch_type(execute_stage_instruction_out) 
-                            AND NOT is_branch_type(memory_stage_instruction_out) 
-                            AND NOT is_branch_type(write_back_stage_instruction_out)) then
-                            branch_target := std_logic_vector(to_unsigned((fetch_stage_PC + 4), 32));
-                            fetch_stage_branch_condition <= '0';
-                        else
-                            branch_target := EX_MEM_register_branch_target_out;
-                            fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
-                        end if;
-                end case;
+                if (bad_prediction_occured) then
+                    branch_target := EX_MEM_register_branch_target_out;
+                    fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                else
+                    case current_prediction is
+                        when PREDICT_TAKEN =>
+                            if(is_branch_type(decode_stage_instruction_out) 
+                                AND NOT is_branch_type(execute_stage_instruction_out) 
+                                AND NOT is_branch_type(memory_stage_instruction_out) 
+                                AND NOT is_branch_type(write_back_stage_instruction_out)) then
+                                branch_target := decode_stage_branch_target_out;
+                                fetch_stage_branch_condition <= '1';
+                            else
+                                branch_target := EX_MEM_register_branch_target_out;
+                                fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                            end if;
+                        when PREDICT_NOT_TAKEN =>
+                            if(is_branch_type(decode_stage_instruction_out) 
+                                AND NOT is_branch_type(execute_stage_instruction_out) 
+                                AND NOT is_branch_type(memory_stage_instruction_out) 
+                                AND NOT is_branch_type(write_back_stage_instruction_out)) then
+                                branch_target := std_logic_vector(to_unsigned((fetch_stage_PC + 4), 32));
+                                fetch_stage_branch_condition <= '0';
+                            else
+                                branch_target := EX_MEM_register_branch_target_out;
+                                fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                            end if;
+                    end case;
+                end if;
         end case;
         fetch_stage_branch_target <= to_integer(signed(branch_target));
     end process;
