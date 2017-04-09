@@ -9,10 +9,10 @@ library std;
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity cpu_tb is
-end cpu_tb ; 
+entity cpu_performance_tb is
+end cpu_performance_tb ; 
 
-architecture processor_test of cpu_tb is
+architecture no_prediction_test of cpu_performance_tb is
     constant clock_period : time := 1 ns;
     constant TEST_NAME : STRING := "NO_PREDICTION";
     constant TEST_FILE_NAME : STRING := "performance_test_program.txt";
