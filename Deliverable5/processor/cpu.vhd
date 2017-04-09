@@ -405,7 +405,7 @@ architecture CPU_arch of CPU is
     function increment_instruction_pc(old_instruction : INSTRUCTION) return INSTRUCTION is
         variable instruction_result : INSTRUCTION;
     begin
-        instruction_result := makeInstruction(instruction_result.vector(31 downto 26), old_instruction.rs, old_instruction.rt, old_instruction.immediate + 4);
+        instruction_result := makeInstruction(old_instruction.vector(31 downto 26), old_instruction.rs, old_instruction.rt, old_instruction.immediate + 4);
         return instruction_result;
     end increment_instruction_pc;
 
