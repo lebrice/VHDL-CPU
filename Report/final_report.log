@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  10 APR 2017 10:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  10 APR 2017 10:57
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**bare_conf.tex
-(./bare_conf.tex
+**final_report.tex
+(./final_report.tex
 LaTeX2e <2016/03/31>
 Babel <3.9r> and hyphenation patterns for 83 language(s) loaded.
 (/usr/local/texlive/2016/texmf-dist/tex/latex/IEEEtran/IEEEtran.cls
@@ -114,8 +114,9 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <24> not available
 \IEEEPARstartletwidth=\dimen125
 \c@IEEEbiography=\count93
 \@IEEEtranrubishbin=\box27
-) (./bare_conf.aux)
-\openout1 = `bare_conf.aux'.
+)
+No file final_report.aux.
+\openout1 = `final_report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 315.
 LaTeX Font Info:    ... okay on input line 315.
@@ -129,7 +130,6 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 315.
 LaTeX Font Info:    ... okay on input line 315.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 315.
 LaTeX Font Info:    ... okay on input line 315.
-
 -- Lines per column: 56 (exact).
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 409.
@@ -155,21 +155,25 @@ Before submitting the final camera ready copy, remember to:
 
 
 ]
-(./bare_conf.aux) ) 
+(./final_report.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 1063 strings out of 493014
- 19450 string characters out of 6133351
+ 1061 strings out of 493014
+ 19443 string characters out of 6133351
  77120 words of memory out of 5000000
  4667 multiletter control sequences out of 15000+600000
  38728 words of font info for 72 fonts, out of 8000000 for 9000
  1144 hyphenation exceptions out of 8191
- 26i,7n,19p,204b,236s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/base/8r.
-enc}</usr/local/texlive/2016/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/
-local/texlive/2016/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/tex
-live/2016/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2016/
-texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_conf.pdf (1 page, 44526 bytes).
+ 26i,7n,19p,207b,236s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
+exlive/2016/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/201
+6/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2016/texmf-d
+ist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2016/texmf-dist/fonts/
+type1/urw/times/utmri8a.pfb>
+Output written on final_report.pdf (1 page, 44526 bytes).
 PDF statistics:
  25 PDF objects out of 1000 (max. 8388607)
  17 compressed objects within 1 object stream
