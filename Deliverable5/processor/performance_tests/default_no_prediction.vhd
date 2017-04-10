@@ -27,7 +27,9 @@ architecture no_prediction_test of cpu_performance_tb is
         register_file_dump_filepath : STRING := "register_file.txt";
         clock_period : time := 1 ns;
         predictor_bit_width : integer := 2;
-        use_branch_prediction : boolean := false
+        use_branch_prediction : boolean := false;
+        use_static_taken : boolean := false;
+        use_static_not_taken : boolean := false
         );
         port (
             clock : in std_logic;
@@ -84,6 +86,8 @@ begin
 c1 : CPU GENERIC MAP (
     -- TODO: change this depending on the test case. (Also change the constant TEST_NAME)
     use_branch_prediction => false,
+    use_static_not_taken => false,
+    use_static_taken => false,
     predictor_bit_width => 2,
     instruction_memory_load_filepath => TEST_PROGRAM_FILEPATH
     )
