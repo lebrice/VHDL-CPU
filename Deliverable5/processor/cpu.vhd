@@ -394,16 +394,6 @@ architecture CPU_arch of CPU is
 
     signal bad_prediction_occured : boolean := false;
 
-    function is_branch_type(instruction : INSTRUCTION) return boolean is
-    begin
-        case instruction.instruction_type is
-            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-                return true;
-            when others => 
-                return false;
-        end case;
-    end is_branch_type;
-
     function increment_instruction_pc(old_instruction : INSTRUCTION) return INSTRUCTION is
         variable instruction_result : INSTRUCTION;
     begin
