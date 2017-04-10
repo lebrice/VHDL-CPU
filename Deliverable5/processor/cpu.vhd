@@ -592,15 +592,13 @@ begin
 
     manage_fetch_branching : process(
         clock,
-        current_prediction, 
+        current_prediction,
+        IF_ID_register_instruction_out,
+        ID_EX_register_instruction_out,
+        EX_MEM_register_instruction_out,
         EX_MEM_register_branch_target_out,
         EX_MEM_register_does_branch_out,
-        execute_stage_branch,
-        decode_stage_instruction_out,
-        execute_stage_instruction_out,
-        memory_stage_instruction_out,
-        write_back_stage_instruction_out,
-        fetch_stage_PC
+        MEM_WB_register_instruction_out
     ) is 
     variable branch_target : std_logic_vector(31 downto 0) := (others => '0');
     begin
@@ -646,7 +644,7 @@ begin
                                 AND NOT is_branch_type(ID_EX_register_instruction_out)
                                 AND NOT is_branch_type(EX_MEM_register_instruction_out)
                                 AND NOT is_branch_type(MEM_WB_register_instruction_out)) then
-                                branch_target := std_logic_vector(to_unsigned((fetch_stage_PC + 4), 32));
+                                branch_target := (others => '0'); -- DOESNT MATTER, let the PC increment normally. 
                                 fetch_stage_branch_condition <= '0';
                             else
                                 branch_target := EX_MEM_register_branch_target_out;
@@ -726,8 +724,8 @@ begin
     branch_predictor_target <= EX_MEM_register_branch_target_out;
     branch_predictor_branch_taken <= EX_MEM_register_does_branch_out;
     -- TODO: change the target to be the PC, if that makes more sense.
-    branch_predictor_target_to_evaluate <= decode_stage_branch_target_out;
-    -- branch_predictor_target_to_evaluate <= std_logic_vector(to_unsigned(decode_stage_PC_out);
+    -- branch_predictor_target_to_evaluate <= decode_stage_branch_target_out;
+    branch_predictor_target_to_evaluate <= std_logic_vector(to_unsigned(decode_stage_PC_out);
 
     fetch_PC <= IF_ID_register_pc_out;
     fetch_stage_reset <= '1' when initialize = '1' else '0';
@@ -783,7 +781,11 @@ begin
     end process;
 
 
-    detect_wrong_prediction : process(clock, current_prediction, EX_MEM_register_instruction_out, EX_MEM_register_does_branch_out)
+    detect_wrong_prediction : process(
+        current_prediction,
+        EX_MEM_register_instruction_out,
+        EX_MEM_register_does_branch_out
+        )
         variable instruction : INSTRUCTION;
         variable actual_branch : std_logic;
     begin
