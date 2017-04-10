@@ -788,19 +788,19 @@ begin
         variable actual_branch : std_logic;
     begin
         if (use_branch_prediction) then
-        instruction := EX_MEM_register_instruction_out;
-        actual_branch := EX_MEM_register_does_branch_out;
-        bad_prediction_occured <= false;
-        case instruction.instruction_type is
-            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
-                if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
-                    bad_prediction_occured <= true;
+            instruction := EX_MEM_register_instruction_out;
+            actual_branch := EX_MEM_register_does_branch_out;
+            bad_prediction_occured <= false;
+            case instruction.instruction_type is
+                when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+                    if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
+                        bad_prediction_occured <= true;
 
-                    -- report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
-                end if;
-            when others =>   
-                -- do nothing.      
-        end case;
+                        -- report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
+                    end if;
+                when others =>   
+                    -- do nothing.      
+            end case;
         end if;
     end process;
 
