@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
-use work.BRANCH_MANAGEMENT.all;
+use work.BRANCH_PREDICTION.all;
 
 --entity declaration
 entity CPU is
@@ -14,7 +14,11 @@ entity CPU is
         data_memory_dump_filepath : STRING := "memory.txt";
         instruction_memory_load_filepath : STRING := "program.txt";
         register_file_dump_filepath : STRING := "register_file.txt";
-        clock_period : time := 1 ns
+        clock_period : time := 1 ns;
+        predictor_bit_width : integer := 2;
+        use_branch_prediction : boolean := false;
+        use_static_taken : boolean := false;
+        use_static_not_taken : boolean := false
     );
   port (
     clock : in std_logic;
@@ -107,9 +111,10 @@ architecture CPU_arch of CPU is
             stall_in : in std_logic;
 
             -- Stall signal out.
-            stall_out : out std_logic
-            
-        ) ;
+            stall_out : out std_logic;
+            branch_target_out : out std_logic_vector(31 downto 0);            
+            release_instructions : in INSTRUCTION_ARRAY        
+        );
     END COMPONENT;
 
     --Decode Execute Register
@@ -232,6 +237,21 @@ architecture CPU_arch of CPU is
             memload: IN STD_LOGIC          
         );
     END COMPONENT;
+
+    COMPONENT branch_predictor IS
+    GENERIC(
+        PREDICTOR_BIT_WIDTH : integer := 2;
+        PREDICTOR_COUNT : integer := 8
+    );
+    PORT(
+        clock : in std_logic;
+        instruction_in : in INSTRUCTION;
+        target : in std_logic_vector(31 downto 0);
+        branch_taken : in std_logic;
+        target_to_evaluate : in std_logic_vector(31 downto 0);
+        prediction : out std_logic
+    );
+    END COMPONENT;
     
     
     -- SIGNALS
@@ -271,6 +291,8 @@ architecture CPU_arch of CPU is
     signal decode_stage_reset_register_file : std_logic;
     signal decode_stage_stall_in : std_logic;
     signal decode_stage_stall_out :  std_logic;
+    signal decode_stage_branch_target_out : std_logic_vector(31 downto 0); 
+    signal decode_stage_release_instructions : INSTRUCTION_ARRAY := (others => NO_OP_INSTRUCTION);
 
     --Decode Execute Register 
     signal ID_EX_register_pc_in: INTEGER;
@@ -348,15 +370,31 @@ architecture CPU_arch of CPU is
     signal data_memory_dump : std_logic := '0';
     signal data_memory_load : std_logic := '0';
 
+   
+    signal branch_predictor_instruction_in : INSTRUCTION;
+    signal branch_predictor_target : std_logic_vector(31 downto 0);
+    signal branch_predictor_branch_taken : std_logic;
+    signal branch_predictor_target_to_evaluate : std_logic_vector(31 downto 0);
+    signal branch_predictor_prediction  : std_logic;
+
+    --branch prediction
+    signal branch_buff : branch_buffer;
+
     --misc
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
 
-    signal current_state : pipeline_state_snapshot;
     signal manual_IF_ID_stall : std_logic := '0';
     signal manual_fetch_stall : std_logic := '0';
 
     signal feed_no_op_to_IF_ID : boolean := false;
+
+    type branch_prediction_type is (PREDICT_NOT_TAKEN, PREDICT_TAKEN);
+    signal current_prediction : branch_prediction_type := PREDICT_TAKEN;
+
+    signal bad_prediction_occured : boolean := false;
+
+
 
 begin
     ALU_out <= execute_stage_ALU_result;
@@ -426,7 +464,9 @@ begin
         decode_stage_write_register_file,
         decode_stage_reset_register_file,
         decode_stage_stall_in,
-        decode_stage_stall_out
+        decode_stage_stall_out,
+        decode_stage_branch_target_out,
+        decode_stage_release_instructions
     );
 
     ID_EX_reg : ID_EX_Register PORT MAP (
@@ -522,12 +562,105 @@ begin
         write_back_stage_instruction_out
     );
 
+    predictor : branch_predictor GENERIC MAP(
+        PREDICTOR_BIT_WIDTH => predictor_bit_width
+    )
+    PORT MAP(
+        clock,
+        branch_predictor_instruction_in,
+        branch_predictor_target,
+        branch_predictor_branch_taken,
+        branch_predictor_target_to_evaluate,
+        branch_predictor_prediction
+    );
+
     -- SIGNAL CONNECTIONS BETWEEN COMPONENTS
-    fetch_stage_branch_target <= to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0)));
-    fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+    -- fetch_stage_branch_target <= 
+    --     to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when NOT use_branch_prediction else
+    --     to_integer(signed(EX_MEM_register_ALU_result_out(31 downto 0))) when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
+    --     to_integer(signed(decode_stage_branch_target_out)) when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+    --     fetch_stage_PC + 4 when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
+    --     360;
+            
+    -- fetch_stage_branch_condition <= 
+    --     EX_MEM_register_does_branch_out when NOT use_branch_prediction else
+    --     '1' when current_prediction = PREDICT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+    --     '0' when current_prediction = PREDICT_TAKEN AND bad_prediction_occured else
+    --     '0' when current_prediction = PREDICT_NOT_TAKEN AND is_branch_type(decode_stage_instruction_out) else
+    --     '1' when current_prediction = PREDICT_NOT_TAKEN AND bad_prediction_occured else
+    --     EX_MEM_register_does_branch_out;
+
+    manage_fetch_branching : process(
+        clock,
+        current_prediction,
+        IF_ID_register_instruction_out,
+        ID_EX_register_instruction_out,
+        EX_MEM_register_instruction_out,
+        EX_MEM_register_branch_target_out,
+        EX_MEM_register_does_branch_out,
+        MEM_WB_register_instruction_out
+    ) is 
+    variable branch_target : std_logic_vector(31 downto 0) := (others => '0');
+    begin
+        -- if(rising_edge(clock)) then
+        case use_branch_prediction is
+            when false =>
+                branch_target := EX_MEM_register_branch_target_out;
+                fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+            when true =>
+                if (bad_prediction_occured) then
+                    branch_target := EX_MEM_register_branch_target_out;
+                    fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                else
+                    case current_prediction is
+                        when PREDICT_TAKEN =>
+                            if(is_branch_type(IF_ID_register_instruction_out) 
+                                AND NOT is_branch_type(ID_EX_register_instruction_out) 
+                                AND NOT is_branch_type(EX_MEM_register_instruction_out) 
+                                AND NOT is_branch_type(MEM_WB_register_instruction_out))
+                                then
+                                -- report "we're telling fetch to branch, since ID has a branch instruction and we're doing PREDICT TAKEN";
+                                branch_target := decode_stage_branch_target_out;
+                                fetch_stage_branch_condition <= '1';
+
+                            elsif(NOT is_branch_type(IF_ID_register_instruction_out) 
+                                AND NOT is_branch_type(ID_EX_register_instruction_out)
+                                AND is_branch_type(EX_MEM_register_instruction_out) 
+                                AND EX_MEM_register_does_branch_out = '1'
+                                AND NOT is_branch_type(MEM_WB_register_instruction_out))
+                                then
+                                -- we don't branch, since we already correctly predicted we would.
+                                -- report "we correctly predicted that we would branch!";
+                                branch_target := (others => '0');
+                                fetch_stage_branch_condition <= '0';
+
+                            else
+                                -- report "Default case";
+                                branch_target := EX_MEM_register_branch_target_out;
+                                fetch_stage_branch_condition <= EX_mem_register_does_branch_out;
+                            end if;
+                        when PREDICT_NOT_TAKEN =>
+                            if(is_branch_type(decode_stage_instruction_out) 
+                                AND NOT is_branch_type(ID_EX_register_instruction_out)
+                                AND NOT is_branch_type(EX_MEM_register_instruction_out)
+                                AND NOT is_branch_type(MEM_WB_register_instruction_out)) then
+                                branch_target := (others => '0'); -- DOESNT MATTER, let the PC increment normally. 
+                                fetch_stage_branch_condition <= '0';
+                            else
+                                branch_target := EX_MEM_register_branch_target_out;
+                                fetch_stage_branch_condition <= EX_MEM_register_does_branch_out;
+                            end if;
+                    end case;
+                end if;
+        end case;
+        fetch_stage_branch_target <= to_integer(signed(branch_target));
+        -- end if;
+    end process;
+
     fetch_stage_stall <= decode_stage_stall_out OR manual_fetch_stall;
 
     IF_ID_register_instruction_in <= 
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else
         NO_OP_INSTRUCTION when initialize = '1' else 
         input_instruction when override_input_instruction = '1' else
         NO_OP_INSTRUCTION when feed_no_op_to_IF_ID else
@@ -536,13 +669,15 @@ begin
     IF_ID_register_stall <= decode_stage_stall_out OR manual_IF_ID_stall;
 
     decode_stage_PC <= IF_ID_register_pc_out;
-    decode_stage_instruction_in <= IF_ID_register_instruction_out;
+    decode_stage_instruction_in <= 
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else IF_ID_register_instruction_out;
     decode_stage_write_back_data <= write_back_stage_write_data;
     decode_stage_write_back_instruction <= write_back_stage_instruction_out;
 
     ID_EX_register_a_in <= decode_stage_val_a;
     ID_EX_register_b_in <= decode_stage_val_b;
-    ID_EX_register_instruction_in <= decode_stage_instruction_out;
+    ID_EX_register_instruction_in <= 
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else decode_stage_instruction_out;
     ID_EX_register_pc_in <= decode_stage_PC_out;
     ID_EX_register_sign_extend_imm_in <= decode_stage_i_sign_extended;
 
@@ -557,7 +692,8 @@ begin
     EX_MEM_register_does_branch_in <= execute_stage_branch;
     EX_MEM_register_branch_target_in <= execute_stage_branch_target_out;
     EX_MEM_register_pc_in <= execute_stage_PC_out;
-    EX_MEM_register_instruction_in <= execute_stage_instruction_out;
+    EX_MEM_register_instruction_in <= 
+         NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else execute_stage_instruction_out;
 
     memory_stage_ALU_result_in <= EX_MEM_register_ALU_result_out;
     memory_stage_instruction_in <= EX_MEM_register_instruction_out;
@@ -565,7 +701,8 @@ begin
 
     MEM_WB_register_ALU_result_in <= memory_stage_ALU_result_out;
     MEM_WB_register_data_mem_in <= memory_stage_mem_data;
-    MEM_WB_register_instruction_in <= memory_stage_instruction_out;
+    MEM_WB_register_instruction_in <= 
+        NO_OP_INSTRUCTION when use_branch_prediction AND bad_prediction_occured else memory_stage_instruction_out;
     
     write_back_stage_ALU_result_in <= MEM_WB_register_ALU_result_out;
     write_back_stage_instruction_in <= MEM_WB_register_instruction_out;
@@ -582,11 +719,20 @@ begin
     WB_instruction <= write_back_stage_instruction_out;
     WB_data <= write_back_stage_write_data;
 
+
+    branch_predictor_instruction_in <= EX_MEM_register_instruction_out;
+    branch_predictor_target <= EX_MEM_register_branch_target_out;
+    branch_predictor_branch_taken <= EX_MEM_register_does_branch_out;
+    -- TODO: change the target to be the PC, if that makes more sense.
+    -- branch_predictor_target_to_evaluate <= decode_stage_branch_target_out;
+    branch_predictor_target_to_evaluate <= std_logic_vector(to_unsigned(decode_stage_PC_out);
+
     fetch_PC <= IF_ID_register_pc_out;
     fetch_stage_reset <= '1' when initialize = '1' else '0';
 
-
-
+    decode_stage_release_instructions(0) <= ID_EX_register_instruction_out when use_branch_prediction AND bad_prediction_occured else NO_OP_INSTRUCTION;
+    decode_stage_release_instructions(1) <= EX_MEM_register_instruction_out when use_branch_prediction AND bad_prediction_occured else NO_OP_INSTRUCTION;
+    
     init : process( clock, initialize )
     begin
         if initialize = '1' AND initialized = '0' then
@@ -616,18 +762,63 @@ begin
     end process ; -- dump
 
 
-    current_state.fetch_inst    <=  fetch_stage_instruction_out;
-    current_state.IF_ID_inst    <=  IF_ID_register_instruction_out;
-    current_state.ID_EX_inst    <=  ID_EX_register_instruction_out;
-    current_state.EX_MEM_inst   <=  EX_MEM_register_instruction_out;
-    current_state.MEM_WB_inst   <=  MEM_WB_register_instruction_out;
-    current_state.EX_MEM_branch_taken  <=  EX_MEM_register_does_branch_out;
+    -- HERE is the code that actually uses the predictor:
+    current_prediction <= 
+        PREDICT_NOT_TAKEN when use_static_not_taken else
+        PREDICT_TAKEN when use_static_taken else
+        PREDICT_TAKEN when branch_predictor_prediction = '1' else
+        PREDICT_NOT_TAKEN when branch_predictor_prediction = '0'
+        else current_prediction;
 
-    branch_stall_management : process(clock, current_state)
+    report_prediction : process(current_prediction)
     begin
-            if  is_branch_type(current_state.IF_ID_inst) OR
-                is_branch_type(current_state.ID_EX_inst) OR
-                (is_branch_type(current_state.EX_MEM_inst) AND current_state.EX_MEM_branch_taken = '1')
+        case current_prediction is 
+            when PREDICT_TAKEN =>
+                report "current prediction is TAKEN";
+            when PREDICT_NOT_TAKEN =>
+                report "current prediction is NOT_TAKEN";
+        end case;
+    end process;
+
+
+    detect_wrong_prediction : process(
+        current_prediction,
+        EX_MEM_register_instruction_out,
+        EX_MEM_register_does_branch_out
+        )
+        variable instruction : INSTRUCTION;
+        variable actual_branch : std_logic;
+    begin
+        if (use_branch_prediction) then
+        instruction := EX_MEM_register_instruction_out;
+        actual_branch := EX_MEM_register_does_branch_out;
+        bad_prediction_occured <= false;
+        case instruction.instruction_type is
+            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+                if (current_prediction = PREDICT_TAKEN AND actual_branch = '0') OR (current_prediction = PREDICT_NOT_TAKEN AND actual_branch = '1') then
+                    bad_prediction_occured <= true;
+
+                    -- report "bad branch prediction occured! Feeding no-ops to the IF_ID, ID_EX, EX_MEM, and MEM_WB registers.";
+                end if;
+            when others =>   
+                -- do nothing.      
+        end case;
+        end if;
+    end process;
+
+
+    branch_stall_management : process(
+        clock, 
+        IF_ID_register_instruction_out,
+        ID_EX_register_instruction_out,
+        EX_MEM_register_instruction_out,
+        EX_MEM_register_does_branch_out
+        )
+    begin
+        if (NOT use_branch_prediction) then
+            if  is_branch_type(IF_ID_register_instruction_out) OR is_jump_type(IF_ID_register_instruction_out) OR 
+                is_branch_type(ID_EX_register_instruction_out) OR is_jump_type(ID_EX_register_instruction_out) OR
+                ((is_branch_type(EX_MEM_register_instruction_out) OR is_jump_type(EX_MEM_register_instruction_out)) AND EX_MEM_register_does_branch_out = '1')
             then
                 feed_no_op_to_IF_ID <= true;
                 manual_fetch_stall <= '1';
@@ -635,19 +826,10 @@ begin
                 feed_no_op_to_IF_ID <= false;
                 manual_fetch_stall <= '0';
             end if;
-    end process;
-
-    branch_prediction : process(clock, current_state)
-    variable should_take_branch : std_logic;
-    begin
-        if rising_edge(clock) then
-            -- if (should_take_branch(current_state)) then
-            --     -- TODO: branch prediction
-            -- else
-
-            -- end if;  
         end if;
     end process;
+
+
 
 
 end architecture;

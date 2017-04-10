@@ -44,7 +44,7 @@ BEGIN
     branch_target_out <= branch_target_intermediate;
 
 
-    ex_mem_process: PROCESS (clock, pc_in, instruction_in, does_branch_in, b_value_in, branch_target_in)
+    ex_mem_process: PROCESS (clock, pc_in, instruction_in, does_branch_in, b_value_in, branch_target_in, alu_result_in)
     BEGIN
         IF(rising_edge(clock)) THEN
             -- report "EX_MEM register";

@@ -3,13 +3,13 @@
 # It stores the generated Fibonacci numbers first into Reg[2] ($2), and then into memory
 # Assume that your data section in memory starts from address 2000. (Of course, since you will use separate memories for code and data for this part of the project, you could put data at address 0, but in the next phase of the project, you may use a single memory for both code and data, which is why we give you this program assuming a unified memory.)
 
-	addi $7, $0, 6	# number of generating Fibonacci-numbers
+	addi $7, $0, 20	# number of generating Fibonacci-numbers
 	add $10,  $0, $0	# loop index 
 	addi $1,   $0, 1	# initializing Fib(-1) = 0
 	addi $2,   $0, 1	# initializing Fib(0) = 1
 	addi $11,  $0, 0  	# initializing the beginning of Data Section address in memory
 	addi $15,  $0, 4	# word size in byte
-			
+
 loop:	addi $3, $2, 0		# temp = Fib(n-1)
 	add  $2, $2, $1		# Fib(n)=Fib(n-1)+Fib(n-2)
 	addi $1, $3, 0		# Fib(n-2)=temp=Fib(n-1)
@@ -19,6 +19,13 @@ loop:	addi $3, $2, 0		# temp = Fib(n-1)
 	sw	 $2, 0($13)	# Mem[$10+2000] <-- Fib(n)
 	addi $10, $10, 1	# loop index
 	bne  $10, $7, loop 
+	addi $0, $0, 0
 			
-EoP:	beq	 $11, $11, EoP 	#end of program (infinite loop)
+EoP: sw $0, 0($0)
+	addi $30, $0, 1
+	sw $0, 0($0)
+	sw $0, 0($0)
+	sw $0, 0($0)
+	sw $0, 0($0)
+	beq	 $11, $11, EoP 	#end of program (infinite loop)
 ###############################################

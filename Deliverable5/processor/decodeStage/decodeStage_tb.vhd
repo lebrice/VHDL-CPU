@@ -39,8 +39,8 @@ architecture behaviour of decodeStage_tb is
 
             -- Stall signal out.
             stall_in : std_logic;
-            stall_out : out std_logic
-            
+            stall_out : out std_logic;
+            branch_target_out : std_logic_vector(31 downto 0)            
         );
     end component;
 
@@ -65,6 +65,7 @@ signal val_a_int : integer;
 signal val_b_int : integer;
 
 signal write_back_data_int : integer;
+signal branch_target_out : std_logic_vector(31 downto 0);
 
 begin
 
@@ -82,7 +83,8 @@ begin
         write_register_file,
         reset_register_file,
         stall_in,
-        stall_out
+        stall_out,
+        branch_target_out
     );
 
 
