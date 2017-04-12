@@ -390,7 +390,7 @@ architecture CPU_arch of CPU is
     signal feed_no_op_to_IF_ID : boolean := false;
 
     type branch_prediction_type is (PREDICT_NOT_TAKEN, PREDICT_TAKEN);
-    signal current_prediction : branch_prediction_type := PREDICT_TAKEN;
+    signal current_prediction : branch_prediction_type := PREDICT_NOT_TAKEN;
 
     signal bad_prediction_occured : boolean := false;
 
@@ -724,8 +724,8 @@ begin
     branch_predictor_target <= EX_MEM_register_branch_target_out;
     branch_predictor_branch_taken <= EX_MEM_register_does_branch_out;
     -- TODO: change the target to be the PC, if that makes more sense.
-    -- branch_predictor_target_to_evaluate <= decode_stage_branch_target_out;
-    branch_predictor_target_to_evaluate <= std_logic_vector(to_unsigned(decode_stage_PC_out);
+    branch_predictor_target_to_evaluate <= decode_stage_branch_target_out;
+    -- branch_predictor_target_to_evaluate <= std_logic_vector(to_unsigned(decode_stage_PC_out);
 
     fetch_PC <= IF_ID_register_pc_out;
     fetch_stage_reset <= '1' when initialize = '1' else '0';

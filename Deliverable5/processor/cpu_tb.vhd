@@ -19,7 +19,8 @@ architecture processor_test of cpu_tb is
         register_file_dump_filepath : STRING := "register_file.txt";
         clock_period : time := 1 ns;
         predictor_bit_width : integer := 2;
-        use_branch_prediction : boolean := false
+        use_branch_prediction : boolean := false;
+        use_static_not_taken : boolean := false
         );
         port (
             clock : in std_logic;
@@ -62,7 +63,8 @@ architecture processor_test of cpu_tb is
 begin
 
 c1 : CPU GENERIC MAP (
-    use_branch_prediction => true
+    use_branch_prediction => false,
+    use_static_not_taken => false
     )
     PORT MAP (
     clock,
