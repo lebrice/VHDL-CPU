@@ -24,7 +24,7 @@ BEGIN
         assert test.format = R_TYPE report "Did not report the right instruction format for ADD" severity error;
         assert test.instruction_type = ADD report "Did not report the right instruction type for ADD" severity error;
 
-        test := makeInstruction(x"00", 1,2,3,0, "100000"); -- ADD R1 R2 R3
+        test := makeInstruction("000000", 1,2,3,0, "100000"); -- ADD R1 R2 R3
         assert test.instruction_type = ADD report "Did not report the right instruction type for ADD" severity error;
         assert test.format = R_TYPE report "Did not report the right instruction format for ADD" severity error;
         

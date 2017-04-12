@@ -1,15 +1,23 @@
 library ieee ;
     use ieee.std_logic_1164.all ;
-    use ieee.numeric_std.all ;
+    use ieee.numeric_std.all ;    
+	use ieee.std_logic_textio.all;
+
+library std;
+    use std.textio.all;
 
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
 
-entity cpu_tb is
-end cpu_tb ; 
+entity cpu_performance_tb is
+end cpu_performance_tb ; 
 
-architecture processor_test of cpu_tb is
+architecture no_prediction_test of cpu_performance_tb is
     constant clock_period : time := 1 ns;
+    constant TEST_NAME : STRING := "NO_PREDICTION";
+    constant TEST_FILE_NAME : STRING := "performance_test_program.txt";
+    constant RESULTS_FILEPATH : STRING := "./performance_tests/" & TEST_NAME & "_results.txt";
+    constant TEST_PROGRAM_FILEPATH : STRING := "./performance_tests/" & TEST_FILE_NAME;
     COMPONENT CPU is
         generic(
         ram_size : integer := 8196;
@@ -20,6 +28,7 @@ architecture processor_test of cpu_tb is
         clock_period : time := 1 ns;
         predictor_bit_width : integer := 2;
         use_branch_prediction : boolean := false;
+        use_static_taken : boolean := false;
         use_static_not_taken : boolean := false
         );
         port (
@@ -59,12 +68,28 @@ architecture processor_test of cpu_tb is
 
     signal input_instruction : INSTRUCTION;
     signal override_input_instruction : std_logic := '0';
+    signal total_time : time;
 
+    procedure write_test_results(total_time : in time) is 
+		file     outfile  : text;
+		variable outline : line;
+	begin
+		file_open(outfile, RESULTS_FILEPATH, write_mode);
+        write(outline, "Test Name :" & TEST_NAME);
+        writeline(outfile, outline);
+        write(outline, "Result    :" & time'image(total_time));
+        writeline(outfile, outline);
+		file_close(outfile);
+	end write_test_results;
 begin
 
 c1 : CPU GENERIC MAP (
+    -- TODO: change this depending on the test case. (Also change the constant TEST_NAME)
     use_branch_prediction => false,
-    use_static_not_taken => false
+    use_static_not_taken => false,
+    use_static_taken => false,
+    predictor_bit_width => 2,
+    instruction_memory_load_filepath => TEST_PROGRAM_FILEPATH
     )
     PORT MAP (
     clock,
@@ -94,6 +119,9 @@ end process ; -- clock_process
 
 
 test_process : process
+variable exit_register : integer := 30;
+variable exit_flag : std_logic_vector(31 downto 0) := (0 => '1', others => '0');
+variable start_time, end_time : time;
 begin
     report "starting test process";
     initialize <= '1';
@@ -101,18 +129,31 @@ begin
     initialize <= '0';
     wait for clock_period;
     report "initialized.";
+    start_time := now;
 
-    for i in 0 to 50 loop
-      wait for clock_period;
+    for i in 0 to 9990 loop
+        wait for clock_period;
+        -- check if the program is done (Register 30 contains '1');
+        exit when decode_register_file(exit_register).data = exit_flag;
     end loop;
 
-    wait for 9900 ns;
+    end_time := now;
+    total_time <= end_time - start_time;
+
+    wait for 5 * clock_period;
+
     report "dumping...";
     dump <= '1'; --dump data
     wait for clock_period;
     dump <= '0';
     wait for clock_period;
     report "Dumped Contents into 'memory.txt' and 'register_file.txt'";
+
+    report "program finished executing in " & time'image(total_time);
+
+    -- Write the test results to a file.
+    write_test_results(total_time);
+
     wait;
 
 end process test_process;

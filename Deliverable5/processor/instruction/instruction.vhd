@@ -102,6 +102,8 @@ package INSTRUCTION_TOOLS is
         vector : std_logic_vector(31 downto 0);
     end record;
 
+    type INSTRUCTION_ARRAY is ARRAY (1 downto 0) of INSTRUCTION;
+
     function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT;
 
@@ -111,22 +113,48 @@ package INSTRUCTION_TOOLS is
     function getInstruction(instruction_vector : std_logic_vector(31 downto 0))
         return INSTRUCTION;
 
-    function makeInstruction(opCode : std_logic_vector; rs: integer; rt : integer; rd : integer; shamt : integer; funct : std_logic_vector)
+    function makeInstruction(opCode : std_logic_vector (5 downto 0); rs: integer; rt : integer; rd : integer; shamt : integer; funct : std_logic_vector(5 downto 0))
         return INSTRUCTION;
 
-    function makeInstruction(opCode : std_logic_vector; rs: integer; rt : integer; immediate : integer)
+    function makeInstruction(opCode : std_logic_vector (5 downto 0); rs: integer; rt : integer; immediate : integer)
         return INSTRUCTION;
 
     function makeInstruction(opCode : std_logic_vector(5 downto 0); address : integer)
         return INSTRUCTION;
 
+    function is_jump_type(instruction : INSTRUCTION) return boolean;
+    function is_branch_type(instruction : INSTRUCTION) return boolean;
     constant NO_OP_INSTRUCTION : INSTRUCTION;
+    
     
 end INSTRUCTION_TOOLS;
 
 
 
 package body INSTRUCTION_TOOLS is 
+
+    function is_jump_type(instruction : INSTRUCTION) return boolean is
+    begin
+        case instruction.instruction_type is
+            when JUMP | JUMP_AND_LINK | JUMP_TO_REGISTER =>
+                return true;
+            when others => 
+                return false;
+        end case;
+    end is_jump_type;
+
+    function is_branch_type(instruction : INSTRUCTION) return boolean is
+    begin
+        case instruction.instruction_type is
+            when BRANCH_IF_EQUAL | BRANCH_IF_NOT_EQUAL =>
+                return true;
+            when others => 
+                return false;
+        end case;
+    end is_branch_type;
+
+
+
     function getInstructionFormat(instruction : std_logic_vector(31 downto 0))
         return INSTRUCTION_FORMAT is
         variable opcode : std_logic_vector(5 downto 0) := instruction(31 downto 26);

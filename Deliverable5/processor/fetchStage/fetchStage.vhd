@@ -41,7 +41,7 @@ PC_next <=
   PC_register when stall = '1' else
   PC_register + 4;
 
-pc_process : process( clock, reset, PC_next, stall, branch_condition)
+pc_process : process( clock, reset, branch_target, PC_next, stall, branch_condition)
 begin
   if( reset = '1' ) then
     PC_register <= 0;
