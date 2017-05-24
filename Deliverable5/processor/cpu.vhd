@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
-use work.BRANCH_MANAGEMENT.all;
+use work.prediction.all;
 
 --entity declaration
 entity CPU is
@@ -348,11 +348,13 @@ architecture CPU_arch of CPU is
     signal data_memory_dump : std_logic := '0';
     signal data_memory_load : std_logic := '0';
 
+    --branch prediction
+    signal branch_buff : branch_buffer;
+
     --misc
     signal initialized : std_logic := '0';
     signal dumped : std_logic := '0';
 
-    signal current_state : pipeline_state_snapshot;
     signal manual_IF_ID_stall : std_logic := '0';
     signal manual_fetch_stall : std_logic := '0';
 
@@ -616,36 +618,23 @@ begin
     end process ; -- dump
 
 
-    current_state.fetch_inst    <=  fetch_stage_instruction_out;
-    current_state.IF_ID_inst    <=  IF_ID_register_instruction_out;
-    current_state.ID_EX_inst    <=  ID_EX_register_instruction_out;
-    current_state.EX_MEM_inst   <=  EX_MEM_register_instruction_out;
-    current_state.MEM_WB_inst   <=  MEM_WB_register_instruction_out;
-    current_state.EX_MEM_branch_taken  <=  EX_MEM_register_does_branch_out;
 
-    branch_stall_management : process(clock, current_state)
+    branch_prediction : process(clock)
+        variable make_buffer: boolean := true;
     begin
-            if  is_branch_type(current_state.IF_ID_inst) OR
-                is_branch_type(current_state.ID_EX_inst) OR
-                (is_branch_type(current_state.EX_MEM_inst) AND current_state.EX_MEM_branch_taken = '1')
-            then
-                feed_no_op_to_IF_ID <= true;
-                manual_fetch_stall <= '1';
-            else
-                feed_no_op_to_IF_ID <= false;
-                manual_fetch_stall <= '0';
-            end if;
-    end process;
-
-    branch_prediction : process(clock, current_state)
-    variable should_take_branch : std_logic;
-    begin
+        if (make_buffer) then
+            branch_buff <= init_buffer;
+            make_buffer := false;
+        end if;
         if rising_edge(clock) then
-            -- if (should_take_branch(current_state)) then
-            --     -- TODO: branch prediction
-            -- else
-
-            -- end if;  
+            --if (is a branch intruction) then
+                branch_buff <= update_branch_buff(branch_buff, execute_stage_PC_out, current_state.EX_MEM_branch_taken);
+                if (branch_decision(fetch_stage_PC, branch_buff)) then
+                    -- TODO: branch taken is a go -> act on it
+                else
+                    null;
+                end if;  
+            -- end if;   
         end if;
     end process;
 

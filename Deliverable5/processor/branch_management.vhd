@@ -4,6 +4,7 @@ use IEEE.numeric_std.all;
 
 use work.INSTRUCTION_TOOLS.all;
 use work.REGISTERS.all;
+use work.prediction.all;
 
 package BRANCH_MANAGEMENT is
 
@@ -21,15 +22,13 @@ package BRANCH_MANAGEMENT is
         EX_MEM_branch_taken :   std_logic;
     end record;  
 
-    function should_take_branch(state : pipeline_state_snapshot)
-        return boolean;
-
 end package ;
 
 
 package body BRANCH_MANAGEMENT is
 
     -- Returns True if the given instruction is branch-like, (Jumps and branches)
+    -- TODO: check to see if we want J and JAL instructions in here!!!!!
     function is_branch_type(instruction : INSTRUCTION) 
         return boolean is
     begin
@@ -40,15 +39,6 @@ package body BRANCH_MANAGEMENT is
                 return false;
         end case;
     end is_branch_type;
-
-
-    -- Function responsible for making an assumption about the taken/not taken behaviour, for branch prediction.
-    function should_take_branch(state : pipeline_state_snapshot)
-        return boolean is
-    begin
-        --TODO: implement branch prediction here later maybe ?
-        return true;
-    end should_take_branch;
 
 
 end BRANCH_MANAGEMENT;
